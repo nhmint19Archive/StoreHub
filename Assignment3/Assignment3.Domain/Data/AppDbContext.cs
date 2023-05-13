@@ -8,6 +8,6 @@ internal class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer(@"Server=\\localDB;Database=Assignment3;Trusted_Connection=True;");
+        optionsBuilder.UseSqlServer(@"Server=(localdb)\\mssqllocaldb;MultipleActiveResultSets=false;Database=Assignment3;Trusted_Connection=True;");
     }
 }
