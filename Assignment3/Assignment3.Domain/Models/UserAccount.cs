@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Assignment3.Domain.Models
 {
-    internal abstract class UserAccount
+    internal class UserAccount
     {
         private string _id;
         private string _username;
         private string _password;
-        private string? _email;
-        private string? _phone;
-        private DateTime? _registryDate;
-        public UserAccount(string id, string username, string password)
+        private string _email;
+        private string _phone;
+        private DateTime _registryDate;
+        public UserAccount(string id, string username, string password, string email, string phone, DateTime registryDate)
         {
             _id = id;
             _username = username;
             _password = password;
-            _email = null;
-            _phone = null;
-            _registryDate = null;
+            _email = email;
+            _phone = phone;
+            _registryDate = registryDate;
         }
 
         public string Id 
@@ -41,13 +42,13 @@ namespace Assignment3.Domain.Models
             set => _password = value;
         }
 
-        public string? Email
+        public string Email
         {
             get => _email;
             set => _email = value;
         }
 
-        public string? Phone
+        public string Phone
         {
             get => _phone;
             set => _phone = value;
@@ -58,6 +59,10 @@ namespace Assignment3.Domain.Models
             get => _registryDate;
         }
 
-        protected abstract void Authenticate();
+        public bool Authenticate(string username, string password)
+        {
+            // TODO: encrypt password
+            return _username == username && _password == password;
+        }
     }
 }

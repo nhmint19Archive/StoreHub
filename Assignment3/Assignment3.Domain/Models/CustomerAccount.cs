@@ -11,7 +11,8 @@ namespace Assignment3.Domain.Models
     {
         private bool _active;
 
-        public CustomerAccount(string id, string username, string password) : base(id, username, password)
+        public CustomerAccount(string id, string username, string password, string email, string phone, DateTime registryDate) : 
+            base(id, username, password, email, phone, registryDate)
         {
             _active = true;
         }
@@ -22,17 +23,15 @@ namespace Assignment3.Domain.Models
             set => _active = value; 
         }
 
-        protected override void Authenticate()
-        {
-        }
-
-        public void PlaceOrder()
-        {
-        }
-
-        //public string? searchCatalogue(Catalogue catalogue, string keyword)
+        // TODO: create Order classes
+        //public bool PlaceOrder(Order order)
         //{
-        //    return null;
+        //}
+
+        // TODO: create Catalogue class
+        //public List<Product> SearchCatalogue(Catalogue catalogue, string keyword)
+        //{
+        //    return new List<Product>();
         //}
     }
 }
