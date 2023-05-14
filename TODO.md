@@ -4,10 +4,10 @@
 
 - console application
 - language of choice: C#
-- inputs are validated 
+- inputs are validated
 - areas of implementation (at least 4 required)
-  
-  
+
+
 - demonstrated scenarios must include 4 steps:
   1. empty UI at the beginning
   2. takes inputs
@@ -21,9 +21,40 @@
 
 ## TODO
 
-1. Determine the areas of implementation.
-2. Create project structure.
-3. Divide tasks.
+1. Determine the areas of implementation. (done)
+2. Create project structure. (done)
+3. Divide tasks. (done)
+4. Create objects with empty methods
+
+## Tasks
+
+1. CRUD product (5)
+2. Sales Data (1,5)
+    - write to excel/csv file
+    - calculate total by month
+3. Request refund (4,5)
+4. Purchase Order (1,5)
+    - follow sequence diagram as much as possible
+    - subtasks:
+      - add product to shopping cart (Dictionary<Product, int>, unconfirmed order)
+      - enter payment details
+      - enter delivery details
+      - invoice + receipt
+      - check order status/history
+5. Implement `UserAccount` classes
+6. `Repository<T>`
+    - save to JSON file
+7. Implement Catalogue (1,5)
+8. Input Controllers
+    - print prompts
+    - handle control flow
+    - handle user inputs
+    - validate user input
+      - delivery detail
+      - product
+      - validate order quantity
+9. Publish application as single .exe
+
 
 ## FINISHED
 
