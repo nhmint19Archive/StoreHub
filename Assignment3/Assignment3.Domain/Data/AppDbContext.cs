@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Assignment3.Domain.Data;
 internal class AppDbContext : DbContext
 {
-	private const string SqlServerLocalDbName = @"(localdb)\\mssqllocaldb";
+	private const string SqlServerLocalDbName = @"(localdb)\mssqllocaldb";
 	private const string DatabaseName = "AllYourHealthyFood";
 	public DbSet<Product> Products { get; set; }
 	public DbSet<CustomerAccount> CustomerAccounts { get; set; }
@@ -12,7 +12,8 @@ internal class AppDbContext : DbContext
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
-		optionsBuilder.UseSqlServer(@$"Server={SqlServerLocalDbName};MultipleActiveResultSets=false;Database={DatabaseName};Trusted_Connection=True;");
+		var connectionString = @$"Server={SqlServerLocalDbName};MultipleActiveResultSets=false;Database={DatabaseName};Trusted_Connection=True;";
+		_ = optionsBuilder.UseSqlServer(connectionString);
 	}
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -20,12 +21,16 @@ internal class AppDbContext : DbContext
 		base.OnModelCreating(modelBuilder);
 
 		// TODO: use the same table for these two
-		modelBuilder
+		_ = modelBuilder
 			.Entity<StaffAccount>()
 			.HasKey(x => x.Username);
 
-		modelBuilder
+		_ = modelBuilder
 			.Entity<CustomerAccount>()
 			.HasKey(x => x.Username);
+
+		_ = modelBuilder
+			.Entity<Product>()
+			.HasKey(x => x.Id);
 	}
 }
