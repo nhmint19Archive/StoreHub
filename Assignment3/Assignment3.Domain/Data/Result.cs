@@ -23,5 +23,10 @@ public enum DataResult
     /// <summary>
     /// Transaction failed because the connection to the data store failed.
     /// </summary>
-    Disconnected
+    Disconnected,
+
+    /// <summary>
+    /// Transaction failed due to an unknown error.
+    /// </summary>
+    UnknownError
 }

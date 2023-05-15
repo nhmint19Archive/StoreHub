@@ -1,4 +1,5 @@
 ﻿using Assignment3.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Domain.Data;
 
@@ -20,13 +21,25 @@ internal class UnitOfWork : IDisposable
     }
 
     /// <summary>
-    /// Save the changes made to repositories.
+    /// Commit to the changes made to repositories.
     /// </summary>
     /// <returns>Result object indicating the status of the data transaction.</returns>
-    public DataResult Save()
+    public DataResult CommitChanges()
     {
-        _dbContext.SaveChanges();
-        return DataResult.Success;
+        try
+        {
+            _dbContext.SaveChanges();
+            return DataResult.Success;
+        }
+        catch (Exception exception)
+        {
+            return exception switch
+            {
+                DbUpdateException => DataResult.Conflict,
+                ObjectDisposedException => DataResult.Disconnected,
+                _ => DataResult.UnknownError,
+            };
+        }
     }
 
     /// <summary>
