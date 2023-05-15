@@ -54,6 +54,9 @@
       - product
       - validate order quantity
 9. Publish application as single .exe
+  - check if a single exe is possible
+  - test run zipped executable
+  - ask tutor what runtime they are running in (windows/mac/os)
 
 
 ## FINISHED
