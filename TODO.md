@@ -41,9 +41,9 @@
       - enter delivery details
       - invoice + receipt
       - check order status/history
-5. Implement `UserAccount` classes
+5. Implement `UserAccount` classes (done)
 6. `Repository<T>`
-    - save to JSON file
+    - save to JSON file (done: replaced with UnitOfWork)
 7. Implement Catalogue (1,5)
 8. Input Controllers
     - print prompts
