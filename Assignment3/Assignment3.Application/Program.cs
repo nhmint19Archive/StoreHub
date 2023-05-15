@@ -1,18 +1,20 @@
 ﻿using Assignment3.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Assignment3;
+namespace Assignment3.Application;
 
 internal class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
         Console.WriteLine("Hello, World!");
-        var services = new ServiceCollection();
-        services.AddScoped<IInputController, InputController>();
-        var serviceProvider = services.BuildServiceProvider();
+        _ = RegisterDependencies();
+    }
 
-        // Obtain an instance of the InputController object
-        var inputController = serviceProvider.GetService<IInputController>();
+    private static ServiceProvider RegisterDependencies()
+    {
+        var services = new ServiceCollection();
+        // TODO: register objects here
+        return services.BuildServiceProvider();
     }
 }
