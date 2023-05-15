@@ -1,7 +1,7 @@
 ﻿using Assignment3.Domain.Data;
 
 namespace Assignment3.Domain.Models;
-internal class Catalogue
+public class Catalogue
 {
 	public IReadOnlyCollection<Product> GetProducts(
 		Func<decimal, bool>? priceFilter = null,
