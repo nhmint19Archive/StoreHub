@@ -2,14 +2,13 @@ using System.Text;
 
 namespace Assignment3.Application.Services;
 
-internal class ConsoleService
+internal class ConsoleHelper
 {
     public char AskUserOption(
         IReadOnlyDictionary<char, string> choices,
         string prompt = "Please select an option:")
     {
-        PrintSeparator();
-        Console.WriteLine(prompt);
+        Console.WriteLine($"> {prompt}");
         foreach (var (choice, description) in choices)
         {
             Console.WriteLine($"[{char.ToUpper(choice)}] - {description}");
@@ -21,8 +20,7 @@ internal class ConsoleService
             input.Length != 1 ||
             !choices.ContainsKey(char.ToUpper(input.First())))
         {
-            PrintSeparator();
-            Console.WriteLine("Please select a valid option");
+            Console.WriteLine("> Please select a valid option");
             input = Console.ReadLine();
         }
 
@@ -31,19 +29,7 @@ internal class ConsoleService
 
     public string AskUserTextInput(string prompt = "Please type your input:")
     {
-        PrintSeparator();
-        Console.WriteLine(prompt);
+        Console.WriteLine($"> {prompt}");
         return Console.ReadLine() ?? string.Empty;
-    }
-
-    private static void PrintSeparator(char separator = '#')
-    {
-        Console.WriteLine();
-        var stringBuilder = new StringBuilder();
-        for (var i = 0; i < 20; i++) {
-            Console.Write(separator);
-        }
-
-        Console.WriteLine();
     }
 }

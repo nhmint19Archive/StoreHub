@@ -1,17 +1,14 @@
-using Assignment3.Application.Models;
 using Assignment3.Application.Services;
-using Assignment3.Domain.Enums;
-using Assignment3.Domain.Models;
 
 namespace Assignment3.Application.States;
 
 internal class MainMenuState : AppState
 {
-    private readonly ConsoleService _consoleService;
+    private readonly ConsoleHelper _consoleHelper;
     public MainMenuState(
-        ConsoleService consoleService)
+        ConsoleHelper consoleHelper)
     {
-        _consoleService = consoleService;
+        _consoleHelper = consoleHelper;
     }
 
     public override void Run()
@@ -22,7 +19,7 @@ internal class MainMenuState : AppState
             { 'A', "Accounts" },
         };
 
-        var input = _consoleService.AskUserOption(
+        var input = _consoleHelper.AskUserOption(
             choices,
             "Welcome to All Your Healthy Food Store!");
 

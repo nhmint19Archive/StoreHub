@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
@@ -9,14 +8,17 @@ namespace Assignment3.Application.States;
 
 internal class SignInState : AppState
 {
-    private readonly ConsoleService _consoleService;
+    private readonly ConsoleHelper _consoleHelper;
     private readonly UserSession _currentSession;
+    private readonly ValidationHelper _validationHelper;
     public SignInState(
-        ConsoleService consoleService,
-        UserSession currentSession)
+        ConsoleHelper consoleHelper,
+        UserSession currentSession,
+        ValidationHelper validationHelper)
     {
-        _consoleService = consoleService;
+        _consoleHelper = consoleHelper;
         _currentSession = currentSession;
+        _validationHelper = validationHelper;
     }
 
     public override void Run()
@@ -24,7 +26,7 @@ internal class SignInState : AppState
         var userSignedIn = _currentSession.IsUserSignedIn;
         if (!userSignedIn)
         {
-            var input = _consoleService.AskUserOption(
+            var input = _consoleHelper.AskUserOption(
                 new Dictionary<char, string>()
                 {
                     { 'S', "Sign in with an existing account" },
@@ -62,7 +64,7 @@ internal class SignInState : AppState
             _ => throw new NotImplementedException(),
         });
 
-        var input = _consoleService.AskUserOption(choices);
+        var input = _consoleHelper.AskUserOption(choices);
 
         switch (input)
         {
@@ -77,9 +79,9 @@ internal class SignInState : AppState
 
     private void CreateCustomerAccount()
     {
-        var email = _consoleService.AskUserTextInput("Choose your email");
-        var phone = _consoleService.AskUserTextInput("Choose your phone number");
-        var password = _consoleService.AskUserTextInput("Choose your password");
+        var email = _consoleHelper.AskUserTextInput("Choose your email");
+        var phone = _consoleHelper.AskUserTextInput("Choose your phone number");
+        var password = _consoleHelper.AskUserTextInput("Choose your password");
 
         var newUserAccount = new CustomerAccount(password)
         {
@@ -88,11 +90,11 @@ internal class SignInState : AppState
             Role = Roles.Customer,
         };
 
-        var validationResults = new List<ValidationResult>();
-        if (!Validator.TryValidateObject(newUserAccount, new ValidationContext(newUserAccount), validationResults))
+        var validationResults = _validationHelper.ValidateObject(newUserAccount);
+        if (validationResults.Count != 0)
         {
             Console.WriteLine("Invalid user details:");
-            foreach (var error in validationResults.Select(x => x.ErrorMessage))
+            foreach (var error in validationResults)
             {
                 Console.WriteLine($"\t{error}");
             }
@@ -106,9 +108,12 @@ internal class SignInState : AppState
             context.CustomerAccounts.Add(newUserAccount);
             context.SaveChanges();
         }
-        catch (Exception) // TODO: catch more specific exception
+        catch (Exception e) // TODO: catch more specific exception
         {
             Console.WriteLine("Failed to register new customer account. Perhaps an account with this email already exists?");
+#if DEBUG
+            Console.WriteLine(e.Message);
+#endif
             return;
         }
 
@@ -118,8 +123,8 @@ internal class SignInState : AppState
 
     private void SignIn()
     {
-        var email = _consoleService.AskUserTextInput("Enter username:");
-        var password = _consoleService.AskUserTextInput("Enter password");
+        var email = _consoleHelper.AskUserTextInput("Enter username:");
+        var password = _consoleHelper.AskUserTextInput("Enter password");
         if (string.IsNullOrEmpty(email))
         {
             Console.WriteLine("Email must not be empty");

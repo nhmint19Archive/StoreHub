@@ -21,13 +21,13 @@ internal class Program
     private static ServiceProvider RegisterDependencies()
     {
         var services = new ServiceCollection();
-        _ = services.AddScoped<ConsoleService>();
+        _ = services.AddScoped<ConsoleHelper>();
         _ = services.AddScoped<AppController>();
         _ = services.AddScoped<Catalogue>();
         _ = services.AddScoped<MainMenuState>();
         _ = services.AddScoped<BrowsingState>();
         _ = services.AddScoped<SignInState>();
-        _ = services.AddScoped<IDictionary<Roles, UserAccount?>>();
+        _ = services.AddScoped<ValidationHelper>();
         _ = services.AddScoped<UserSession>();
         _ = services.AddScoped<IReadOnlyDictionary<string, AppState>>(x =>
         {

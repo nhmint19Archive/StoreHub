@@ -5,13 +5,13 @@ using Assignment3.Domain.Models;
 namespace Assignment3.Application.Controllers;
 internal class AppController
 {
-    private readonly ConsoleService _consoleService;
+    private readonly ConsoleHelper _consoleService;
     private readonly Catalogue _catalogue;
     private readonly IReadOnlyDictionary<string, AppState> _appStates;
     private AppState _currentState;
 
     public AppController(
-        ConsoleService consoleService,
+        ConsoleHelper consoleService,
         Catalogue catalogue,
         IReadOnlyDictionary<string, AppState> appStates)
     {
