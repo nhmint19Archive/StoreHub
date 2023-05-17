@@ -30,6 +30,10 @@
 
 1. CRUD product (5)
 2. Sales Data (1,5)
+    - receipt model
+      - create c# model
+      - add validation
+      - add to database
     - write to excel/csv file
     - calculate total by month
 3. Request refund (4,5)

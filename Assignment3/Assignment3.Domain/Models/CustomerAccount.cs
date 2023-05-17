@@ -1,6 +1,6 @@
-﻿namespace Assignment3.Domain.Models
-{
-internal class CustomerAccount : UserAccount
+﻿namespace Assignment3.Domain.Models;
+
+public class CustomerAccount : UserAccount
 {
 	public bool Active { get; init; }
 
@@ -14,5 +14,4 @@ internal class CustomerAccount : UserAccount
 	//{
 	//    return new List<Product>();
 	//}
-}
 }
