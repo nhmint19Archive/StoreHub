@@ -19,14 +19,14 @@ internal class ConsoleService
         while (
             string.IsNullOrEmpty(input) ||
             input.Length != 1 ||
-            !choices.ContainsKey(char.ToLower(input.First())))
+            !choices.ContainsKey(char.ToUpper(input.First())))
         {
             PrintSeparator();
             Console.WriteLine("Please select a valid option");
             input = Console.ReadLine();
         }
 
-        return input.First();
+        return char.ToUpper(input.First());
     }
 
     public string AskUserTextInput(string prompt = "Please type your input:")
@@ -40,7 +40,7 @@ internal class ConsoleService
     {
         Console.WriteLine();
         var stringBuilder = new StringBuilder();
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < 20; i++) {
             Console.Write(separator);
         }
 

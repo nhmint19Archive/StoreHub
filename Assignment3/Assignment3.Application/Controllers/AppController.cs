@@ -24,7 +24,10 @@ internal class AppController
 
     public void Run()
     {
-        _currentState.Run();
+        while (true)
+        {
+            _currentState.Run();
+        }
     }
 
     private void SwitchState(object? sender, string newStateName)

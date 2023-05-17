@@ -235,3 +235,7 @@ _Pvt_Extensions
 
 .idea/
 
+# database files
+*.db
+*.db-shm
+*.db-wal

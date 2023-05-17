@@ -10,7 +10,6 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
         var services = RegisterDependencies();
         var appController = services.GetRequiredService<AppController>();
         using var scope = services.CreateScope();
@@ -31,8 +30,8 @@ internal class Program
             return new Dictionary<string, AppState>()
             {
                 { nameof(MainMenuState), x.GetRequiredService<MainMenuState>() },
-                { nameof(MainMenuState), x.GetRequiredService<BrowsingState>() },
-                { nameof(MainMenuState), x.GetRequiredService<SignInState>() },
+                { nameof(BrowsingState), x.GetRequiredService<BrowsingState>() },
+                { nameof(SignInState), x.GetRequiredService<SignInState>() },
             };
         });
 
