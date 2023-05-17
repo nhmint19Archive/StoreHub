@@ -4,11 +4,8 @@ namespace Assignment3.Application.States;
 
 internal class MainMenuState : AppState
 {
-    private readonly ConsoleHelper _consoleHelper;
-    public MainMenuState(
-        ConsoleHelper consoleHelper)
+    public MainMenuState()
     {
-        _consoleHelper = consoleHelper;
     }
 
     public override void Run()
@@ -19,7 +16,7 @@ internal class MainMenuState : AppState
             { 'A', "Accounts" },
         };
 
-        var input = _consoleHelper.AskUserOption(
+        var input = ConsoleHelper.AskUserOption(
             choices,
             "Welcome to All Your Healthy Food Store!");
 

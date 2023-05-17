@@ -8,17 +8,11 @@ namespace Assignment3.Application.States;
 
 internal class SignInState : AppState
 {
-    private readonly ConsoleHelper _consoleHelper;
     private readonly UserSession _currentSession;
-    private readonly ValidationHelper _validationHelper;
     public SignInState(
-        ConsoleHelper consoleHelper,
-        UserSession currentSession,
-        ValidationHelper validationHelper)
+        UserSession currentSession)
     {
-        _consoleHelper = consoleHelper;
         _currentSession = currentSession;
-        _validationHelper = validationHelper;
     }
 
     public override void Run()
@@ -26,7 +20,7 @@ internal class SignInState : AppState
         var userSignedIn = _currentSession.IsUserSignedIn;
         if (!userSignedIn)
         {
-            var input = _consoleHelper.AskUserOption(
+            var input = ConsoleHelper.AskUserOption(
                 new Dictionary<char, string>()
                 {
                     { 'S', "Sign in with an existing account" },
@@ -64,7 +58,7 @@ internal class SignInState : AppState
             _ => throw new NotImplementedException(),
         });
 
-        var input = _consoleHelper.AskUserOption(choices);
+        var input = ConsoleHelper.AskUserOption(choices);
 
         switch (input)
         {
@@ -79,9 +73,9 @@ internal class SignInState : AppState
 
     private void CreateCustomerAccount()
     {
-        var email = _consoleHelper.AskUserTextInput("Choose your email");
-        var phone = _consoleHelper.AskUserTextInput("Choose your phone number");
-        var password = _consoleHelper.AskUserTextInput("Choose your password");
+        var email = ConsoleHelper.AskUserTextInput("Choose your email");
+        var phone = ConsoleHelper.AskUserTextInput("Choose your phone number");
+        var password = ConsoleHelper.AskUserTextInput("Choose your password");
 
         var newUserAccount = new CustomerAccount(password)
         {
@@ -90,13 +84,13 @@ internal class SignInState : AppState
             Role = Roles.Customer,
         };
 
-        var validationResults = _validationHelper.ValidateObject(newUserAccount);
+        var validationResults = ValidationHelper.ValidateObject(newUserAccount);
         if (validationResults.Count != 0)
         {
             Console.WriteLine("Invalid user details:");
             foreach (var error in validationResults)
             {
-                Console.WriteLine($"\t{error}");
+                Console.WriteLine($"! {error}");
             }
 
             return;
@@ -105,7 +99,7 @@ internal class SignInState : AppState
         using var context = new AppDbContext();
         try
         {
-            context.CustomerAccounts.Add(newUserAccount);
+            context.UserAccounts.Add(newUserAccount);
             context.SaveChanges();
         }
         catch (Exception e) // TODO: catch more specific exception
@@ -123,8 +117,8 @@ internal class SignInState : AppState
 
     private void SignIn()
     {
-        var email = _consoleHelper.AskUserTextInput("Enter username:");
-        var password = _consoleHelper.AskUserTextInput("Enter password");
+        var email = ConsoleHelper.AskUserTextInput("Enter username:");
+        var password = ConsoleHelper.AskUserTextInput("Enter password");
         if (string.IsNullOrEmpty(email))
         {
             Console.WriteLine("Email must not be empty");
@@ -137,7 +131,7 @@ internal class SignInState : AppState
         }
 
         using var context = new AppDbContext();
-        var userAccount = context.CustomerAccounts.FirstOrDefault(x => x.Email == email);
+        var userAccount = context.UserAccounts.FirstOrDefault(x => x.Email == email);
         if (userAccount == null)
         {
             Console.WriteLine("User account does not exist");

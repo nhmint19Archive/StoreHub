@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Assignment3.Application.Services;
 
-public class ValidationHelper
+public static class ValidationHelper
 {
-    public IReadOnlyCollection<string> ValidateObject<T>(T instance) where T : notnull
+    public static IReadOnlyCollection<string> ValidateObject<T>(T instance) where T : notnull
     {
         var results = new List<ValidationResult>();
         var validationResults = new List<ValidationResult>();

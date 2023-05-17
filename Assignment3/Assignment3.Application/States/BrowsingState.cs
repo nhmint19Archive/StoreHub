@@ -5,16 +5,13 @@ namespace Assignment3.Application.States;
 
 internal class BrowsingState : AppState
 {
-    private readonly ConsoleHelper _consoleHelper;
     private readonly Catalogue _catalogue;
     private Func<Product, bool>? _priceFilter = null;
     private Func<Product, bool>? _nameFilter = null;
 
     public BrowsingState(
-        ConsoleHelper consoleHelper,
         Catalogue catalogue)
     {
-        _consoleHelper = consoleHelper;
         _catalogue = catalogue;
     }
 
@@ -53,7 +50,7 @@ internal class BrowsingState : AppState
             options.Add('A', "Add filter");
         }
 
-        var input = _consoleHelper.AskUserOption(options);
+        var input = ConsoleHelper.AskUserOption(options);
 
         switch (input)
         {
@@ -76,21 +73,21 @@ internal class BrowsingState : AppState
     private void ShowFilters()
     {
         while (_nameFilter == null) {
-            var productName = _consoleHelper.AskUserTextInput("Please type the product name filter and press [Enter]");
+            var productName = ConsoleHelper.AskUserTextInput("Please type the product name filter and press [Enter]");
             _nameFilter = p => p.Name.Contains(productName, StringComparison.InvariantCultureIgnoreCase);
         }
 
         while (_priceFilter == null) {
             var upperPrice = 0m;
-            var upperPriceStr = _consoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
+            var upperPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
             while (!Decimal.TryParse(upperPriceStr, out upperPrice)) {
-                upperPriceStr = _consoleHelper.AskUserTextInput("Please type in a valid number");
+                upperPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
             }
 
             var lowerPrice = 0m;
-            var lowerPriceStr = _consoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
+            var lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
             while (!Decimal.TryParse(lowerPriceStr, out lowerPrice)) {
-                lowerPriceStr = _consoleHelper.AskUserTextInput("Please type in a valid number");
+                lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
             }
 
             _priceFilter = p => p.Price <= upperPrice || p.Price >= lowerPrice;
