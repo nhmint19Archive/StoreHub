@@ -8,16 +8,10 @@ public class Catalogue
 		Func<Product, bool>? nameFilter = null)
 	{
 		using var context = new AppDbContext();
-		var query = context.Products.Where(x => x.InventoryCount > 0);
-		if (priceFilter is not null)
-		{
-			query = (IQueryable<Product>)query.Where(priceFilter);
-		}
-
-		if (nameFilter is not null)
-		{
-			query = (IQueryable<Product>)query.Where(nameFilter);
-		}
+		var query = context.Products
+			.Where(x => x.InventoryCount > 0)
+			.Where(priceFilter != null ? priceFilter : x => true)
+			.Where(nameFilter != null ? nameFilter : x => true);
 
 		return query.ToList();
 	}

@@ -7,6 +7,9 @@ internal class BrowsingState : AppState
 {
     private readonly ConsoleService _consoleService;
     private readonly Catalogue _catalogue;
+    private Func<Product, bool>? _priceFilter = null;
+    private Func<Product, bool>? _nameFilter = null;
+
     public BrowsingState(
         ConsoleService consoleService,
         Catalogue catalogue)
@@ -14,7 +17,6 @@ internal class BrowsingState : AppState
         _consoleService = consoleService;
         _catalogue = catalogue;
     }
-
 
     public override void Run()
     {
@@ -24,7 +26,7 @@ internal class BrowsingState : AppState
 
     private void ShowProducts()
     {
-        var products = _catalogue.GetProducts();
+        var products = _catalogue.GetProducts(_priceFilter, _nameFilter);
         Console.WriteLine($"Displaying {products.Count} available products: ");
 
         foreach (var product in products)
@@ -36,21 +38,34 @@ internal class BrowsingState : AppState
 
     private void ShowOptions()
     {
-        var input = _consoleService.AskUserOption(
-            new Dictionary<char, string>()
-            {
-                { 'S', "Sign in to begin purchasing" },
-                { 'F', "Add filter" },
-                { 'E', "Exit to Main Menu" },
-            });
+        var options = new Dictionary<char, string>()
+        {
+            { 'S', "Sign in to begin purchasing" },
+            { 'E', "Exit to Main Menu" },
+        };
+
+        if (_nameFilter != null || _priceFilter != null)
+        {
+            options.Add('C', "Clear filter");
+        }
+        else
+        {
+            options.Add('A', "Add filter");
+        }
+
+        var input = _consoleService.AskUserOption(options);
 
         switch (input)
         {
             case 'S':
                 OnStateChanged(this, nameof(SignInState));
                 break;
-            case 'F':
+            case 'A':
                 ShowFilters();
+                break;
+            case 'C':
+                _priceFilter = null;
+                _nameFilter = null;
                 break;
             case 'E':
                 OnStateChanged(this, nameof(MainMenuState));
@@ -60,6 +75,27 @@ internal class BrowsingState : AppState
 
     private void ShowFilters()
     {
-        // TODO: handle filters
+        while (_nameFilter == null) {
+            var productName = _consoleService.AskUserTextInput("Please type the product name filter and press [Enter]");
+            _nameFilter = p => p.Name.Contains(productName, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        while (_priceFilter == null) {
+            var upperPrice = 0m;
+            var upperPriceStr = _consoleService.AskUserTextInput("Please type the upper price limit and press [Enter]");
+            while (!Decimal.TryParse(upperPriceStr, out upperPrice)) {
+                upperPriceStr = _consoleService.AskUserTextInput("Please type in a valid number");
+            }
+
+            var lowerPrice = 0m;
+            var lowerPriceStr = _consoleService.AskUserTextInput("Please type the upper price limit and press [Enter]");
+            while (!Decimal.TryParse(lowerPriceStr, out lowerPrice)) {
+                lowerPriceStr = _consoleService.AskUserTextInput("Please type in a valid number");
+            }
+
+            _priceFilter = p => p.Price <= upperPrice || p.Price >= lowerPrice;
+        }
+
+        return;
     }
 }

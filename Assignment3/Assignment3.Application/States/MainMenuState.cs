@@ -6,15 +6,11 @@ namespace Assignment3.Application.States;
 internal class MainMenuState : AppState
 {
     private readonly ConsoleService _consoleService;
-    private readonly Catalogue _catalogue;
     public MainMenuState(
-        ConsoleService consoleService,
-        Catalogue catalogue)
+        ConsoleService consoleService)
     {
         _consoleService = consoleService;
-        _catalogue = catalogue;
     }
-
 
     public override void Run()
     {
@@ -34,8 +30,6 @@ internal class MainMenuState : AppState
             case 'B':
                 OnStateChanged(this, nameof(BrowsingState));
                 break;
-            default:
-                throw new Exception();
         }
     }
 }

@@ -1,12 +1,13 @@
-﻿using Assignment3.Domain.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Assignment3.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Domain.Data;
 public class AppDbContext : DbContext
 {
-	public DbSet<Product> Products { get; set; }
-	public DbSet<CustomerAccount> CustomerAccounts { get; set; }
-	public DbSet<StaffAccount> StaffAccounts { get; set; }
+	public DbSet<Product> Products { get; set; } = null!;
+	public DbSet<CustomerAccount> CustomerAccounts { get; set; } = null!;
+	public DbSet<StaffAccount> StaffAccounts { get; set; } = null!;
 
 	public AppDbContext()
 	{
