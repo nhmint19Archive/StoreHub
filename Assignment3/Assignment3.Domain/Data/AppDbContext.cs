@@ -27,11 +27,11 @@ public class AppDbContext : DbContext
 		// TODO: use the same table for these two
 		_ = modelBuilder
 			.Entity<StaffAccount>()
-			.HasKey(x => x.Username);
+			.HasKey(x => x.Email);
 
 		_ = modelBuilder
 			.Entity<CustomerAccount>()
-			.HasKey(x => x.Username);
+			.HasKey(x => x.Email);
 
 		_ = modelBuilder
 			.Entity<Product>()

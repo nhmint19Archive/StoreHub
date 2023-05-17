@@ -2,6 +2,10 @@
 
 public class CustomerAccount : UserAccount
 {
+	public CustomerAccount(string password) : base(password)
+	{
+	}
+
 	public bool Active { get; init; }
 
 	// TODO: create Order classes

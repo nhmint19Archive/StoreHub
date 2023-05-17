@@ -1,6 +1,8 @@
 ﻿using Assignment3.Application.Controllers;
+using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Application.States;
+using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,6 +27,8 @@ internal class Program
         _ = services.AddScoped<MainMenuState>();
         _ = services.AddScoped<BrowsingState>();
         _ = services.AddScoped<SignInState>();
+        _ = services.AddScoped<IDictionary<Roles, UserAccount?>>();
+        _ = services.AddScoped<UserSession>();
         _ = services.AddScoped<IReadOnlyDictionary<string, AppState>>(x =>
         {
             return new Dictionary<string, AppState>()

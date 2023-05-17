@@ -1,4 +1,6 @@
+using Assignment3.Application.Models;
 using Assignment3.Application.Services;
+using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
 
 namespace Assignment3.Application.States;
@@ -14,18 +16,20 @@ internal class MainMenuState : AppState
 
     public override void Run()
     {
+        var choices = new Dictionary<char, string>()
+        {
+            { 'B', "Browse our store" },
+            { 'A', "Accounts" },
+        };
+
         var input = _consoleService.AskUserOption(
-            new Dictionary<char, string>()
-            {
-                { 'S', "Sign In" },
-                { 'B', "Browse our store" },
-            },
+            choices,
             "Welcome to All Your Healthy Food Store!");
 
         switch (input)
         {
-            case 'S':
-                Console.WriteLine("Sign In Page");
+            case 'A':
+                OnStateChanged(this, nameof(SignInState));
                 break;
             case 'B':
                 OnStateChanged(this, nameof(BrowsingState));

@@ -40,4 +40,7 @@ public class StaffAccount : UserAccount
 	//{
 	//    return false;
 	//}
+	public StaffAccount(string password) : base(password)
+	{
+	}
 }
