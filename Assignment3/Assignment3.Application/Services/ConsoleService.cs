@@ -4,7 +4,7 @@ namespace Assignment3.Application.Services;
 
 internal class ConsoleService
 {
-    public char AskForUserInput(
+    public char AskUserOption(
         IReadOnlyDictionary<char, string> choices,
         string prompt = "Please select an option:")
     {
@@ -15,7 +15,6 @@ internal class ConsoleService
             Console.WriteLine($"[{char.ToUpper(choice)}] - {description}");
         }
 
-        // TODO: validate against string inputs (only chars are allowed)
         var input = Console.ReadLine();
         while (
             string.IsNullOrEmpty(input) ||
@@ -30,8 +29,16 @@ internal class ConsoleService
         return input.First();
     }
 
+    public string AskUserTextInput(string prompt = "Please type your input:")
+    {
+        PrintSeparator();
+        Console.WriteLine(prompt);
+        return Console.ReadLine() ?? string.Empty;
+    }
+
     private static void PrintSeparator(char separator = '#')
     {
+        Console.WriteLine();
         var stringBuilder = new StringBuilder();
         for (var i = 0; i < 10; i++) {
             Console.Write(separator);

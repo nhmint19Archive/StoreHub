@@ -1,4 +1,5 @@
 ﻿using Assignment3.Application.Services;
+using Assignment3.Application.States;
 using Assignment3.Domain.Models;
 
 namespace Assignment3.Application.Controllers;
@@ -6,56 +7,30 @@ internal class AppController
 {
     private readonly ConsoleService _consoleService;
     private readonly Catalogue _catalogue;
+    private readonly IReadOnlyDictionary<string, AppState> _appStates;
+    private AppState _currentState;
+
     public AppController(
         ConsoleService consoleService,
-        Catalogue catalogue)
+        Catalogue catalogue,
+        IReadOnlyDictionary<string, AppState> appStates)
     {
         _consoleService = consoleService;
         _catalogue = catalogue;
+        _appStates = appStates;
+        _currentState = _appStates[nameof(MainMenuState)];
+        _currentState.StateChanged += SwitchState;
     }
 
-    public void Initialize()
+    public void Run()
     {
-        var input = _consoleService.AskForUserInput(
-            new Dictionary<char, string>()
-            {
-                { 'S', "Sign In" },
-                { 'B', "Browse Our Store" },
-            },
-            "Welcome to All Your Healthy Food Store!");
-
-        switch (input)
-        {
-            case 'S':
-                Console.WriteLine("Sign In Page");
-                break;
-            case 'B':
-                ShowProducts();
-                break;
-            default:
-                throw new Exception();
-        }
+        _currentState.Run();
     }
 
-    private void ShowProducts()
+    private void SwitchState(object? sender, string newStateName)
     {
-        var products = _catalogue.GetProducts();
-        Console.WriteLine($"Displaying {products.Count} available products: ");
-
-        foreach (var product in products)
-        {
-            Console.WriteLine($"ID [{product.Id}] - Availability: {product.InventoryCount}");
-            Console.WriteLine($"[{product.Name}]-[{product.Description}]-[{product.Price}]");
-        }
-    }
-
-    private void ShowOptions()
-    {
-        var input = _consoleService.AskForUserInput(
-            new Dictionary<char, string>()
-            {
-                { 'S', "Sign In To Begin Purchasing" },
-                { 'E', "Exit" },
-            });
+        _currentState.StateChanged -= SwitchState;
+        _currentState = _appStates[newStateName];
+        _currentState.StateChanged += SwitchState;
     }
 }
