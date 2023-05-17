@@ -1,6 +1,6 @@
 ﻿namespace Assignment3.Domain.Models;
 
-internal class StaffAccount : UserAccount
+public class StaffAccount : UserAccount
 {
 	// TODO: create Repository class
 
