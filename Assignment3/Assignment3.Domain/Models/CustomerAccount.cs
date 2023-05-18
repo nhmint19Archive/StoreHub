@@ -8,10 +8,4 @@ public class CustomerAccount : UserAccount
 	//public bool PlaceOrder(Order order)
 	//{
 	//}
-
-	// TODO: create Catalogue class
-	//public List<Product> SearchCatalogue(Catalogue catalogue, string keyword)
-	//{
-	//    return new List<Product>();
-	//}
 }

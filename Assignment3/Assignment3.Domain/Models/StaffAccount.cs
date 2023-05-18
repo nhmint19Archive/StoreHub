@@ -2,29 +2,22 @@
 
 public class StaffAccount : UserAccount
 {
-	// TODO: create Repository class
-
-	//public Product? GetProductById(Repository<Product> repo, string productId)
-	//{
-	//    return null;
-	//}
-
 	//public List<Product> GetProductsByName(Repository<Product> repo, string name)
 	//{
 	//    return new List<Product>();
 	//}
 
-	//public bool AddProduct(Repository<Product> repo, Product product)
+	//public bool AddProduct(Product product)
 	//{
 	//    return false;
 	//}
 
-	//public bool UpdateProduct(Repository<Product> repo, Product product)
+	//public bool UpdateProduct(Product product)
 	//{
 	//    return false;
 	//}
 
-	//public bool RemoveProduct(Repository<Product> repo, Product product)
+	//public bool RemoveProduct(Product product)
 	//{
 	//    return false;
 	//}
