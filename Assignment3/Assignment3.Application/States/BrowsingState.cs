@@ -1,3 +1,4 @@
+using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Models;
 
@@ -5,38 +6,80 @@ namespace Assignment3.Application.States;
 
 internal class BrowsingState : AppState
 {
-    private readonly ConsoleService _consoleService;
     private readonly Catalogue _catalogue;
+    private readonly UserSession _session;
     private Func<Product, bool>? _priceFilter = null;
     private Func<Product, bool>? _nameFilter = null;
 
     public BrowsingState(
-        ConsoleService consoleService,
-        Catalogue catalogue)
+        Catalogue catalogue,
+        UserSession session)
     {
-        _consoleService = consoleService;
         _catalogue = catalogue;
+        _session = session;
     }
 
+    /// <inheritdoc />
     public override void Run()
     {
         ShowProducts();
-        ShowOptions();
+        if (_session.IsUserSignedIn) 
+        {
+            ShowSignedInOptions();
+        }
+        else
+        {
+            ShowSignedOutOptions();
+        }
+    }
+
+    private void ShowSignedInOptions()
+    {
+        // TODO: reduce duplication with ShowSignedOutOptions()
+        var options = new Dictionary<char, string>()
+        {
+            { 'E', "Exit to Main Menu" },
+        };
+
+        if (_nameFilter != null || _priceFilter != null)
+        {
+            options.Add('C', "Clear filter");
+        }
+        else
+        {
+            options.Add('A', "Add filter");
+        }
+
+        var input = ConsoleHelper.AskUserOption(options);
+
+        switch (input)
+        {
+            case 'A':
+                ShowFilters();
+                break;
+            case 'C':
+                _priceFilter = null;
+                _nameFilter = null;
+                break;
+            case 'E':
+                OnStateChanged(this, nameof(MainMenuState));
+                break;
+        }
     }
 
     private void ShowProducts()
     {
         var products = _catalogue.GetProducts(_priceFilter, _nameFilter);
-        Console.WriteLine($"Displaying {products.Count} available products: ");
+        ConsoleHelper.PrintInfo($"Displaying {products.Count} available products:");
 
         foreach (var product in products)
         {
-            Console.WriteLine($"ID [{product.Id}] - Availability: {product.InventoryCount}");
-            Console.WriteLine($"[{product.Name}] - [{product.Description}]-[{product.Price}]");
+            ConsoleHelper.PrintInfo($"ID [{product.Id}] - Availability: {product.InventoryCount}");
+            ConsoleHelper.PrintInfo($"[{product.Name}] - [{product.Description}]-[{product.Price}]");
         }
     }
 
-    private void ShowOptions()
+    private void ShowSignedOutOptions()
     {
         var options = new Dictionary<char, string>()
         {
@@ -53,7 +96,7 @@ internal class BrowsingState : AppState
             options.Add('A', "Add filter");
         }
 
-        var input = _consoleService.AskUserOption(options);
+        var input = ConsoleHelper.AskUserOption(options);
 
         switch (input)
         {
@@ -76,26 +119,24 @@ internal class BrowsingState : AppState
     private void ShowFilters()
     {
         while (_nameFilter == null) {
-            var productName = _consoleService.AskUserTextInput("Please type the product name filter and press [Enter]");
+            var productName = ConsoleHelper.AskUserTextInput("Please type the product name filter and press [Enter]");
             _nameFilter = p => p.Name.Contains(productName, StringComparison.InvariantCultureIgnoreCase);
         }
 
         while (_priceFilter == null) {
             var upperPrice = 0m;
-            var upperPriceStr = _consoleService.AskUserTextInput("Please type the upper price limit and press [Enter]");
-            while (!Decimal.TryParse(upperPriceStr, out upperPrice)) {
-                upperPriceStr = _consoleService.AskUserTextInput("Please type in a valid number");
+            var upperPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
+            while (!decimal.TryParse(upperPriceStr, out upperPrice)) {
+                upperPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
             }
 
             var lowerPrice = 0m;
-            var lowerPriceStr = _consoleService.AskUserTextInput("Please type the upper price limit and press [Enter]");
-            while (!Decimal.TryParse(lowerPriceStr, out lowerPrice)) {
-                lowerPriceStr = _consoleService.AskUserTextInput("Please type in a valid number");
+            var lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
+            while (!decimal.TryParse(lowerPriceStr, out lowerPrice)) {
+                lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
             }
 
             _priceFilter = p => p.Price <= upperPrice || p.Price >= lowerPrice;
         }
-
-        return;
     }
 }
