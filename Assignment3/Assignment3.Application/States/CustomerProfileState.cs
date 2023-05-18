@@ -7,20 +7,20 @@ namespace Assignment3.Application.States;
 
 internal class CustomerProfileState : AppState
 {
-    private readonly UserSession _currentSession;
-    public CustomerProfileState(UserSession currentSession)
+    private readonly UserSession _session;
+    public CustomerProfileState(UserSession session)
     {
-        _currentSession = currentSession;
+        _session = session;
     }
 
     /// <inheritdoc /> 
     public override void Run()
     {
-        if (!_currentSession.IsUserSignedIn || _currentSession.CurrentUser.Role != Roles.Customer)
+        if (!_session.IsUserInRole(Roles.Customer))
         {
             ConsoleHelper.PrintError("Invalid access to customer page");
             ConsoleHelper.PrintInfo("Signing out");
-            _currentSession.SignOut();
+            _session.SignOut();
             OnStateChanged(this, nameof(MainMenuState));
         }
 
@@ -33,9 +33,9 @@ internal class CustomerProfileState : AppState
         };
 
         ConsoleHelper.PrintInfo("Customer Profile");
-        ConsoleHelper.PrintInfo($"Email: {_currentSession.CurrentUser.Email}");
-        ConsoleHelper.PrintInfo($"Phone: {_currentSession.CurrentUser.Phone}");
-        ConsoleHelper.PrintInfo($"Registration Date: {_currentSession.CurrentUser.RegistryDate}");
+        ConsoleHelper.PrintInfo($"Email: {_session.AuthenticatedUser.Email}");
+        ConsoleHelper.PrintInfo($"Phone: {_session.AuthenticatedUser.Phone}");
+        ConsoleHelper.PrintInfo($"Registration Date: {_session.AuthenticatedUser.RegistryDate.ToLocalTime()}");
         var input = ConsoleHelper.AskUserOption(choices);
 
         switch (input)
@@ -67,12 +67,12 @@ internal class CustomerProfileState : AppState
         }
 
         using var context = new AppDbContext();
-        var userAccount = context.UserAccounts.Find(_currentSession.CurrentUser.Email);
+        var userAccount = context.UserAccounts.Find(_session.AuthenticatedUser.Email);
         if (userAccount == null)
         {
             ConsoleHelper.PrintError("Unable to find customer account");
             ConsoleHelper.PrintInfo("Signing out");
-            _currentSession.SignOut();
+            _session.SignOut();
             OnStateChanged(this, nameof(MainMenuState));
             return;
         }

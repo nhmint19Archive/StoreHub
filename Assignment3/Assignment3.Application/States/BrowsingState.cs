@@ -1,3 +1,4 @@
+using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Models;
 
@@ -6,20 +7,64 @@ namespace Assignment3.Application.States;
 internal class BrowsingState : AppState
 {
     private readonly Catalogue _catalogue;
+    private readonly UserSession _session;
     private Func<Product, bool>? _priceFilter = null;
     private Func<Product, bool>? _nameFilter = null;
 
     public BrowsingState(
-        Catalogue catalogue)
+        Catalogue catalogue,
+        UserSession session)
     {
         _catalogue = catalogue;
+        _session = session;
     }
 
     /// <inheritdoc />
     public override void Run()
     {
         ShowProducts();
-        ShowOptions();
+        if (_session.IsUserSignedIn) 
+        {
+            ShowSignedInOptions();
+        }
+        else
+        {
+            ShowSignedOutOptions();
+        }
+    }
+
+    private void ShowSignedInOptions()
+    {
+        // TODO: reduce duplication with ShowSignedOutOptions()
+        var options = new Dictionary<char, string>()
+        {
+            { 'E', "Exit to Main Menu" },
+        };
+
+        if (_nameFilter != null || _priceFilter != null)
+        {
+            options.Add('C', "Clear filter");
+        }
+        else
+        {
+            options.Add('A', "Add filter");
+        }
+
+        var input = ConsoleHelper.AskUserOption(options);
+
+        switch (input)
+        {
+            case 'A':
+                ShowFilters();
+                break;
+            case 'C':
+                _priceFilter = null;
+                _nameFilter = null;
+                break;
+            case 'E':
+                OnStateChanged(this, nameof(MainMenuState));
+                break;
+        }
     }
 
     private void ShowProducts()
@@ -34,7 +79,7 @@ internal class BrowsingState : AppState
         }
     }
 
-    private void ShowOptions()
+    private void ShowSignedOutOptions()
     {
         var options = new Dictionary<char, string>()
         {

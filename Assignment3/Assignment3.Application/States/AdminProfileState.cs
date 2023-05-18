@@ -8,20 +8,20 @@ namespace Assignment3.Application.States;
 
 internal class AdminProfileState : AppState
 {
-    private readonly UserSession _currentSession;
-    public AdminProfileState(UserSession currentSession)
+    private readonly UserSession _session;
+    public AdminProfileState(UserSession session)
     {
-        _currentSession = currentSession;
+        _session = session;
     }
     
     /// <inheritdoc/>
     public override void Run()
     {
-        if (!_currentSession.IsUserSignedIn || _currentSession.CurrentUser.Role != Roles.Admin)
+        if (!_session.IsUserInRole(Roles.Admin))
         {
             ConsoleHelper.PrintError("Invalid access to admin page");
             ConsoleHelper.PrintInfo("Signing out");
-            _currentSession.SignOut();
+            _session.SignOut();
             OnStateChanged(this, nameof(MainMenuState));
         }
 
@@ -162,7 +162,7 @@ internal class AdminProfileState : AppState
         ConsoleHelper.PrintInfo($"Displaying {staffAccounts.Count} staff member(s)");
         foreach (var staff in staffAccounts)
         {
-            ConsoleHelper.PrintInfo($"Email: {staff.Email} - Phone: {staff.Phone} - Registration Date: {staff.RegistryDate}");
+            ConsoleHelper.PrintInfo($"Email: {staff.Email} - Phone: {staff.Phone} - Registration Date: {staff.RegistryDate.ToLocalTime()}");
         }
     }
 }

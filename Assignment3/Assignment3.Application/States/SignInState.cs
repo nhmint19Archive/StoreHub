@@ -8,17 +8,17 @@ namespace Assignment3.Application.States;
 
 internal class SignInState : AppState
 {
-    private readonly UserSession _currentSession;
+    private readonly UserSession _session;
     public SignInState(
-        UserSession currentSession)
+        UserSession session)
     {
-        _currentSession = currentSession;
+        _session = session;
     }
 
     /// <inheritdoc />
     public override void Run()
     {
-        var userSignedIn = _currentSession.IsUserSignedIn;
+        var userSignedIn = _session.IsUserSignedIn;
         if (!userSignedIn)
         {
             ShowSignedOutOptions();
@@ -37,6 +37,7 @@ internal class SignInState : AppState
             {
                 { 'S', "Sign in with an existing account" },
                 { 'C', "Create a new customer account" },
+                { 'F', "Forgot password" },
                 { 'E', "Exit to Main Menu" },
             });
 
@@ -48,10 +49,54 @@ internal class SignInState : AppState
             case 'C':
                 CreateCustomerAccount();
                 break;
+            case 'F':
+                ResetPassword();
+                break;
             case 'E':
                 OnStateChanged(this, nameof(MainMenuState));
                 break;
         }
+    }
+
+    private void ResetPassword()
+    {
+        var email = ConsoleHelper.AskUserTextInput("Enter the email of your account");
+        while (string.IsNullOrEmpty(email))
+        {
+            ConsoleHelper.PrintError("Email cannot be empty");
+            ConsoleHelper.AskUserTextInput("Please enter a valid email");
+        }
+
+        using var context = new AppDbContext();
+        var account = context.UserAccounts.Find(email);
+        if (account == null)
+        {
+            ConsoleHelper.PrintError($"No account with the email '{email}' exists");
+            return;
+        }
+
+        // pretend that the user receives and enters the correct reset code
+        _ = ConsoleHelper.AskUserTextInput("Enter the reset code sent to your email");
+        
+        var newPassword = ConsoleHelper.AskUserTextInput("Enter your new password");
+        account.SetPassword(newPassword);
+        
+        try
+        {
+            context.UserAccounts.Update(account);
+            context.SaveChanges();
+        }
+        catch (Exception e) // TODO: catch more specific exception
+        {
+            ConsoleHelper.PrintError("Failed to update the account password");
+#if DEBUG
+            Console.WriteLine(e.Message);
+#endif
+            return;
+        }
+
+        _session.SignIn(account);
+        ConsoleHelper.PrintInfo("Successfully signed in");
     }
 
     private void ShowSignedInOptions()
@@ -61,7 +106,7 @@ internal class SignInState : AppState
             { 'S', "Sign Out"},
             { 'E', "Exit to Main Menu" },
         };
-        var (prompt, newStateName) = _currentSession.CurrentUser.Role switch
+        var (prompt, newStateName) = _session.AuthenticatedUser.Role switch
         {
             // TODO: jump to another state where staff account details can be changed/ created
             Roles.Admin => ("View admin profile", "AdminState"),
@@ -78,7 +123,7 @@ internal class SignInState : AppState
         switch (input)
         {
             case 'S':
-                _currentSession.SignOut();
+                _session.SignOut();
                 ConsoleHelper.PrintInfo("Signed out successfully");
                 break;
             case 'V':
@@ -126,8 +171,8 @@ internal class SignInState : AppState
             return;
         }
 
+        _session.SignIn(newUserAccount);
         ConsoleHelper.PrintInfo("Successfully signed in");
-        _currentSession.SignIn(newUserAccount);
     }
 
     private void SignIn()
@@ -160,7 +205,7 @@ internal class SignInState : AppState
             return;
         }
 
-        _currentSession.SignIn(userAccount);
-        ConsoleHelper.PrintInfo("Signed in successfully");
+        _session.SignIn(userAccount);
+        ConsoleHelper.PrintInfo("Successfully signed in");
     }
 }
