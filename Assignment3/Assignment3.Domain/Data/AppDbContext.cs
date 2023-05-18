@@ -1,18 +1,23 @@
-﻿using Assignment3.Domain.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Assignment3.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Domain.Data;
-internal class AppDbContext : DbContext
+public class AppDbContext : DbContext
 {
-	private const string SqlServerLocalDbName = @"(localdb)\\mssqllocaldb";
-	private const string DatabaseName = "AllYourHealthyFood";
-	public DbSet<Product> Products { get; set; }
-	public DbSet<CustomerAccount> CustomerAccounts { get; set; }
-	public DbSet<StaffAccount> StaffAccounts { get; set; }
+	public DbSet<Product> Products { get; set; } = null!;
+	public DbSet<CustomerAccount> CustomerAccounts { get; set; } = null!;
+	public DbSet<StaffAccount> StaffAccounts { get; set; } = null!;
+
+	public AppDbContext()
+	{
+		_ = Database.EnsureCreated();
+	}
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
-		optionsBuilder.UseSqlServer(@$"Server={SqlServerLocalDbName};MultipleActiveResultSets=false;Database={DatabaseName};Trusted_Connection=True;");
+		var connectionString = "Data Source=AllYourHealthyDb.db";
+		_ = optionsBuilder.UseSqlite(connectionString);
 	}
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -20,12 +25,16 @@ internal class AppDbContext : DbContext
 		base.OnModelCreating(modelBuilder);
 
 		// TODO: use the same table for these two
-		modelBuilder
+		_ = modelBuilder
 			.Entity<StaffAccount>()
 			.HasKey(x => x.Username);
 
-		modelBuilder
+		_ = modelBuilder
 			.Entity<CustomerAccount>()
 			.HasKey(x => x.Username);
+
+		_ = modelBuilder
+			.Entity<Product>()
+			.HasKey(x => x.Id);
 	}
 }

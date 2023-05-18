@@ -1,6 +1,6 @@
 ﻿namespace Assignment3.Domain.Models;
 
-internal class UserAccount
+public class UserAccount
 {
 	public required string Username { get; init; }
 
