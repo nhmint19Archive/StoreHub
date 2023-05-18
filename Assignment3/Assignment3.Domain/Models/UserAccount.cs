@@ -23,7 +23,7 @@ public class UserAccount
 
 	[Required]
 	[DataType(DataType.Password)]
-	public string Password { get; protected set; } = string.Empty;
+	public string Password { get; protected set; }
 	public UserAccount(string password)
 	{
 		Password = password;

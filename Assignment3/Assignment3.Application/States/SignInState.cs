@@ -14,7 +14,8 @@ internal class SignInState : AppState
     {
         _currentSession = currentSession;
     }
-
+    
+    /// <inheritdoc />
     public override void Run()
     {
         var userSignedIn = _currentSession.IsUserSignedIn;
@@ -90,7 +91,7 @@ internal class SignInState : AppState
             Console.WriteLine("Invalid user details:");
             foreach (var error in validationResults)
             {
-                Console.WriteLine($"! {error}");
+                ConsoleHelper.PrintError(error);
             }
 
             return;
@@ -104,7 +105,7 @@ internal class SignInState : AppState
         }
         catch (Exception e) // TODO: catch more specific exception
         {
-            Console.WriteLine("Failed to register new customer account. Perhaps an account with this email already exists?");
+            ConsoleHelper.PrintError("Failed to register new customer account. Perhaps an account with this email already exists?");
 #if DEBUG
             Console.WriteLine(e.Message);
 #endif
@@ -124,7 +125,8 @@ internal class SignInState : AppState
             Console.WriteLine("Email must not be empty");
             return;
         }
-        if (string.IsNullOrEmpty(email))
+        
+        if (string.IsNullOrEmpty(password))
         {
             Console.WriteLine("Password must not be empty");
             return;
@@ -134,7 +136,7 @@ internal class SignInState : AppState
         var userAccount = context.UserAccounts.FirstOrDefault(x => x.Email == email);
         if (userAccount == null)
         {
-            Console.WriteLine("User account does not exist");
+            Console.WriteLine("This customer account does not exist");
             return;
         }
 

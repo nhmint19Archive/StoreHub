@@ -16,7 +16,7 @@ public class AppDbContext : DbContext
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
-		var connectionString = "Data Source=AllYourHealthyDb.db";
+		const string connectionString = "Data Source=AllYourHealthyDb.db";
 		_ = optionsBuilder.UseSqlite(connectionString);
 	}
 

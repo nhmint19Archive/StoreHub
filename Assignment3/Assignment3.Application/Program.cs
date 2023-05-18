@@ -1,8 +1,6 @@
 ﻿using Assignment3.Application.Controllers;
 using Assignment3.Application.Models;
-using Assignment3.Application.Services;
 using Assignment3.Application.States;
-using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,14 +25,11 @@ internal class Program
         _ = services.AddScoped<BrowsingState>();
         _ = services.AddScoped<SignInState>();
         _ = services.AddScoped<UserSession>();
-        _ = services.AddScoped<IReadOnlyDictionary<string, AppState>>(x =>
+        _ = services.AddScoped<IReadOnlyDictionary<string, AppState>>(x => new Dictionary<string, AppState>()
         {
-            return new Dictionary<string, AppState>()
-            {
-                { nameof(MainMenuState), x.GetRequiredService<MainMenuState>() },
-                { nameof(BrowsingState), x.GetRequiredService<BrowsingState>() },
-                { nameof(SignInState), x.GetRequiredService<SignInState>() },
-            };
+            { nameof(MainMenuState), x.GetRequiredService<MainMenuState>() },
+            { nameof(BrowsingState), x.GetRequiredService<BrowsingState>() },
+            { nameof(SignInState), x.GetRequiredService<SignInState>() },
         });
 
         // TODO: register objects here

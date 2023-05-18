@@ -3,6 +3,12 @@
 namespace Assignment3.Domain.Models;
 public class Catalogue
 {
+	/// <summary>
+	/// Gets a collection of available products.
+	/// </summary>
+	/// <param name="priceFilter">Optional price filter.</param>
+	/// <param name="nameFilter">Optional product name filter.</param>
+	/// <returns>Read-only collection of available products</returns>
 	public IReadOnlyCollection<Product> GetProducts(
 		Func<Product, bool>? priceFilter = null,
 		Func<Product, bool>? nameFilter = null)

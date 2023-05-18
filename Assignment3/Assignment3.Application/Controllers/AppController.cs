@@ -1,6 +1,4 @@
-﻿using Assignment3.Application.Services;
-using Assignment3.Application.States;
-using Assignment3.Domain.Models;
+﻿using Assignment3.Application.States;
 
 namespace Assignment3.Application.Controllers;
 internal class AppController

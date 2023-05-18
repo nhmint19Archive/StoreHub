@@ -8,6 +8,7 @@ internal class MainMenuState : AppState
     {
     }
 
+    /// <inheritdoc />
     public override void Run()
     {
         var choices = new Dictionary<char, string>()

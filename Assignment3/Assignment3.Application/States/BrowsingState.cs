@@ -14,7 +14,8 @@ internal class BrowsingState : AppState
     {
         _catalogue = catalogue;
     }
-
+    
+    /// <inheritdoc />
     public override void Run()
     {
         ShowProducts();
@@ -24,8 +25,8 @@ internal class BrowsingState : AppState
     private void ShowProducts()
     {
         var products = _catalogue.GetProducts(_priceFilter, _nameFilter);
-        Console.WriteLine($"Displaying {products.Count} available products: ");
-
+        Console.WriteLine($"Displaying {products.Count} available products:");
+        
         foreach (var product in products)
         {
             Console.WriteLine($"ID [{product.Id}] - Availability: {product.InventoryCount}");
@@ -80,19 +81,17 @@ internal class BrowsingState : AppState
         while (_priceFilter == null) {
             var upperPrice = 0m;
             var upperPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
-            while (!Decimal.TryParse(upperPriceStr, out upperPrice)) {
+            while (!decimal.TryParse(upperPriceStr, out upperPrice)) {
                 upperPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
             }
 
             var lowerPrice = 0m;
             var lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
-            while (!Decimal.TryParse(lowerPriceStr, out lowerPrice)) {
+            while (!decimal.TryParse(lowerPriceStr, out lowerPrice)) {
                 lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
             }
 
             _priceFilter = p => p.Price <= upperPrice || p.Price >= lowerPrice;
         }
-
-        return;
     }
 }
