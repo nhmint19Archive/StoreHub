@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
 using Assignment3.Domain.Enums;
 
 namespace Assignment3.Domain.Models;
@@ -23,15 +24,23 @@ public class UserAccount
 
 	[Required]
 	[DataType(DataType.Password)]
-	public string Password { get; protected set; }
-	public UserAccount(string password)
+	public string Password { get; protected set; } = string.Empty;
+
+	public void SetPassword(string password)
 	{
-		Password = password;
+		Password = Convert.ToHexString(HashPassword(password));
 	}
 
 	public bool Authenticate(string password)
 	{
-		// TODO: encrypt password
-		return Password == password;
+		var hashedString = Convert.ToHexString(HashPassword(password));
+		return hashedString == Password;
+	}
+
+	private static byte[] HashPassword(string password)
+	{
+		var salt = new byte[1];
+		var hashedPasswordBytes = Rfc2898DeriveBytes.Pbkdf2(password, salt, 100, HashAlgorithmName.SHA256, 32);
+		return hashedPasswordBytes;
 	}
 }

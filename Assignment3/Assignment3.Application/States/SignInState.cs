@@ -14,50 +14,67 @@ internal class SignInState : AppState
     {
         _currentSession = currentSession;
     }
-    
+
     /// <inheritdoc />
     public override void Run()
     {
         var userSignedIn = _currentSession.IsUserSignedIn;
         if (!userSignedIn)
         {
-            var input = ConsoleHelper.AskUserOption(
-                new Dictionary<char, string>()
-                {
-                    { 'S', "Sign in with an existing account" },
-                    { 'C', "Create a new customer account" },
-                },
-                "User Profile");
-
-            switch (input)
-            {
-                case 'S':
-                    SignIn();
-                    break;
-                case 'C':
-                    CreateCustomerAccount();
-                    break;
-            }
-
-            return;
+            ShowSignedOutOptions();
+        }
+        else
+        {
+            ShowSignedInOptions();
         }
 
-        ShowSignedInOptions();
     }
+
+    private void ShowSignedOutOptions()
+    {
+        var input = ConsoleHelper.AskUserOption(
+            new Dictionary<char, string>()
+            {
+                { 'S', "Sign in with an existing account" },
+                { 'C', "Create a new customer account" },
+                { 'E', "Exit to Main Menu" },
+            },
+            "User Profile");
+
+        switch (input)
+        {
+            case 'S':
+                SignIn();
+                break;
+            case 'C':
+                CreateCustomerAccount();
+                break;
+            case 'E':
+                OnStateChanged(this, nameof(MainMenuState));
+                break;
+        }
+    }
+    
 
     private void ShowSignedInOptions()
     {
-        var choices = new Dictionary<char, string>();
-        choices.Add('V', _currentSession.CurrentUser.Role switch
+        var choices = new Dictionary<char, string>()
+        {
+            { 'S', "Sign Out"},
+            { 'E', "Exit to Main Menu" },
+        };
+        var (prompt, newStateName) = _currentSession.CurrentUser.Role switch
         {
             // TODO: jump to another state where staff account details can be changed/ created
-            Roles.Admin => "View admin profile",
+            Roles.Admin => ("View admin profile", "StaffState"),
             // TODO: jump to another state where refund requests can be viewed and product inventory can be updated
-            Roles.Staff => "View staff profile",
+            Roles.Staff => ("View staff profile", "AdminState"),
             // TODO: jump to another state where order history + logged refund requests can be seen
-            Roles.Customer => "View customer profile",
+            Roles.Customer => ("View customer profile", "CustomerState"),
             _ => throw new NotImplementedException(),
-        });
+        };
+
+        choices.Add('V', prompt);
 
         var input = ConsoleHelper.AskUserOption(choices);
 
@@ -65,9 +82,13 @@ internal class SignInState : AppState
         {
             case 'S':
                 _currentSession.SignOut();
+                ConsoleHelper.PrintInfo("Signed out successfully");
                 break;
             case 'V':
-                CreateCustomerAccount();
+                OnStateChanged(this, newStateName);
+                break;               
+            case 'E':
+                OnStateChanged(this, nameof(MainMenuState));
                 break;
         }
     }
@@ -78,17 +99,18 @@ internal class SignInState : AppState
         var phone = ConsoleHelper.AskUserTextInput("Choose your phone number");
         var password = ConsoleHelper.AskUserTextInput("Choose your password");
 
-        var newUserAccount = new CustomerAccount(password)
+        var newUserAccount = new CustomerAccount()
         {
             Email = email,
             Phone = phone,
             Role = Roles.Customer,
         };
-
+        
+        newUserAccount.SetPassword(password);
         var validationResults = ValidationHelper.ValidateObject(newUserAccount);
         if (validationResults.Count != 0)
         {
-            Console.WriteLine("Invalid user details:");
+            ConsoleHelper.PrintError("Invalid user details:");
             foreach (var error in validationResults)
             {
                 ConsoleHelper.PrintError(error);
@@ -112,7 +134,7 @@ internal class SignInState : AppState
             return;
         }
 
-        Console.WriteLine("Successfully signed in");
+        ConsoleHelper.PrintInfo("Successfully signed in");
         _currentSession.SignIn(newUserAccount);
     }
 
@@ -122,13 +144,13 @@ internal class SignInState : AppState
         var password = ConsoleHelper.AskUserTextInput("Enter password");
         if (string.IsNullOrEmpty(email))
         {
-            Console.WriteLine("Email must not be empty");
+            ConsoleHelper.PrintError("Email must not be empty");
             return;
         }
-        
+
         if (string.IsNullOrEmpty(password))
         {
-            Console.WriteLine("Password must not be empty");
+            ConsoleHelper.PrintError("Password must not be empty");
             return;
         }
 
@@ -136,16 +158,17 @@ internal class SignInState : AppState
         var userAccount = context.UserAccounts.FirstOrDefault(x => x.Email == email);
         if (userAccount == null)
         {
-            Console.WriteLine("This customer account does not exist");
+            ConsoleHelper.PrintError($"No account with the email '{email}' exists");
             return;
         }
 
         if (!userAccount.Authenticate(password))
         {
-            Console.WriteLine("Incorrect password");
+            ConsoleHelper.PrintError("Incorrect password");
             return;
         }
 
         _currentSession.SignIn(userAccount);
+        ConsoleHelper.PrintInfo("Signed in successfully");
     }
 }

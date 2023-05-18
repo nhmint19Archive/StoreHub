@@ -14,7 +14,7 @@ internal class BrowsingState : AppState
     {
         _catalogue = catalogue;
     }
-    
+
     /// <inheritdoc />
     public override void Run()
     {
@@ -25,12 +25,12 @@ internal class BrowsingState : AppState
     private void ShowProducts()
     {
         var products = _catalogue.GetProducts(_priceFilter, _nameFilter);
-        Console.WriteLine($"Displaying {products.Count} available products:");
-        
+        ConsoleHelper.PrintInfo($"Displaying {products.Count} available products:");
+
         foreach (var product in products)
         {
-            Console.WriteLine($"ID [{product.Id}] - Availability: {product.InventoryCount}");
-            Console.WriteLine($"[{product.Name}] - [{product.Description}]-[{product.Price}]");
+            ConsoleHelper.PrintInfo($"ID [{product.Id}] - Availability: {product.InventoryCount}");
+            ConsoleHelper.PrintInfo($"[{product.Name}] - [{product.Description}]-[{product.Price}]");
         }
     }
 

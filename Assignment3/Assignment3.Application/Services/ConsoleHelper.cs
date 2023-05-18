@@ -12,7 +12,7 @@ internal static class ConsoleHelper
         IReadOnlyDictionary<char, string> choices,
         string prompt = "Please select an option:")
     {
-        PrintPrompt(prompt);
+        PrintInfo(prompt);
         foreach (var (choice, description) in choices)
         {
             Console.WriteLine($"[{char.ToUpper(choice)}] - {description}");
@@ -24,7 +24,7 @@ internal static class ConsoleHelper
             input.Length != 1 ||
             !choices.ContainsKey(char.ToUpper(input.First())))
         {
-            PrintPrompt("Please select a valid option");
+            PrintInfo("Please select a valid option");
             input = Console.ReadLine();
         }
 
@@ -38,17 +38,17 @@ internal static class ConsoleHelper
     /// <returns>The entered text or <c>string.Empty</c>.</returns>
     public static string AskUserTextInput(string prompt = "Please type your input:")
     {
-        PrintPrompt(prompt);
+        PrintInfo(prompt);
         return Console.ReadLine() ?? string.Empty;
     }
     
-    public static void PrintPrompt(string prompt)
+    public static void PrintInfo(string prompt)
     {
-        Console.WriteLine($"> {prompt}");
+        Console.WriteLine($">>> {prompt}");
     }
 
     public static void PrintError(string prompt)
     {
-        Console.WriteLine($"! {prompt}");
+        Console.WriteLine($"!!! {prompt}");
     }
 }
