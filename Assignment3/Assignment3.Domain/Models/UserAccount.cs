@@ -8,13 +8,13 @@ public class UserAccount
 {
 	[Required]
 	[StringLength(256, MinimumLength = 3, ErrorMessage = "Email length must be between 3 and 256 characters")]
-	[RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+	[RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Email is invalid")]
 	public required string Email { get; init; }
 
 	[Required]
 	[StringLength(10, ErrorMessage = "Phone number must contains 10 digits")]
 	[RegularExpression(@"^(\d{10})$", ErrorMessage = "Phone number must contains 10 digits")]
-	public required string Phone { get; init; }
+	public required string Phone { get; set; }
 
 	[Required]
 	public required Roles Role { get; init; }
@@ -40,7 +40,12 @@ public class UserAccount
 	private static byte[] HashPassword(string password)
 	{
 		var salt = new byte[1];
-		var hashedPasswordBytes = Rfc2898DeriveBytes.Pbkdf2(password, salt, 100, HashAlgorithmName.SHA256, 32);
+		var hashedPasswordBytes = Rfc2898DeriveBytes.Pbkdf2(
+			password,
+			salt, 
+			100,
+			HashAlgorithmName.SHA256,
+			32);
 		return hashedPasswordBytes;
 	}
 }

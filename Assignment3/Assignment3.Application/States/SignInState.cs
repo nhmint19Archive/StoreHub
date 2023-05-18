@@ -38,8 +38,7 @@ internal class SignInState : AppState
                 { 'S', "Sign in with an existing account" },
                 { 'C', "Create a new customer account" },
                 { 'E', "Exit to Main Menu" },
-            },
-            "User Profile");
+            });
 
         switch (input)
         {
@@ -54,7 +53,6 @@ internal class SignInState : AppState
                 break;
         }
     }
-    
 
     private void ShowSignedInOptions()
     {
@@ -66,11 +64,10 @@ internal class SignInState : AppState
         var (prompt, newStateName) = _currentSession.CurrentUser.Role switch
         {
             // TODO: jump to another state where staff account details can be changed/ created
-            Roles.Admin => ("View admin profile", "StaffState"),
+            Roles.Admin => ("View admin profile", "AdminState"),
             // TODO: jump to another state where refund requests can be viewed and product inventory can be updated
-            Roles.Staff => ("View staff profile", "AdminState"),
-            // TODO: jump to another state where order history + logged refund requests can be seen
-            Roles.Customer => ("View customer profile", "CustomerState"),
+            Roles.Staff => ("View staff profile", "StaffState"),
+            Roles.Customer => ("View customer profile", nameof(CustomerProfileState)),
             _ => throw new NotImplementedException(),
         };
 
@@ -110,12 +107,7 @@ internal class SignInState : AppState
         var validationResults = ValidationHelper.ValidateObject(newUserAccount);
         if (validationResults.Count != 0)
         {
-            ConsoleHelper.PrintError("Invalid user details:");
-            foreach (var error in validationResults)
-            {
-                ConsoleHelper.PrintError(error);
-            }
-
+            ConsoleHelper.PrintErrors(validationResults);
             return;
         }
 

@@ -47,8 +47,17 @@ internal static class ConsoleHelper
         Console.WriteLine($">>> {prompt}");
     }
 
-    public static void PrintError(string prompt)
+    public static void PrintError(string error)
     {
-        Console.WriteLine($"!!! {prompt}");
+        Console.WriteLine($"!!! {error}");
+    }
+
+    public static void PrintErrors(IEnumerable<string> errors)
+    {
+        ConsoleHelper.PrintError("Error(s):");
+        foreach (var error in errors)
+        {
+            ConsoleHelper.PrintError(error);
+        }
     }
 }
