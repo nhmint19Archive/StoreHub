@@ -1,6 +1,7 @@
 using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Models;
+using System.Linq.Expressions;
 
 namespace Assignment3.Application.States;
 
@@ -8,8 +9,8 @@ internal class BrowsingState : AppState
 {
     private readonly Catalogue _catalogue;
     private readonly UserSession _session;
-    private Func<Product, bool>? _priceFilter = null;
-    private Func<Product, bool>? _nameFilter = null;
+    private Expression<Func<Product, bool>>? _priceFilter = null;
+    private Expression<Func<Product, bool>>? _nameFilter = null;
 
     public BrowsingState(
         Catalogue catalogue,
@@ -120,7 +121,7 @@ internal class BrowsingState : AppState
     {
         while (_nameFilter == null) {
             var productName = ConsoleHelper.AskUserTextInput("Please type the product name filter and press [Enter]");
-            _nameFilter = p => p.Name.Contains(productName, StringComparison.InvariantCultureIgnoreCase);
+            _nameFilter = p => p.Name.Contains(productName);
         }
 
         while (_priceFilter == null) {

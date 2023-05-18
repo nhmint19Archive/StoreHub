@@ -28,9 +28,9 @@ internal class AdminProfileState : AppState
         var input = ConsoleHelper.AskUserOption(
             new Dictionary<char, string>()
             {
-                { 'V', "View staff accounts" },
-                { 'A', "Alter staff account detail" },
-                { 'C', "Create staff account" },
+                { 'V', "View all staff accounts" },
+                { 'A', "Alter a staff account" },
+                { 'C', "Create a new staff account" },
                 { 'E', "Exit to Main Menu" },
             });
 

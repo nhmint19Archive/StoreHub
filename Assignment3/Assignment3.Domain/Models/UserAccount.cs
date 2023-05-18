@@ -20,7 +20,7 @@ public class UserAccount
 	public required Roles Role { get; init; }
 
 	[Required]
-	public DateTime RegistryDate { get; } = DateTime.UtcNow;
+	public DateTime RegistryDate { get; init; } = DateTime.UtcNow;
 
 	[Required]
 	[DataType(DataType.Password)]

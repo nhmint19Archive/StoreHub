@@ -11,7 +11,8 @@ public class AppDbContext : DbContext
 
 	public AppDbContext()
 	{
-		_ = Database.EnsureCreated();
+		// comment out this line when performing migrations
+		Database.EnsureCreated();
 	}
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
