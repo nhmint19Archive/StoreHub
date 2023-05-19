@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Assignment3.Domain.Migrations
-{
+namespace Assignment3.Domain.Migrations;
+
     /// <inheritdoc />
     public partial class Init : Migration
     {
@@ -20,6 +20,7 @@ namespace Assignment3.Domain.Migrations
                     Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     Price = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Unit = table.Column<string>(type: "TEXT", nullable: false),
                     InventoryCount = table.Column<uint>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -53,4 +54,3 @@ namespace Assignment3.Domain.Migrations
                 name: "UserAccounts");
         }
     }
-}

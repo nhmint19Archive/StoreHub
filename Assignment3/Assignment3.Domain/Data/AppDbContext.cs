@@ -8,11 +8,11 @@ public class AppDbContext : DbContext
 {
 	public DbSet<Product> Products { get; set; } = null!;
 	public DbSet<UserAccount> UserAccounts { get; set; } = null!;
-
+	
 	public AppDbContext()
 	{
 		// comment out this line when performing migrations
-		Database.EnsureCreated();
+		//Database.EnsureCreated();
 	}
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -38,5 +38,6 @@ public class AppDbContext : DbContext
 		_ = modelBuilder
 			.Entity<UserAccount>()
 			.HasKey(x => x.Email);
+
 	}
 }

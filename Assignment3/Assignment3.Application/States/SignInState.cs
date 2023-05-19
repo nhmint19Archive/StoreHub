@@ -109,7 +109,7 @@ internal class SignInState : AppState
         var (prompt, newStateName) = _session.AuthenticatedUser.Role switch
         {
             // TODO: jump to another state where staff account details can be changed/ created
-            Roles.Admin => ("View admin profile", "AdminState"),
+            Roles.Admin => ("View admin profile", nameof(AdminProfileState)),
             // TODO: jump to another state where refund requests can be viewed and product inventory can be updated
             Roles.Staff => ("View staff profile", "StaffState"),
             Roles.Customer => ("View customer profile", nameof(CustomerProfileState)),

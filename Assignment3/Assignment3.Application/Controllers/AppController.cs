@@ -1,4 +1,5 @@
 ﻿using Assignment3.Application.States;
+using Assignment3.Domain.Data;
 
 namespace Assignment3.Application.Controllers;
 
@@ -23,6 +24,7 @@ internal class AppController
     /// </summary>
     public void Run()
     {
+        AppDbSeeder.SeedData();
         while (true)
         {
             _currentState.Run();

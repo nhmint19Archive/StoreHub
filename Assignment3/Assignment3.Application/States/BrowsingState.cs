@@ -76,7 +76,7 @@ internal class BrowsingState : AppState
         foreach (var product in products)
         {
             ConsoleHelper.PrintInfo($"ID [{product.Id}] - Availability: {product.InventoryCount}");
-            ConsoleHelper.PrintInfo($"[{product.Name}] - [{product.Description}]-[{product.Price}]");
+            ConsoleHelper.PrintInfo($"[{product.Name}] - [{product.Description}]-[{product.Price}/{product.Unit}]");
         }
     }
 
