@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Assignment3.Domain.Models;
-internal class Transaction
+﻿namespace Assignment3.Domain.Models;
+public abstract class Transaction
 {
 	public int Id { get; set; }
 
+	public DateTime TransactionDateUtc { get; init; }
+
+	public abstract Receipt Execute();
 }

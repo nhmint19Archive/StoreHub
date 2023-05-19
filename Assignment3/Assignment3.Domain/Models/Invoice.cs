@@ -1,20 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Assignment3.Domain.Models;
 
-namespace Assignment3.Domain.Models;
 public class Invoice
 {
-	public int Id { get; set; }
-	public List<Dictionary<Product, uint>> Products;
-	public decimal TotalPrice { get; }
+	private readonly IReadOnlyCollection<OrderProduct> _products;
+	private readonly string _customerEmail;
+	private readonly decimal _deliveryCost;
+	private readonly decimal _totalPrice;
 
-	public Invoice(List<Dictionary<Product, uint>> products, decimal totalPrice)
+	public Invoice(
+		IReadOnlyList<OrderProduct> products,
+		string customerEmail,
+		decimal deliveryCost)
 	{
-		Products = products;
-		TotalPrice = totalPrice;
+		_products = products;
+		_customerEmail = customerEmail;
+		_deliveryCost = deliveryCost;
+		TotalPrice = CalculateTotalPrice();
 	}
 
+	public int Id { get; set; }
+
+	public decimal TotalPrice { get; }
+
+	public void EmailInvoice()
+	{
+		Console.WriteLine($"An invoice has been sent to '{_customerEmail}'");
+	}
+
+	private decimal CalculateTotalPrice()
+	{
+		return _products.Sum(x => x.PriceAtPurchase * x.ProductQuantity) + _deliveryCost;
+	}
 }
