@@ -1,24 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Assignment3.Domain.Models;
 
-namespace Assignment3.Domain.Models;
 public class Receipt
 {
-	public int Id { get; }
-	public int OrderId { get; }
-	public List<Dictionary<Product, uint>> Products { get; }
-	 
-	public decimal TotalPrice { get; }
+	public int Id { get; init; }
 
-	public int TransactionId { get;}
+	public int OrderId { get; init; }
 
-	public Receipt(List<Dictionary<Product, uint>> products, decimal totalPrice, int transactionId)
-	{
-		TotalPrice = totalPrice;
-		TransactionId = transactionId;
-		Products = products;
-	}
+	public ICollection<Product> Products { get; init; } = new List<Product>();
+
+	public Transaction Transaction { get; init; } = null!;
+
+	public int TransactionId { get; init; }
 }

@@ -36,28 +36,19 @@
       - add to database
     - write to excel/csv file
     - calculate total by month
-3. Request refund (4,5)
+3. Request refund (4,5) 
 4. Purchase Order (1,5)
     - follow sequence diagram as much as possible
     - subtasks:
-      - add product to shopping cart (Dictionary<Product, int>, unconfirmed order)
       - enter payment details
       - enter delivery details
-      - invoice + receipt
+      - invoice + receipt generation
       - check order status/history
 5. Implement `UserAccount` classes (done)
 6. `Repository<T>`
     - save to JSON file (done: replaced with UnitOfWork)
 7. Implement Catalogue (1,5)
-8. Input Controllers
-    - print prompts
-    - handle control flow
-    - handle user inputs
-    - validate user input
-      - delivery detail
-      - product
-      - validate order quantity
-9. Publish application as single .exe
+8. Publish application as single .exe
   - check if a single exe is possible
   - test run zipped executable
   - ask tutor what runtime they are running in (windows/mac/os)

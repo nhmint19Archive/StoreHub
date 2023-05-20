@@ -1,21 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
+using Assignment3.Domain.Enums;
 
 namespace Assignment3.Domain.Models;
 public class Order
 {
-	public int Id { get; set; }
-	public List<Dictionary<Product, uint>> Products { get; set; }
-	public string Status { get; set; } = "In cart";
-	public string ReceiptId { get; set; } = string.Empty;
-	public string InvoiceId { get; set; } = string.Empty;
+	private readonly string _customerEmail;
 
-	public Order(List<Dictionary<Product, uint>> products)
+	private void UpdateStatus(object? sender, EventArgs arg)
 	{
-		Products = products;
+		Status = OrderStatus.Delivered;
 	}
 
+	public Order(string customerEmail)
+	{
+		_customerEmail = customerEmail;
+	}
+
+	public Invoice Prepare(DeliveryMethod deliveryMethod)
+	{
+		return new Invoice(
+			new ReadOnlyCollection<OrderProduct>(Products),
+			_customerEmail,
+			deliveryMethod.DeliveryCost);
+	}
+
+	public int Id { get; set; }
+	public OrderStatus Status { get; private set; } = OrderStatus.Unconfirmed;
+	public IList<OrderProduct> Products { get; init; } = new List<OrderProduct>();
 }
