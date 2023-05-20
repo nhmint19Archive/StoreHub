@@ -15,10 +15,8 @@ public class Receipt
 
 	public int TransactionId { get;}
 
-	public Receipt(int id, int orderId, decimal totalPrice, int transactionId, List<Dictionary<Product, uint>> products)
+	public Receipt(List<Dictionary<Product, uint>> products, decimal totalPrice, int transactionId)
 	{
-		Id = id;
-		OrderId = orderId;
 		TotalPrice = totalPrice;
 		TransactionId = transactionId;
 		Products = products;

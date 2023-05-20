@@ -13,9 +13,8 @@ public class Order
 	public string ReceiptId { get; set; } = string.Empty;
 	public string InvoiceId { get; set; } = string.Empty;
 
-	public Order(int id, List<Dictionary<Product, uint>> products)
+	public Order(List<Dictionary<Product, uint>> products)
 	{
-		Id = id;
 		Products = products;
 	}
 

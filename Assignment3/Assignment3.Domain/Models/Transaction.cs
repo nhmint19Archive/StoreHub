@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Assignment3.Domain.Models;
-internal class Transaction
+public class Transaction
 {
 	public int Id { get; set; }
 
