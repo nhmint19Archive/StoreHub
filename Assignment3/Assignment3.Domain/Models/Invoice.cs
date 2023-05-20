@@ -5,7 +5,6 @@ public class Invoice
 	private readonly IReadOnlyCollection<OrderProduct> _products;
 	private readonly string _customerEmail;
 	private readonly decimal _deliveryCost;
-	private readonly decimal _totalPrice;
 
 	public Invoice(
 		IReadOnlyList<OrderProduct> products,

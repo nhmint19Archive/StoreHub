@@ -4,12 +4,7 @@ namespace Assignment3.Application.Services
 {
     internal class InputController
     {
-        public string SanitiseInput(string input)
-        {
-            return input.ToLower().Trim();
-        }
-
-        public bool ValidateCardNumber(string cardNumber)
+        public static bool ValidateCardNumber(string cardNumber)
         {
             // Check if the card number matches a valid credit card pattern
             Regex regex = new Regex(@"^(4|5|6)\d{3}[\ \-]?\d{4}[\ \-]?\d{4}[\ \-]?\d{4}$");
@@ -38,18 +33,6 @@ namespace Assignment3.Application.Services
             }
 
             return sum % 10 == 0;
-        }
-
-        public bool ValidateEmail(string email)
-        {
-            Regex regex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
-            return regex.IsMatch(email);
-        }
-
-        public bool ValidateInput(string input)
-        {
-            // Input validation logic here
-            return false;
         }
     }
 }

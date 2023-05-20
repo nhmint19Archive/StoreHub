@@ -5,6 +5,6 @@ public class OrderProduct
 	public uint ProductQuantity { get; init; }
 	public int ProductId { get; set; }
 	public int OrderId { get; set; }
-	public Order Order { get; init; }
-	public Product Product { get; init; }
+	public Order Order { get; init; } = null!;
+	public Product Product { get; init; } = null!;
 }
