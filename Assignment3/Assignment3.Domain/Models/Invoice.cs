@@ -26,6 +26,12 @@ public class Invoice
 		Console.WriteLine($"An invoice has been sent to '{_customerEmail}'");
 	}
 
+	public void MakePayment(ITransactionStrategy transactionStrategy)
+	{
+        transactionStrategy.Execute();
+        Console.WriteLine("Making payment");
+	}
+
 	private decimal CalculateTotalPrice()
 	{
 		return _products.Sum(x => x.PriceAtPurchase * x.ProductQuantity) + _deliveryCost;

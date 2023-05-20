@@ -27,4 +27,5 @@ public class Order
 	public int Id { get; set; }
 	public OrderStatus Status { get; private set; } = OrderStatus.Unconfirmed;
 	public IList<OrderProduct> Products { get; init; } = new List<OrderProduct>();
+    public string CustomerEmail { get; init; }
 }

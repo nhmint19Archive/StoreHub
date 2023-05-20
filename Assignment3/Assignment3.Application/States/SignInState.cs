@@ -106,6 +106,7 @@ internal class SignInState : AppState
             { 'S', "Sign Out"},
             { 'E', "Exit to Main Menu" },
         };
+
         var (prompt, newStateName) = _session.AuthenticatedUser.Role switch
         {
             // TODO: jump to another state where staff account details can be changed/ created
@@ -177,7 +178,7 @@ internal class SignInState : AppState
 
     private void SignIn()
     {
-        var email = ConsoleHelper.AskUserTextInput("Enter username:");
+        var email = ConsoleHelper.AskUserTextInput("Enter account email");
         var password = ConsoleHelper.AskUserTextInput("Enter password");
         if (string.IsNullOrEmpty(email))
         {
