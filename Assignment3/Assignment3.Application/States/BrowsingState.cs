@@ -1,7 +1,11 @@
 using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Models;
+using CsvHelper;
+using System.Globalization;
+using System.IO;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Assignment3.Application.States;
 
@@ -85,6 +89,7 @@ internal class BrowsingState : AppState
         var options = new Dictionary<char, string>()
         {
             { 'S', "Sign in to begin purchasing" },
+            { 'P', "Print Sales Data" },
             { 'E', "Exit to Main Menu" },
         };
 

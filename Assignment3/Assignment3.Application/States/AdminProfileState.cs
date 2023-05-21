@@ -45,6 +45,9 @@ internal class AdminProfileState : AppState
             case 'C':
                 CreateStaffAccount();
                 break;
+            case 'S':
+                ShowSalesData(); 
+                break;
             case 'E':
                 OnStateChanged(this, nameof(MainMenuState));
                 break;
@@ -164,5 +167,10 @@ internal class AdminProfileState : AppState
         {
             ConsoleHelper.PrintInfo($"Email: {staff.Email} - Phone: {staff.Phone} - Registration Date: {staff.RegistryDate.ToLocalTime()}");
         }
+    }
+
+    private void ShowSalesData()
+    {
+        OnStateChanged(this, nameof(ViewSalesDataState));
     }
 }
