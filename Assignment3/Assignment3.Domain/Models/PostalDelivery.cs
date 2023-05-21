@@ -1,6 +1,6 @@
 namespace Assignment3.Domain.Models;
 
-public class PostalDelivery : DeliveryMethod
+public class PostalDelivery : IDeliveryMethod
 {
 	private readonly int _orderId;
 	private readonly int _streetNumber;
@@ -22,9 +22,9 @@ public class PostalDelivery : DeliveryMethod
 		_apartmentNumber = apartmentNumber;
 	}
 
-	public override decimal DeliveryCost => throw new NotImplementedException();
+	public decimal DeliveryCost => throw new NotImplementedException();
 
-	public override void StartDelivery()
+	public void StartDelivery()
 	{
 
 	}

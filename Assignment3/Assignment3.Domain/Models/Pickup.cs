@@ -2,7 +2,7 @@ using Assignment3.Domain.Data;
 
 namespace Assignment3.Domain.Models;
 
-public class Pickup : DeliveryMethod
+public class Pickup : IDeliveryMethod
 {
 	private readonly int _orderId;
 
@@ -11,9 +11,9 @@ public class Pickup : DeliveryMethod
 		_orderId = orderId;
 	}
 
-	public override decimal DeliveryCost => 0m;
+	public decimal DeliveryCost => 0m;
 
-	public override void StartDelivery()
+	public void StartDelivery()
 	{
 		using var context = new AppDbContext();
 		var order = context.Orders.Find(_orderId) ?? throw new InvalidOperationException();

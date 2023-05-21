@@ -278,6 +278,7 @@ internal class OrderingState : AppState
     {
         var deliveryMethod = AskUserForDeliveryMethod(order.Id);
         var transactionMethod = AskUserForPaymentMethod(order.Id);
+        // TODO: move to CustomerAccount class per assignment 2
         var invoice = order.Prepare(deliveryMethod, transactionMethod);
         invoice.EmailToCustomer();
         var success = invoice.MakePayment();
@@ -291,7 +292,7 @@ internal class OrderingState : AppState
         ConsoleHelper.PrintError("An error occurred whilst processing your order");
     }
 
-    private DeliveryMethod AskUserForDeliveryMethod(int orderId)
+    private IDeliveryMethod AskUserForDeliveryMethod(int orderId)
     {
         var choice = ConsoleHelper.AskUserOption(new Dictionary<char, string>()
             {
@@ -307,7 +308,7 @@ internal class OrderingState : AppState
         };
     }
 
-    private DeliveryMethod ProcessPostalDelivery(int orderId)
+    private IDeliveryMethod ProcessPostalDelivery(int orderId)
     {
         var streetNumber = ConsoleHelper.AskUserTextInput("Enter your address number");
         var streetName =  ConsoleHelper.AskUserTextInput("Enter your address street name");
@@ -322,7 +323,7 @@ internal class OrderingState : AppState
             apartmentNumber);
     }
 
-    private DeliveryMethod ProcessPickupMethod(int orderId)
+    private IDeliveryMethod ProcessPickupMethod(int orderId)
     {
         return new Pickup(orderId);
     }

@@ -4,14 +4,14 @@ using Assignment3.Domain.Enums;
 namespace Assignment3.Domain.Models;
 public class Order
 {
-	private DeliveryMethod? _deliveryMethod;
+	private IDeliveryMethod? _deliveryMethod;
 	public Order(string customerEmail)
 	{
 		CustomerEmail = customerEmail;
 	}
 
 	public Invoice Prepare(
-		DeliveryMethod deliveryMethod,
+		IDeliveryMethod deliveryMethod,
 		ITransactionMethod transactionMethod)
 	{
 		return new Invoice(
