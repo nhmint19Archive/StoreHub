@@ -13,5 +13,5 @@ public abstract class DeliveryMethod
 
 	public abstract decimal DeliveryCost { get; }
 
-	public abstract void ExecuteDelivery();
+	public abstract void StartDelivery();
 }

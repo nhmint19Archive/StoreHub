@@ -8,7 +8,7 @@ public class PostalDelivery : DeliveryMethod
 
 	public override decimal DeliveryCost => throw new NotImplementedException();
 
-	public override void ExecuteDelivery()
+	public override void StartDelivery()
 	{
 
 	}

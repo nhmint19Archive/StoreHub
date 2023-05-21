@@ -8,7 +8,7 @@ public class Pickup : DeliveryMethod
 
 	public override decimal DeliveryCost => 0m;
 
-	public override void ExecuteDelivery()
+	public override void StartDelivery()
 	{
 
 	}

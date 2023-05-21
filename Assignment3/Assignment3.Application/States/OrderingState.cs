@@ -98,7 +98,10 @@ internal class OrderingState : AppState
             }
             else
             {
-                var numberPair = productQuantityStr.Split("-").Select(x => int.Parse(x));
+                var numberPair = productQuantityStr
+                    .Split("-")
+                    .Select(x => int.Parse(x))
+                    .ToList();
                 var productId = numberPair.First();
                 var productQuantity = numberPair.Last();
                 order.Products.Add(new OrderProduct
@@ -111,7 +114,7 @@ internal class OrderingState : AppState
             consoleKey = Console.ReadKey(false).Key;
         }
 
-        var productIdList = order.Products.Select(order => order.ProductId).ToList();
+        var productIdList = order.Products.Select(x => x.ProductId).ToList();
         using var context = new AppDbContext();
         var products = context.Products
             .Where(x => productIdList.Contains(x.Id) && x.InventoryCount > 0)
@@ -151,14 +154,11 @@ internal class OrderingState : AppState
             return false;
         }
 
-        var errorMessages = new List<string>();
-        foreach (var orderProduct in order.Products)
-        {
-                if (orderProduct.ProductQuantity > availableProducts[orderProduct.ProductId])
-            {
-                errorMessages.Add($"Invalid purchase quantity for product with ID [{orderProduct.ProductId}] (only {availableProducts[orderProduct.ProductId]} are available");
-            }
-        }
+        var errorMessages = order
+            .Products
+            .Where(x => x.ProductQuantity > availableProducts[x.ProductId])
+            .Select(x => $"Invalid purchase quantity for product with ID [{x.ProductId}] (only {availableProducts[x.ProductId]} are available")
+            .ToList();
 
         if (errorMessages.Count > 0)
         {
@@ -255,7 +255,7 @@ internal class OrderingState : AppState
             .ToDictionary(
                 x => x.Id,
                 x => x.InventoryCount);
-                
+
         if (!ValidateProducts(order, products))
         {
             ConsoleHelper.PrintError("Ordered items are invalid");
@@ -276,6 +276,27 @@ internal class OrderingState : AppState
 
     private void ConfirmOrder(Order order)
     {
+        var deliveryMethod = AskUserForDeliveryMethod();
+        var transactionMethod = AskUserForPaymentMethod();
+        var invoice = order.Prepare(deliveryMethod, transactionMethod);
+        invoice.EmailToCustomer();
+        var success = invoice.MakePayment();
+        if (success)
+        {
+            ConsoleHelper.PrintInfo("Order successfully placed");
+            order.StartDelivery();
+            return;
+        }
+        
+        ConsoleHelper.PrintError("An error occurred whilst processing your order");
+    }
+
+    private DeliveryMethod AskUserForDeliveryMethod()
+    {
         throw new NotImplementedException();
     }
+    private ITransactionStrategy AskUserForPaymentMethod()
+    {                                                
+        throw new NotImplementedException();         
+    }                                                
 }

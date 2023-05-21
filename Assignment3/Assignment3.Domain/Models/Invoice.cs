@@ -1,18 +1,27 @@
-﻿namespace Assignment3.Domain.Models;
+﻿using Assignment3.Domain.Data;
+using Assignment3.Domain.Enums;
+
+namespace Assignment3.Domain.Models;
 
 public class Invoice
 {
 	private readonly IReadOnlyCollection<OrderProduct> _products;
+	private readonly int _orderId;
 	private readonly string _customerEmail;
+	private readonly ITransactionStrategy _transactionStrategy;
 	private readonly decimal _deliveryCost;
 
-	public Invoice(
-		IReadOnlyList<OrderProduct> products,
+	internal Invoice(
+		IReadOnlyCollection<OrderProduct> products,
+		int orderId,
 		string customerEmail,
+		ITransactionStrategy transactionStrategy,
 		decimal deliveryCost)
 	{
 		_products = products;
+		_orderId = orderId;
 		_customerEmail = customerEmail;
+		_transactionStrategy = transactionStrategy;
 		_deliveryCost = deliveryCost;
 		TotalPrice = CalculateTotalPrice();
 	}
@@ -21,15 +30,39 @@ public class Invoice
 
 	public decimal TotalPrice { get; }
 
-	public void EmailInvoice()
+	public void EmailToCustomer()
 	{
 		Console.WriteLine($"An invoice has been sent to '{_customerEmail}'");
 	}
 
-	public void MakePayment(ITransactionStrategy transactionStrategy)
+	public bool MakePayment()
 	{
-        transactionStrategy.Execute();
         Console.WriteLine("Making payment");
+
+        var transaction = new Transaction()
+        {
+	        TransactionDateUtc = DateTime.UtcNow,
+	        Amount = TotalPrice,
+        };
+
+        try
+        {
+	        var receipt = _transactionStrategy.Execute(transaction);
+	        using var context = new AppDbContext();	        
+	        var order = context.Orders.Find(_orderId) ?? throw new InvalidOperationException();
+	        order.Status = OrderStatus.Confirmed;
+	        context.Update(order);
+	        context.Transactions.Add(transaction);
+	        context.Receipts.Add(receipt);
+
+	        context.SaveChanges();
+
+	        return true;
+        }
+        catch
+        {
+	        return false;
+        }
 	}
 
 	private decimal CalculateTotalPrice()

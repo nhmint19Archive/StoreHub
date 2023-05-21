@@ -1,5 +1,5 @@
 ﻿namespace Assignment3.Domain.Models;
 public interface ITransactionStrategy
 {
-    Receipt Execute();
+    Receipt Execute(Transaction transaction);
 }
