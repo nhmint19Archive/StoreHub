@@ -68,8 +68,8 @@ internal class BrowsingState : AppState
             case 'E':
                 OnStateChanged(this, nameof(MainMenuState));
                 break;
-            case 'S':
-                this.AddProductsToShoppingCart();
+            case 'O':
+                OnStateChanged(this, nameof(OrderingState));
                 break;
         }
     }
@@ -88,94 +88,7 @@ internal class BrowsingState : AppState
         }
     }
 
-    private void AddProductsToShoppingCart()
-    {
-        var order = new Order(_session.AuthenticatedUser.Email);
-        ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to purchase. Type [Esc] when you are finish.");
-        ConsoleHelper.PrintInfo("For example: type '1-2 [Enter] 43-1 [Esc]' to add 2 products with ID 1 and 1 product with ID 43");
-        var consoleKey = ConsoleKey.Enter;
-        while (consoleKey != ConsoleKey.Escape)
-        {
-            var productQuantityStr = ConsoleHelper.AskUserTextInput("Enter the product ID and quantity");
-            if (!Regex.IsMatch(productQuantityStr, $@"\d+-\d+"))
-            {
-                ConsoleHelper.PrintError("Invalid input. Please see the input rules again");
-            }
-            else
-            {
-                var numberPair = productQuantityStr.Split("-").Select(x => int.Parse(x));
-                var productId = numberPair.First();
-                var productQuantity = numberPair.Last();
-                order.Products.Add(new OrderProduct
-                {
-                    ProductId = productId,
-                    ProductQuantity = productQuantity,
-                });
-            }
-
-            consoleKey = Console.ReadKey(false).Key;
-        }
-
-        var productIdList = order.Products.Select(order => order.ProductId).ToList();
-        using var context = new AppDbContext();
-        var products = context.Products
-            .Where(x => productIdList.Contains(x.Id) && x.InventoryCount > 0)
-            .Select(x => new { x.Id, x.InventoryCount })
-            .ToDictionary(
-                x => x.Id,
-                x => x.InventoryCount);
-
-        if (!ValidateProducts(order, products))
-        {
-            ConsoleHelper.PrintError("Ordered items are invalid");
-            return;
-        }
-
-        // TODO: save order + associated order products
-        try
-        {
-            context.Orders.Add(order);
-            context.OrderProducts.AddRange(order.Products);
-            context.SaveChanges();
-        }
-        catch
-        {
-            ConsoleHelper.PrintError("Failed to process order");
-        }
-
-        OnStateChanged(this, "PaymentState");
-
-        static bool ValidateProducts(Order order, IReadOnlyDictionary<int, uint> availableProducts)
-        {
-            if (availableProducts.Count < order.Products.Count)
-            {
-                var invalidProductIds = order.Products
-                    .Select(x => x.ProductId)
-                    .Where(x => !availableProducts.ContainsKey(x))
-                    .ToList();
-
-                ConsoleHelper.PrintError($"The following product IDs are not valid: {string.Join(", ", invalidProductIds)}");
-                return false;
-            }
-
-            var errorMessages = new List<string>();
-            foreach (var orderProduct in order.Products)
-            {
-                 if (orderProduct.ProductQuantity > availableProducts[orderProduct.ProductId])
-                {
-                    errorMessages.Add($"Invalid purchase quantity for product with ID [{orderProduct.ProductId}] (only {availableProducts[orderProduct.ProductId]} are available");
-                }
-            }
-
-            if (errorMessages.Count > 0)
-            {
-                ConsoleHelper.PrintErrors(errorMessages);
-                return false;
-            }
-
-            return true;
-        }
-    }
+    // TODO: move to OrderingState
 
     private void ShowSignedOutOptions()
     {
