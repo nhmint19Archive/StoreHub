@@ -12,13 +12,13 @@ public class Order
 
 	public Invoice Prepare(
 		DeliveryMethod deliveryMethod,
-		ITransactionStrategy transactionStrategy)
+		ITransactionMethod transactionMethod)
 	{
 		return new Invoice(
 			new ReadOnlyCollection<OrderProduct>(Products),
 			Id,
 			CustomerEmail,
-			transactionStrategy,
+			transactionMethod,
 			deliveryMethod.DeliveryCost);
 	}
 

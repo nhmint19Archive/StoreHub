@@ -276,8 +276,8 @@ internal class OrderingState : AppState
 
     private void ConfirmOrder(Order order)
     {
-        var deliveryMethod = AskUserForDeliveryMethod();
-        var transactionMethod = AskUserForPaymentMethod();
+        var deliveryMethod = AskUserForDeliveryMethod(order.Id);
+        var transactionMethod = AskUserForPaymentMethod(order.Id);
         var invoice = order.Prepare(deliveryMethod, transactionMethod);
         invoice.EmailToCustomer();
         var success = invoice.MakePayment();
@@ -291,12 +291,84 @@ internal class OrderingState : AppState
         ConsoleHelper.PrintError("An error occurred whilst processing your order");
     }
 
-    private DeliveryMethod AskUserForDeliveryMethod()
+    private DeliveryMethod AskUserForDeliveryMethod(int orderId)
+    {
+        var choice = ConsoleHelper.AskUserOption(new Dictionary<char, string>()
+            {
+                { 'P', "Pick up at store" },
+                { 'D', "Postal delivery" },
+            },
+            "Please select a delivery method");
+        return choice switch
+        {
+            'P' => ProcessPickupMethod(orderId),
+            'D' => ProcessPostalDelivery(orderId),
+            _ => throw new InvalidOperationException(),
+        };
+    }
+
+    private DeliveryMethod ProcessPostalDelivery(int orderId)
+    {
+        var streetNumber = ConsoleHelper.AskUserTextInput("Enter your address number");
+        var streetName =  ConsoleHelper.AskUserTextInput("Enter your address street name");
+        var postalCode = ConsoleHelper.AskUserTextInput("Enter your postcode");
+        var apartmentNumber = ConsoleHelper.AskUserTextInput("Enter your apartment number (if applicable)");
+
+        return new PostalDelivery(
+            orderId, 
+            int.Parse(streetNumber), 
+            streetName, 
+             int.Parse(postalCode), 
+            apartmentNumber);
+    }
+
+    private DeliveryMethod ProcessPickupMethod(int orderId)
+    {
+        return new Pickup(orderId);
+    }
+
+    private ITransactionMethod AskUserForPaymentMethod(int orderId)
+    {                                                
+        var choice = ConsoleHelper.AskUserOption(new Dictionary<char, string>()          
+            {                                                                            
+                { 'P', "Paypal" },                                             
+                { 'A', "Cash" },                   
+                { 'B', "Bank Transfer" },  
+                { 'C', "Credit Card" },                                              
+            },                                                                           
+            "Please select a delivery method");
+        return choice switch
+        {
+            'P' => ProcessPaypalTransaction(orderId),
+            'A' => ProcessCashTransaction(orderId),
+            'B' => ProcessBankTransfer(orderId),  
+            'C' => ProcessCardTransaction(orderId),    
+            _ => throw new InvalidOperationException(),
+        };
+    }
+
+    private ITransactionMethod ProcessBankTransfer(int orderId)
+    {
+        var bsb = ConsoleHelper.AskUserTextInput("Enter your BSB");     
+        var accountNo =  ConsoleHelper.AskUserTextInput("Enter your account number");
+        return new BankTransaction(bsb, accountNo);
+    }
+
+    private ITransactionMethod ProcessCardTransaction(int orderId)
+    {
+        var cardNo = ConsoleHelper.AskUserTextInput("Enter your card number");
+        var cvc = ConsoleHelper.AskUserTextInput("Enter your card CVC");
+        var expiryDate = ConsoleHelper.AskUserTextInput("Enter your card expiry date");
+        return new CreditCardTransaction(cardNo, cvc, DateOnly.FromDateTime(DateTime.Parse(expiryDate))); 
+    }
+
+    private ITransactionMethod ProcessCashTransaction(int orderId)
     {
         throw new NotImplementedException();
     }
-    private ITransactionStrategy AskUserForPaymentMethod()
-    {                                                
-        throw new NotImplementedException();         
-    }                                                
+
+    private ITransactionMethod ProcessPaypalTransaction(int orderId)
+    {
+        throw new NotImplementedException();
+    }
 }

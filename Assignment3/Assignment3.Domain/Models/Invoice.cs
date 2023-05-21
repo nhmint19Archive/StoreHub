@@ -8,20 +8,20 @@ public class Invoice
 	private readonly IReadOnlyCollection<OrderProduct> _products;
 	private readonly int _orderId;
 	private readonly string _customerEmail;
-	private readonly ITransactionStrategy _transactionStrategy;
+	private readonly ITransactionMethod _transactionMethod;
 	private readonly decimal _deliveryCost;
 
 	internal Invoice(
 		IReadOnlyCollection<OrderProduct> products,
 		int orderId,
 		string customerEmail,
-		ITransactionStrategy transactionStrategy,
+		ITransactionMethod transactionMethod,
 		decimal deliveryCost)
 	{
 		_products = products;
 		_orderId = orderId;
 		_customerEmail = customerEmail;
-		_transactionStrategy = transactionStrategy;
+		_transactionMethod = transactionMethod;
 		_deliveryCost = deliveryCost;
 		TotalPrice = CalculateTotalPrice();
 	}
@@ -33,6 +33,10 @@ public class Invoice
 	public void EmailToCustomer()
 	{
 		Console.WriteLine($"An invoice has been sent to '{_customerEmail}'");
+		var email = new Email(_customerEmail);
+		email.Send(
+			"Your invoice from All Your Healthy Food Store",
+			$"Order: {_orderId}\nTotal price: {TotalPrice}\nDelivery cost: {_deliveryCost}");
 	}
 
 	public bool MakePayment()
@@ -47,7 +51,7 @@ public class Invoice
 
         try
         {
-	        var receipt = _transactionStrategy.Execute(transaction);
+	        var receipt = _transactionMethod.Execute(transaction);
 	        using var context = new AppDbContext();	        
 	        var order = context.Orders.Find(_orderId) ?? throw new InvalidOperationException();
 	        order.Status = OrderStatus.Confirmed;
