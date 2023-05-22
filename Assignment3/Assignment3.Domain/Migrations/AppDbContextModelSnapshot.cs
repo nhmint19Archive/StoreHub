@@ -27,6 +27,9 @@ namespace Assignment3.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
@@ -45,9 +48,6 @@ namespace Assignment3.Domain.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("OrderId1")
-                        .HasColumnType("INTEGER");
-
                     b.Property<decimal>("PriceAtPurchase")
                         .HasColumnType("TEXT");
 
@@ -55,8 +55,6 @@ namespace Assignment3.Domain.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("OrderId", "ProductId");
-
-                    b.HasIndex("OrderId1");
 
                     b.HasIndex("ProductId");
 
@@ -119,6 +117,9 @@ namespace Assignment3.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("TransactionDateUtc")
                         .HasColumnType("TEXT");
 
@@ -166,14 +167,10 @@ namespace Assignment3.Domain.Migrations
             modelBuilder.Entity("Assignment3.Domain.Models.OrderProduct", b =>
                 {
                     b.HasOne("Assignment3.Domain.Models.Order", "Order")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Assignment3.Domain.Models.Order", null)
-                        .WithMany("Products")
-                        .HasForeignKey("OrderId1");
 
                     b.HasOne("Assignment3.Domain.Models.Product", "Product")
                         .WithMany()
