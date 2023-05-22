@@ -1,7 +1,9 @@
 using Assignment3.Application.Models;
 using Assignment3.Application.Services;
+using Assignment3.Domain.Data;
 using Assignment3.Domain.Models;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace Assignment3.Application.States;
 
@@ -24,7 +26,7 @@ internal class BrowsingState : AppState
     public override void Run()
     {
         ShowProducts();
-        if (_session.IsUserSignedIn) 
+        if (_session.IsUserSignedIn)
         {
             ShowSignedInOptions();
         }
@@ -40,6 +42,7 @@ internal class BrowsingState : AppState
         var options = new Dictionary<char, string>()
         {
             { 'E', "Exit to Main Menu" },
+            { 'S', "Add items to shopping cart" }
         };
 
         if (_nameFilter != null || _priceFilter != null)
@@ -65,6 +68,9 @@ internal class BrowsingState : AppState
             case 'E':
                 OnStateChanged(this, nameof(MainMenuState));
                 break;
+            case 'O':
+                OnStateChanged(this, nameof(OrderingState));
+                break;
         }
     }
 
@@ -75,10 +81,14 @@ internal class BrowsingState : AppState
 
         foreach (var product in products)
         {
+            ConsoleHelper.PrintInfo(string.Empty);
             ConsoleHelper.PrintInfo($"ID [{product.Id}] - Availability: {product.InventoryCount}");
-            ConsoleHelper.PrintInfo($"[{product.Name}] - [{product.Description}]-[{product.Price}]");
+            ConsoleHelper.PrintInfo($"{product.Name} - {product.Price} AUD");
+            ConsoleHelper.PrintInfo($"{product.Description}");
         }
     }
+
+    // TODO: move to OrderingState
 
     private void ShowSignedOutOptions()
     {
@@ -119,6 +129,7 @@ internal class BrowsingState : AppState
 
     private void ShowFilters()
     {
+        // TODO(HUY): utilize ConsoleHelper.TryAskUserInput???
         while (_nameFilter == null) {
             var productName = ConsoleHelper.AskUserTextInput("Please type the product name filter and press [Enter]");
             _nameFilter = p => p.Name.Contains(productName);
@@ -128,12 +139,14 @@ internal class BrowsingState : AppState
             var upperPrice = 0m;
             var upperPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
             while (!decimal.TryParse(upperPriceStr, out upperPrice)) {
+                ConsoleHelper.PrintError("Invalid input");
                 upperPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
             }
 
             var lowerPrice = 0m;
             var lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
             while (!decimal.TryParse(lowerPriceStr, out lowerPrice)) {
+                ConsoleHelper.PrintError("Invalid input");
                 lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
             }
 
