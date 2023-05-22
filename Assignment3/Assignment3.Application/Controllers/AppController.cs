@@ -18,6 +18,7 @@ internal class AppController
         _currentState = _appStates[nameof(MainMenuState)];
         _currentState.StateChanged += SwitchState;
 
+        AppDbSeeder.SeedData();
         EnsureDatabaseCreated();
     }
 

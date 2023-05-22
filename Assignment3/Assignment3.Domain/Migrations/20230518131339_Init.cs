@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Assignment3.Domain.Migrations
-{
+namespace Assignment3.Domain.Migrations;
+
     /// <inheritdoc />
     public partial class Init : Migration
     {
@@ -53,4 +53,3 @@ namespace Assignment3.Domain.Migrations
                 name: "UserAccounts");
         }
     }
-}

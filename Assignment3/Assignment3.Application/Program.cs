@@ -26,12 +26,14 @@ internal class Program
         _ = services.AddScoped<SignInState>();
         _ = services.AddScoped<UserSession>();
         _ = services.AddScoped<CustomerProfileState>();
+        _ = services.AddScoped<AdminProfileState>();
         _ = services.AddScoped<IReadOnlyDictionary<string, AppState>>(x => new Dictionary<string, AppState>()
         {
             { nameof(MainMenuState), x.GetRequiredService<MainMenuState>() },
             { nameof(BrowsingState), x.GetRequiredService<BrowsingState>() },
             { nameof(SignInState), x.GetRequiredService<SignInState>() },
             { nameof(CustomerProfileState), x.GetRequiredService<CustomerProfileState>() },
+            { nameof(AdminProfileState), x.GetRequiredService<AdminProfileState>() }
         });
 
         // TODO: register objects here
