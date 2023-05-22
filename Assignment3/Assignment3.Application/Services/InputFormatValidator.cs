@@ -3,17 +3,32 @@ using System.Text.RegularExpressions;
 
 namespace Assignment3.Application.Services;
 
-public static class InputValidator
+public static class InputFormatValidator
 {
+    /// <summary>
+    /// Validate that the input is a comma-separated number list.
+    /// </summary>
+    /// <param name="input">Input string.</param>
+    /// <returns><c>True</c> if the input is a comma-separated number list, otherwise <c>False</c>.</returns>
     public static bool ValidateCommaSeparatedNumberList(string input)
     {
-        return string.IsNullOrEmpty(input) || Regex.IsMatch(input, @"\d+,(\d+)*");
+        return string.IsNullOrEmpty(input) || 
+            (Regex.IsMatch(input, @"\d+,(\d+)*") &&
+            input
+                .Split(",")
+                .Select(x => int.TryParse(x, out var r))
+                .All(x => x));
     }
 
-    public static bool ValidateHyphenSeparatedNumberPair(string inputStr)
+    /// <summary>
+    /// Validate that the input is a hypen-separated pair of number.
+    /// </summary>
+    /// <param name="input">Input string.</param>
+    /// <returns><c>True</c> if the input is a hypen-separated pair of number, otherwise <c>False</c>.</returns>
+    public static bool ValidateHyphenSeparatedNumberPair(string input)
     {
-        return Regex.IsMatch(inputStr, $@"\d+-\d+") &&
-            inputStr
+        return Regex.IsMatch(input, $@"\d+-\d+") &&
+            input
                 .Split("-")
                 .Select(x => int.TryParse(x, out var r))
                 .All(x => x);

@@ -91,7 +91,7 @@ internal class OrderingState : AppState
         while (consoleKey != ConsoleKey.Escape)
         {
             if (ConsoleHelper.TryAskUserTextInput(
-                    InputValidator.ValidateHyphenSeparatedNumberPair,
+                    InputFormatValidator.ValidateHyphenSeparatedNumberPair,
                     InputConvertor.ToHyphenSeparatedIntegerPair,
                     out var result,
                     "Enter the product ID and quantity"))
@@ -185,7 +185,7 @@ internal class OrderingState : AppState
     private void EditOrder(Order order)
     {
         if (!ConsoleHelper.TryAskUserTextInput(
-                InputValidator.ValidateCommaSeparatedNumberList,
+                InputFormatValidator.ValidateCommaSeparatedNumberList,
                 InputConvertor.ToCommaSeparatedIntegerList,
                 out var productIdsToRemove,
                 "Enter a comma separated list of IDs of products to be removed. Press [Enter] if you do not wish to remove any product"))
@@ -210,7 +210,7 @@ internal class OrderingState : AppState
         while (consoleKey != ConsoleKey.Escape)
         {
             if (ConsoleHelper.TryAskUserTextInput(
-                    InputValidator.ValidateHyphenSeparatedNumberPair,
+                    InputFormatValidator.ValidateHyphenSeparatedNumberPair,
                     InputConvertor.ToHyphenSeparatedIntegerPair, 
                     out var result,
                     "Enter the product ID and new quantity"))
