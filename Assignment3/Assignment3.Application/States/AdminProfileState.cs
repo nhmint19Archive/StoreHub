@@ -3,6 +3,7 @@ using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
+using Assignment3.Domain.Services;
 
 namespace Assignment3.Application.States;
 
@@ -65,7 +66,7 @@ internal class AdminProfileState : AppState
         };
         
         newStaffAccount.SetPassword(password);
-        var validationResults = ValidationHelper.ValidateObject(newStaffAccount);
+        var validationResults = ModelValidator.ValidateObject(newStaffAccount);
         if (validationResults.Count != 0)
         {
             ConsoleHelper.PrintErrors(validationResults);
@@ -126,7 +127,7 @@ internal class AdminProfileState : AppState
             staffAccount.SetPassword(newPassword);
         } 
 
-        var validationResults = ValidationHelper.ValidateObject(staffAccount);
+        var validationResults = ModelValidator.ValidateObject(staffAccount);
         if (validationResults.Count != 0)
         {
             ConsoleHelper.PrintErrors(validationResults);

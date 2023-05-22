@@ -53,7 +53,7 @@ internal static class ConsoleHelper
     /// <param name="convertFunc">The function that validates the output string to the type <typeparamref name="T"/>.</param>
     /// <param name="result">The converted result.</param>
     /// <param name="prompt">The optional prompt.</param>
-    /// <returns><c>True</c> if the input is valid and successfully converted. Otherwise false.</returns>
+    /// <returns><c>True</c> if the input is valid and successfully converted. Otherwise <c>False</c>.</returns>
     public static bool TryAskUserTextInput<T>(
         Func<string, bool> validateFunc,
         Func<string, T> convertFunc,

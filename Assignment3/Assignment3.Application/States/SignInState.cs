@@ -3,6 +3,7 @@ using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
+using Assignment3.Domain.Services;
 
 namespace Assignment3.Application.States;
 
@@ -150,7 +151,7 @@ internal class SignInState : AppState
         };
         
         newUserAccount.SetPassword(password);
-        var validationResults = ValidationHelper.ValidateObject(newUserAccount);
+        var validationResults = ModelValidator.ValidateObject(newUserAccount);
         if (validationResults.Count != 0)
         {
             ConsoleHelper.PrintErrors(validationResults);

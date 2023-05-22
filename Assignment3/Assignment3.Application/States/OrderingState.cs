@@ -91,8 +91,8 @@ internal class OrderingState : AppState
         while (consoleKey != ConsoleKey.Escape)
         {
             if (ConsoleHelper.TryAskUserTextInput(
-                    ValidateHyphenSeparatedNumberPair,
-                    ConvertToHyphenSeparatedIntegerPair,
+                    InputValidator.ValidateHyphenSeparatedNumberPair,
+                    InputConvertor.ToHyphenSeparatedIntegerPair,
                     out var result,
                     "Enter the product ID and quantity"))
             {
@@ -185,8 +185,8 @@ internal class OrderingState : AppState
     private void EditOrder(Order order)
     {
         if (!ConsoleHelper.TryAskUserTextInput(
-                ValidateCommaSeparatedNumberList,
-                ConvertToCommaSeparatedIntegerList,
+                InputValidator.ValidateCommaSeparatedNumberList,
+                InputConvertor.ToCommaSeparatedIntegerList,
                 out var productIdsToRemove,
                 "Enter a comma separated list of IDs of products to be removed. Press [Enter] if you do not wish to remove any product"))
         {
@@ -210,8 +210,8 @@ internal class OrderingState : AppState
         while (consoleKey != ConsoleKey.Escape)
         {
             if (ConsoleHelper.TryAskUserTextInput(
-                    ValidateHyphenSeparatedNumberPair, 
-                    ConvertToHyphenSeparatedIntegerPair, 
+                    InputValidator.ValidateHyphenSeparatedNumberPair,
+                    InputConvertor.ToHyphenSeparatedIntegerPair, 
                     out var result,
                     "Enter the product ID and new quantity"))
             {
@@ -263,38 +263,6 @@ internal class OrderingState : AppState
         {
             ConsoleHelper.PrintError("Failed to process order");
         }
-    }
-
-    private static IReadOnlyCollection<int> ConvertToCommaSeparatedIntegerList(string input)
-    {
-        return input.Split(",")
-            .Select(x => x.Trim())
-            .Select(x => int.Parse(x))
-            .ToList();
-    }
-
-    private static bool ValidateCommaSeparatedNumberList(string input)
-    {
-        return string.IsNullOrEmpty(input) || Regex.IsMatch(input, @"\d+,(\d+)*");
-    }
-
-    private static (int, int) ConvertToHyphenSeparatedIntegerPair(string inputStr)
-    {
-        var numberPair = inputStr
-                .Split("-")
-                .Select(x => int.Parse(x))
-                .ToList();
-
-        return (numberPair.First(), numberPair.Last());
-    }
-
-    private static bool ValidateHyphenSeparatedNumberPair(string inputStr)
-    {
-        return Regex.IsMatch(inputStr, $@"\d+-\d+") &&
-            inputStr
-                .Split("-")
-                .Select(x => int.TryParse(x, out var r))
-                .All(x => x);
     }
 
     private void ConfirmOrder(Order order)

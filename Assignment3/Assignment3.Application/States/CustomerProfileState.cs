@@ -87,7 +87,7 @@ internal class CustomerProfileState : AppState
             userAccount.SetPassword(newPassword);
         } 
 
-        var validationResults = ValidationHelper.ValidateObject(userAccount);
+        var validationResults = ModelValidator.ValidateObject(userAccount);
         if (validationResults.Count != 0)
         {
             ConsoleHelper.PrintErrors(validationResults);
