@@ -3,6 +3,7 @@ using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
+using Assignment3.Domain.Services;
 
 namespace Assignment3.Application.States;
 
@@ -68,7 +69,7 @@ internal class AdminProfileState : AppState
         };
         
         newStaffAccount.SetPassword(password);
-        var validationResults = ValidationHelper.ValidateObject(newStaffAccount);
+        var validationResults = ModelValidator.ValidateObject(newStaffAccount);
         if (validationResults.Count != 0)
         {
             ConsoleHelper.PrintErrors(validationResults);
@@ -95,9 +96,9 @@ internal class AdminProfileState : AppState
 
     private void ChangeStaffAccountDetails()
     {
-        var email = ConsoleHelper.AskUserTextInput("Enter the email of the staff");
-        var newPhoneNumber = ConsoleHelper.AskUserTextInput("Enter the staff member's new phone number or press enter if you do not want to change their phone number");
-        var newPassword = ConsoleHelper.AskUserTextInput("Enter the staff member's new password or press enter if you do not want to change their password");
+        var email = ConsoleHelper.AskUserTextInput("Enter the staff member's email");
+        var newPhoneNumber = ConsoleHelper.AskUserTextInput("Enter the staff member's new phone number. Press [Enter] if you do not want to change their phone number");
+        var newPassword = ConsoleHelper.AskUserTextInput("Enter the staff member's new password. Press [Enter] if you do not want to change their password");
 
         if (string.IsNullOrEmpty(email)) 
         {
@@ -129,7 +130,7 @@ internal class AdminProfileState : AppState
             staffAccount.SetPassword(newPassword);
         } 
 
-        var validationResults = ValidationHelper.ValidateObject(staffAccount);
+        var validationResults = ModelValidator.ValidateObject(staffAccount);
         if (validationResults.Count != 0)
         {
             ConsoleHelper.PrintErrors(validationResults);

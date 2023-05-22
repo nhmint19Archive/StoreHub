@@ -4,27 +4,37 @@ using Assignment3.Domain.Enums;
 namespace Assignment3.Domain.Models;
 public class Order
 {
-	private readonly string _customerEmail;
-
-	private void UpdateStatus(object? sender, EventArgs arg)
-	{
-		Status = OrderStatus.Delivered;
-	}
-
+	private IDeliveryMethod? _deliveryMethod;
 	public Order(string customerEmail)
 	{
-		_customerEmail = customerEmail;
+		CustomerEmail = customerEmail;
 	}
 
-	public Invoice Prepare(DeliveryMethod deliveryMethod)
+	public Invoice Prepare(
+		IDeliveryMethod deliveryMethod,
+		ITransactionMethod transactionMethod)
 	{
 		return new Invoice(
 			new ReadOnlyCollection<OrderProduct>(Products),
-			_customerEmail,
+			Id,
+			CustomerEmail,
+			transactionMethod,
 			deliveryMethod.DeliveryCost);
 	}
 
+	public void StartDelivery()
+	{
+		if (_deliveryMethod == null)
+		{
+			throw new InvalidOperationException();
+		}
+		
+		_deliveryMethod.StartDelivery();
+	}
+
 	public int Id { get; set; }
-	public OrderStatus Status { get; private set; } = OrderStatus.Unconfirmed;
+	public DateTime Date { get; init; }
+    public string CustomerEmail { get; init; }
+    public OrderStatus Status { get; set; } = OrderStatus.Unconfirmed;
 	public IList<OrderProduct> Products { get; init; } = new List<OrderProduct>();
 }

@@ -2,6 +2,7 @@ using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
+using Assignment3.Domain.Services;
 
 namespace Assignment3.Application.States;
 
@@ -60,6 +61,7 @@ internal class CustomerProfileState : AppState
         var newPhoneNumber = ConsoleHelper.AskUserTextInput("Enter your new phone number or press enter if you do not want to change your phone number");
         var newPassword = ConsoleHelper.AskUserTextInput("Enter your new password or press enter if you do not want to change your password");
 
+        // TODO(HUY): VALIDATE INPUT
         if (string.IsNullOrEmpty(newPhoneNumber) && string.IsNullOrEmpty(newPassword))
         {
             ConsoleHelper.PrintInfo("No details changed");
@@ -87,7 +89,7 @@ internal class CustomerProfileState : AppState
             userAccount.SetPassword(newPassword);
         } 
 
-        var validationResults = ValidationHelper.ValidateObject(userAccount);
+        var validationResults = ModelValidator.ValidateObject(userAccount);
         if (validationResults.Count != 0)
         {
             ConsoleHelper.PrintErrors(validationResults);
