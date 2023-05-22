@@ -129,6 +129,7 @@ internal class BrowsingState : AppState
 
     private void ShowFilters()
     {
+        // TODO(HUY): utilize ConsoleHelper.TryAskUserInput???
         while (_nameFilter == null) {
             var productName = ConsoleHelper.AskUserTextInput("Please type the product name filter and press [Enter]");
             _nameFilter = p => p.Name.Contains(productName);

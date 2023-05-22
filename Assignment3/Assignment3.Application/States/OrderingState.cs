@@ -300,7 +300,8 @@ internal class OrderingState : AppState
     }
 
     private IDeliveryMethod ProcessPostalDelivery(int orderId)
-    {
+    { 
+        // TODO(HUY): VALIDATE INPUT
         var streetNumber = ConsoleHelper.AskUserTextInput("Enter your address number");
         var streetName =  ConsoleHelper.AskUserTextInput("Enter your address street name");
         var postalCode = ConsoleHelper.AskUserTextInput("Enter your postcode");
@@ -341,6 +342,7 @@ internal class OrderingState : AppState
 
     private ITransactionMethod ProcessBankTransfer(int orderId)
     {
+        // TODO(HUY): VALIDATE INPUT
         var bsb = ConsoleHelper.AskUserTextInput("Enter your BSB");     
         var accountNo =  ConsoleHelper.AskUserTextInput("Enter your account number");
         return new BankTransaction(bsb, accountNo);
@@ -348,6 +350,7 @@ internal class OrderingState : AppState
 
     private ITransactionMethod ProcessCardTransaction(int orderId)
     {
+        // TODO(HUY): VALIDATE INPUT
         var cardNo = ConsoleHelper.AskUserTextInput("Enter your card number");
         var cvc = ConsoleHelper.AskUserTextInput("Enter your card CVC");
         var expiryDate = ConsoleHelper.AskUserTextInput("Enter your card expiry date");
