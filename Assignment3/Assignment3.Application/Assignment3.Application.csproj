@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Assignment3.Domain\Assignment3.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="bin\Debug\net7.0\AllYourHealthyDb.db" />
+  </ItemGroup>
+
 </Project>

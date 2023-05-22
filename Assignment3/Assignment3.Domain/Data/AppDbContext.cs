@@ -46,29 +46,29 @@ public class AppDbContext : DbContext
 			.WithMany()
 			.HasForeignKey(x => x.CustomerEmail);
 
-        modelBuilder
+     modelBuilder
 			.Entity<Receipt>()
 			.HasKey(x => x.Id);
 
-        modelBuilder
+     modelBuilder
 			.Entity<Receipt>()
 			.HasOne(x => x.Transaction);
 
-        modelBuilder
+     modelBuilder
 			.Entity<Transaction>()
 			.HasKey(x => x.Id);
 
-        modelBuilder
+     modelBuilder
 			.Entity<OrderProduct>()
 			.HasKey(x => new { x.OrderId, x.ProductId });
 
-        modelBuilder
+     modelBuilder
 			.Entity<OrderProduct>()
 			.HasOne(x => x.Order)
 			.WithMany()
 			.HasForeignKey(x => x.OrderId);
 
-        modelBuilder
+     modelBuilder
 			.Entity<OrderProduct>()
 			.HasOne(x => x.Product)
 			.WithMany()
