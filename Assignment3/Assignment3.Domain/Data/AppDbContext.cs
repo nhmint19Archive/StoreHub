@@ -12,7 +12,7 @@ public class AppDbContext : DbContext
 	public AppDbContext()
 	{
 		// comment out this line when performing migrations
-		//Database.EnsureCreated();
+		Database.EnsureCreated();
 	}
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

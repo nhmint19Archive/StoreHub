@@ -11,6 +11,5 @@ public class Product
 	public string Name { get; init; } = string.Empty;
 	public string Description { get; init; } = string.Empty;
 	public decimal Price { get; init; } = decimal.Zero;
-	public string Unit { get; init; } = string.Empty;
 	public uint InventoryCount { get; init; }
 }

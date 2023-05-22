@@ -38,10 +38,6 @@ namespace Assignment3.Domain.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.ToTable("Products");

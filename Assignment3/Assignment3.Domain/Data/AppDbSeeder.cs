@@ -24,7 +24,6 @@ public static class AppDbSeeder
 				Name = "Cabbage",
 				Description = "Fresh cabbage from local farm",
 				Price = 3,
-				Unit = "kg",
 				InventoryCount = 12
 			},
 			new Product()
@@ -32,7 +31,6 @@ public static class AppDbSeeder
 				Name = "Ham",
 				Description = "Fresh ham from local farm",
 				Price = 10,
-				Unit = "kg",
 				InventoryCount = 34
 			},
 			new Product()
@@ -40,7 +38,6 @@ public static class AppDbSeeder
 				Name = "Beef",
 				Description = "Fresh beef from local farm",
 				Price = 15,
-				Unit = "kg",
 				InventoryCount = 29
 			},
 			new Product()
@@ -48,7 +45,6 @@ public static class AppDbSeeder
 				Name = "Corn",
 				Description = "Fresh corn from local farm",
 				Price = 6,
-				Unit = "kg",
 				InventoryCount = 5
 			},
 			new Product()
@@ -56,7 +52,6 @@ public static class AppDbSeeder
 				Name = "Water",
 				Description = "Water from nearby fountain",
 				Price = 2,
-				Unit = "litre",
 				InventoryCount = 17
 			},
 			new Product()
@@ -64,7 +59,6 @@ public static class AppDbSeeder
 				Name = "Sparkling Water",
 				Description = "Still water but sparkle",
 				Price = 3,
-				Unit = "litre",
 				InventoryCount = 16
 			},
 			new Product()
@@ -72,7 +66,6 @@ public static class AppDbSeeder
 				Name = "Carrot",
 				Description = "Fresh carrot from local farm",
 				Price = 4,
-				Unit = "kg",
 				InventoryCount = 1
 			},
 			new Product()
@@ -80,7 +73,6 @@ public static class AppDbSeeder
 				Name = "Bread",
 				Description = "Morning baked bread",
 				Price = 8,
-				Unit = "loaf",
 				InventoryCount = 0
 			},
 			new Product()
@@ -88,7 +80,6 @@ public static class AppDbSeeder
 				Name = "Lamb",
 				Description = "Fresh lamb from local farm",
 				Price = 20,
-				Unit = "kg",
 				InventoryCount = 25
 			},
 			new Product()
@@ -96,7 +87,6 @@ public static class AppDbSeeder
 				Name = "Tomato",
 				Description = "Fresh tomato from local garden",
 				Price = 7,
-				Unit = "kg",
 				InventoryCount = 50
 			}
 		});

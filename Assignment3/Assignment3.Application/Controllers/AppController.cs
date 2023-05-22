@@ -17,6 +17,7 @@ internal class AppController
         _appStates = appStates;
         _currentState = _appStates[nameof(MainMenuState)];
         _currentState.StateChanged += SwitchState;
+        AppDbSeeder.SeedData();
     }
     
     /// <summary>
@@ -24,7 +25,6 @@ internal class AppController
     /// </summary>
     public void Run()
     {
-        AppDbSeeder.SeedData();
         while (true)
         {
             _currentState.Run();
