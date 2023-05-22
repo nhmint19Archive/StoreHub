@@ -53,17 +53,31 @@ internal static class ConsoleHelper
     /// <param name="convertFunc">The function that validates the output string to the type <typeparamref name="T"/>.</param>
     /// <param name="result">The converted result.</param>
     /// <param name="prompt">The optional prompt.</param>
+    /// <param name="validationErrorMessage">The optional validation error message.</param>
+    /// <param name="conversionErrorMessage">The optional conversion error message.</param>
     /// <returns><c>True</c> if the input is valid and successfully converted. Otherwise <c>False</c>.</returns>
     public static bool TryAskUserTextInput<T>(
         Func<string, bool> validateFunc,
         Func<string, T> convertFunc,
         [MaybeNullWhen(false)]
         out T result,
-        string prompt = "Please type your input:")
+        string prompt = "Please type your input:",
+        string validationErrorMessage = "Invalid input",
+        string conversionErrorMessage = "Failed to process input")
     {
         var inputStr = AskUserTextInput(prompt);
-        if (!validateFunc(inputStr))
+        try
         {
+            if (!validateFunc(inputStr))
+            {
+                ConsoleHelper.PrintError(validationErrorMessage);
+                result = default;
+                return false;
+            }
+        }
+        catch
+        {
+            ConsoleHelper.PrintError(validationErrorMessage);
             result = default;
             return false;
         }
@@ -75,6 +89,7 @@ internal static class ConsoleHelper
         }
         catch
         {
+            ConsoleHelper.PrintError(conversionErrorMessage);
             result = default;
             return false;
         }
