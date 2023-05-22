@@ -8,12 +8,10 @@ public class AppDbContext : DbContext
 {
 	public DbSet<Product> Products { get; set; } = null!;
 	public DbSet<UserAccount> UserAccounts { get; set; } = null!;
-	
-	public AppDbContext()
-	{
-		// comment out this line when performing migrations
-		Database.EnsureCreated();
-	}
+	public DbSet<Order> Orders { get; set; } = null!;
+	public DbSet<OrderProduct> OrderProducts { get; set; } = null!;
+	public DbSet<Receipt> Receipts { get; set; } = null!;
+	public DbSet<Transaction> Transactions { get; set; } = null!;
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
@@ -25,19 +23,55 @@ public class AppDbContext : DbContext
 	{
 		base.OnModelCreating(modelBuilder);
 
-		_ = modelBuilder
+		modelBuilder
 			.Entity<Product>()
 			.HasKey(x => x.Id);
 
-		var converter = new EnumToStringConverter<Roles>();
 		modelBuilder
 			.Entity<UserAccount>()
 			.Property(x => x.Role)
-			.HasConversion(converter);
-			
-		_ = modelBuilder
+			.HasConversion(new EnumToStringConverter<Roles>());
+
+		modelBuilder
 			.Entity<UserAccount>()
 			.HasKey(x => x.Email);
 
-	}
+		modelBuilder
+			.Entity<Order>()
+			.HasKey(x => x.Id);
+
+		modelBuilder
+			.Entity<Order>()
+			.HasOne<UserAccount>()
+			.WithMany()
+			.HasForeignKey(x => x.CustomerEmail);
+
+     modelBuilder
+			.Entity<Receipt>()
+			.HasKey(x => x.Id);
+
+     modelBuilder
+			.Entity<Receipt>()
+			.HasOne(x => x.Transaction);
+
+     modelBuilder
+			.Entity<Transaction>()
+			.HasKey(x => x.Id);
+
+     modelBuilder
+			.Entity<OrderProduct>()
+			.HasKey(x => new { x.OrderId, x.ProductId });
+
+     modelBuilder
+			.Entity<OrderProduct>()
+			.HasOne(x => x.Order)
+			.WithMany()
+			.HasForeignKey(x => x.OrderId);
+
+     modelBuilder
+			.Entity<OrderProduct>()
+			.HasOne(x => x.Product)
+			.WithMany()
+			.HasForeignKey(x => x.ProductId);
+    }
 }

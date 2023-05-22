@@ -10,16 +10,24 @@ internal class AppController
 {
     private readonly IReadOnlyDictionary<string, AppState> _appStates;
     private AppState _currentState;
-    
+
     public AppController(
         IReadOnlyDictionary<string, AppState> appStates)
     {
         _appStates = appStates;
         _currentState = _appStates[nameof(MainMenuState)];
         _currentState.StateChanged += SwitchState;
+
         AppDbSeeder.SeedData();
+        EnsureDatabaseCreated();
     }
-    
+
+    private static void EnsureDatabaseCreated()
+    {
+        using var context = new AppDbContext();
+        context.Database.EnsureCreated();
+    }
+
     /// <summary>
     /// Run the application based on its current state.
     /// </summary>

@@ -18,13 +18,4 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.5" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include=".editorconfig" />
-    <None Remove="AllYourHealthyDb.db" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Migrations\20230519094614_AddProductsUnit.cs" />
-  </ItemGroup>
-
 </Project>
