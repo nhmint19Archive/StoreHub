@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text.RegularExpressions;
 using Assignment3.Application.Models;
 using Assignment3.Application.Services;
@@ -91,19 +90,13 @@ internal class OrderingState : AppState
         var consoleKey = ConsoleKey.Enter;
         while (consoleKey != ConsoleKey.Escape)
         {
-            var productQuantityStr = ConsoleHelper.AskUserTextInput("Enter the product ID and quantity");
-            if (!Regex.IsMatch(productQuantityStr, $@"\d+-\d+"))
+            if (ConsoleHelper.TryAskUserTextInput(
+                    ValidateHyphenSeparatedNumberPair,
+                    ConvertToHyphenSeparatedIntegerPair,
+                    out var result,
+                    "Enter the product ID and quantity"))
             {
-                ConsoleHelper.PrintError("Invalid input. Please see the input rules again");
-            }
-            else
-            {
-                var numberPair = productQuantityStr
-                    .Split("-")
-                    .Select(x => int.Parse(x))
-                    .ToList();
-                var productId = numberPair.First();
-                var productQuantity = numberPair.Last();
+                var (productId, productQuantity) = result;
                 order.Products.Add(new OrderProduct
                 {
                     ProductId = productId,
@@ -191,19 +184,17 @@ internal class OrderingState : AppState
 
     private void EditOrder(Order order)
     {
-        var productIdsToRemoveStr = ConsoleHelper.AskUserTextInput("Enter a comma separated list of IDs of products to be removed. Press [Enter] if you do not wish to remove any product");
-        if (!string.IsNullOrEmpty(productIdsToRemoveStr) && !Regex.IsMatch(productIdsToRemoveStr, @"\d+,(\d+)*"))
+        if (!ConsoleHelper.TryAskUserTextInput(
+                ValidateCommaSeparatedNumberList,
+                ConvertToCommaSeparatedIntegerList,
+                out var productIdsToRemove,
+                "Enter a comma separated list of IDs of products to be removed. Press [Enter] if you do not wish to remove any product"))
         {
-            ConsoleHelper.PrintError("Invalid input. Please type in a list of comma-separated product IDs");
+            ConsoleHelper.PrintError("Invalid input. Please type in a list of comma-separated product IDs or press [Enter]");
             return;
         }
 
         var orderProductIds = order.Products.Select(x => x.ProductId).ToList();
-        var productIdsToRemove = productIdsToRemoveStr
-            .Split(",")
-            .Select(x => x.Trim())
-            .Select(x => int.Parse(x))
-            .ToList();
         var invalidProductIdsToRemove = productIdsToRemove.Except(productIdsToRemove.Intersect(orderProductIds)).ToList();
         if (invalidProductIdsToRemove.Count > 0)
         {
@@ -215,17 +206,17 @@ internal class OrderingState : AppState
         ConsoleHelper.PrintInfo("For example: type '1-2 [Enter] 43-1 [Esc]' to add 2 products with ID 1 and 1 product with ID 43");
         var consoleKey = ConsoleKey.Enter;
         var productIdQuantityPairs = new Dictionary<int, int>();
+
         while (consoleKey != ConsoleKey.Escape)
         {
-            var productQuantityStr = ConsoleHelper.AskUserTextInput("Enter the product ID and new quantity");
-            if (!Regex.IsMatch(productQuantityStr, $@"\d+-\d+"))
+            if (ConsoleHelper.TryAskUserTextInput(
+                    ValidateHyphenSeparatedNumberPair, 
+                    ConvertToHyphenSeparatedIntegerPair, 
+                    out var result,
+                    "Enter the product ID and new quantity"))
             {
-                ConsoleHelper.PrintError("Invalid input. Please see the input rules again");
-            }
-            else
-            {
-                var numberPair = productQuantityStr.Split("-").Select(x => int.Parse(x));
-                productIdQuantityPairs.Add(numberPair.First(), numberPair.Last());
+                var (productId, quantity) = result;
+                productIdQuantityPairs.Add(productId, quantity);
             }
 
             consoleKey = Console.ReadKey(false).Key;
@@ -272,6 +263,38 @@ internal class OrderingState : AppState
         {
             ConsoleHelper.PrintError("Failed to process order");
         }
+    }
+
+    private static IReadOnlyCollection<int> ConvertToCommaSeparatedIntegerList(string input)
+    {
+        return input.Split(",")
+            .Select(x => x.Trim())
+            .Select(x => int.Parse(x))
+            .ToList();
+    }
+
+    private static bool ValidateCommaSeparatedNumberList(string input)
+    {
+        return string.IsNullOrEmpty(input) || Regex.IsMatch(input, @"\d+,(\d+)*");
+    }
+
+    private static (int, int) ConvertToHyphenSeparatedIntegerPair(string inputStr)
+    {
+        var numberPair = inputStr
+                .Split("-")
+                .Select(x => int.Parse(x))
+                .ToList();
+
+        return (numberPair.First(), numberPair.Last());
+    }
+
+    private static bool ValidateHyphenSeparatedNumberPair(string inputStr)
+    {
+        return Regex.IsMatch(inputStr, $@"\d+-\d+") &&
+            inputStr
+                .Split("-")
+                .Select(x => int.TryParse(x, out var r))
+                .All(x => x);
     }
 
     private void ConfirmOrder(Order order)
