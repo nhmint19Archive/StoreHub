@@ -13,6 +13,10 @@ internal class Program
     {
         var services = RegisterDependencies();
         var appController = services.GetRequiredService<AppController>();
+
+        
+        
+
         appController.Run();
     }
 
@@ -28,13 +32,15 @@ internal class Program
             .AddSingleton<UserSession>()
             .AddSingleton<CustomerProfileState>()
             .AddSingleton<AdminProfileState>()
+            .AddSingleton<OrderingState>()
             .AddSingleton<IReadOnlyDictionary<string, AppState>>(x => new Dictionary<string, AppState>()
             {
                 { nameof(MainMenuState), x.GetRequiredService<MainMenuState>() },
                 { nameof(BrowsingState), x.GetRequiredService<BrowsingState>() },
                 { nameof(SignInState), x.GetRequiredService<SignInState>() },
                 { nameof(CustomerProfileState), x.GetRequiredService<CustomerProfileState>() },
-                { nameof(AdminProfileState), x.GetRequiredService<AdminProfileState>() }
+                { nameof(AdminProfileState), x.GetRequiredService<AdminProfileState>() },
+                { nameof(OrderingState), x.GetRequiredService<OrderingState>() }
             });
 
 

@@ -51,9 +51,9 @@ public class Invoice
 
         try
         {
-	        var receipt = _transactionMethod.Execute(transaction);
-	        using var context = new AppDbContext();	        
-	        var order = context.Orders.Find(_orderId) ?? throw new InvalidOperationException();
+            using var context = new AppDbContext();
+            var order = context.Orders.Find(_orderId) ?? throw new InvalidOperationException();
+            var receipt = _transactionMethod.Execute(transaction, order);
 	        order.Status = OrderStatus.Confirmed;
 	        context.Update(order);
 	        context.Transactions.Add(transaction);
