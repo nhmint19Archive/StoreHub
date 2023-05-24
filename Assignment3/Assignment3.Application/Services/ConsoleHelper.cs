@@ -47,6 +47,21 @@ internal static class ConsoleHelper
     }
 
     /// <summary>
+    /// Ask user for a single key input.
+    /// </summary>
+    /// <param name="prompt">Optional prompt.</param>
+    /// <returns>The pressed key.</returns>
+    /// <remarks>
+    /// This method is used to ask user to enter a single key and is intended to deal with special keys such as Escape or Enter.
+    /// To ask user to choose from a list of choices, see <see cref="ConsoleHelper.AskUserOption(IReadOnlyDictionary{char, string}, string)"/>.
+    /// </remarks>
+    public static ConsoleKey AskUserKeyInput(string prompt = "Please enter your key:")
+    {
+        PrintInfo(prompt);
+        return Console.ReadKey(false).Key;
+    }
+
+    /// <summary>
     /// Ask user for text input and try converting it to a specified data type.
     /// </summary>
     /// <typeparam name="T">The output data type.</typeparam>

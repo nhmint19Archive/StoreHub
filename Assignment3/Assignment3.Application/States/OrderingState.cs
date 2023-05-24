@@ -52,8 +52,6 @@ internal class OrderingState : AppState
             switch (input)
             {
                 case 'E':
-                    // TODO: ask for product IDs that need to be removed
-                    // ask for product IDs that need to be changed
                     EditOrder(order);
                     break;
                 case 'D':
@@ -122,8 +120,7 @@ internal class OrderingState : AppState
                 ConsoleHelper.PrintInfo($"Added {productQuantity} of product ID [{productId}]");
             }
 
-            ConsoleHelper.PrintInfo("Press any key to continue. Press [Esc] to quit.");
-            consoleKey = Console.ReadKey(false).Key;
+            consoleKey = ConsoleHelper.AskUserKeyInput("Press any key to continue. Press [Esc] to quit.");
         }
 
         var productIdList = order.Products.Select(x => x.ProductId).ToList();
@@ -228,9 +225,9 @@ internal class OrderingState : AppState
 
         ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [Esc] when you are finish.");
         ConsoleHelper.PrintInfo("For example: type '1-2 [Enter] 43-1 [Esc]' to add 2 products with ID 1 and 1 product with ID 43");
-        var consoleKey = ConsoleKey.Enter;
-        var productIdQuantityPairs = new Dictionary<int, int>();
 
+        var productIdQuantityPairs = new Dictionary<int, int>();
+        var consoleKey = ConsoleKey.Enter;
         while (consoleKey != ConsoleKey.Escape)
         {
             if (ConsoleHelper.TryAskUserTextInput(
@@ -243,8 +240,7 @@ internal class OrderingState : AppState
                 productIdQuantityPairs.Add(productId, quantity);
             }
 
-            ConsoleHelper.PrintInfo("Press any key to continue. Press [Esc] to quit.");
-            consoleKey = Console.ReadKey(false).Key;
+            consoleKey = ConsoleHelper.AskUserKeyInput("Press any key to continue. Press [Esc] to quit.");
         }
 
         var productIdsToUpdate = productIdQuantityPairs.Select(x => x.Key).ToList();
