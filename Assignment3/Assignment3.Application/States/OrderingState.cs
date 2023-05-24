@@ -3,6 +3,7 @@ using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
+using System.Linq;
 
 namespace Assignment3.Application.States;
 
@@ -35,6 +36,7 @@ internal class OrderingState : AppState
 
         var choices = new Dictionary<char, string>()
         {
+            // TODO(HUY): implement a back function using a stack?m  
             { 'B', "Back to Browsing" },
         };
 
@@ -44,6 +46,7 @@ internal class OrderingState : AppState
             choices.Add('E', "Edit Order");
             choices.Add('D', "Delete existing order and make a new one");
             choices.Add('C', "Confirm Order");
+            choices.Add('V', "View Order");
 
             var input = ConsoleHelper.AskUserOption(choices);
             switch (input)
@@ -63,6 +66,9 @@ internal class OrderingState : AppState
                 case 'B':
                     OnStateChanged(this, nameof(BrowsingState));
                     break;
+                case 'V':
+                    ViewOrder(order);
+                    break;
             }
         }
         else
@@ -81,12 +87,23 @@ internal class OrderingState : AppState
         }
     }
 
+    private void ViewOrder(Order order)
+    {
+        ConsoleHelper.PrintInfo($"Pending order [{order.Id}]");
+        ConsoleHelper.PrintInfo($"Creation date: {order.Date}");
+        ConsoleHelper.PrintInfo($"Items:");
+        foreach (var product in order.Products) {
+            ConsoleHelper.PrintInfo($"\tProduct ID: [{product.ProductId}] - Quantity:  {product.ProductQuantity}");
+        }
+    }
+
     private void AddProductsToShoppingCart()
     {
         var order = new Order(_session.AuthenticatedUser.Email);
         ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to purchase. Type [Esc] when you are finished.");
         ConsoleHelper.PrintInfo("For example: type '1-2 [Enter] 43-1 [Esc]' to add 2 products with ID 1 and 1 product with ID 43");
         var consoleKey = ConsoleKey.Enter;
+
         while (consoleKey != ConsoleKey.Escape)
         {
             if (ConsoleHelper.TryAskUserTextInput(
@@ -102,10 +119,10 @@ internal class OrderingState : AppState
                     ProductQuantity = productQuantity,
                 });
 
-                ConsoleHelper.PrintInfo($"Added {productQuantity} of items ID [{productId}]");
+                ConsoleHelper.PrintInfo($"Added {productQuantity} of product ID [{productId}]");
             }
 
-            ConsoleHelper.PrintInfo("Press [Enter] to continue. Press [Esc] to quit.");
+            ConsoleHelper.PrintInfo("Press any key to continue. Press [Esc] to quit.");
             consoleKey = Console.ReadKey(false).Key;
         }
 
@@ -118,7 +135,7 @@ internal class OrderingState : AppState
                 x => x.Id,
                 x => x.InventoryCount);
 
-        if (!ValidateProducts(order, products))
+        if (order.Products.Count > 0 && products.Count > 0 && !ValidateOrderProductQuantity(order, products))
         {
             ConsoleHelper.PrintError("Ordered items are invalid");
             return;
@@ -137,24 +154,27 @@ internal class OrderingState : AppState
         }
     }
 
-    private bool ValidateProducts(Order order, IReadOnlyDictionary<int, uint> availableProducts)
+    private bool ValidateOrderProductQuantity(Order order, IReadOnlyDictionary<int, uint> availableProducts)
     {
-        if (availableProducts.Count < order.Products.Count)
+        var errorMessages = new List<string>();
+        IEnumerable<OrderProduct> validProducts = order.Products;
+
+        var invalidProductIds = order.Products
+            .Select(x => x.ProductId)
+            .Where(x => !availableProducts.ContainsKey(x))
+            .ToList();
+
+        if (invalidProductIds.Count > 0)
         {
-            var invalidProductIds = order.Products
-                .Select(x => x.ProductId)
-                .Where(x => !availableProducts.ContainsKey(x))
-                .ToList();
-
-            ConsoleHelper.PrintError($"The following product IDs are not valid: {string.Join(", ", invalidProductIds)}");
-            return false;
+            validProducts = validProducts.ExceptBy(invalidProductIds, x => x.ProductId);
+            errorMessages.Add($"The following product IDs do not exist: {string.Join(", ", invalidProductIds)}");
         }
-
-        var errorMessages = order
-            .Products
+        
+        errorMessages.AddRange(
+            validProducts
             .Where(x => x.ProductQuantity > availableProducts[x.ProductId])
             .Select(x => $"Invalid purchase quantity for product with ID [{x.ProductId}] (only {availableProducts[x.ProductId]} are available")
-            .ToList();
+            .ToList());
 
         if (errorMessages.Count > 0)
         {
@@ -180,9 +200,10 @@ internal class OrderingState : AppState
         var order = context.Orders.Find(orderId);
         if (order != null)
         {
+            ConsoleHelper.PrintInfo($"Erasing order [{order.Id}]");
             context.Orders.Remove(order);
             context.SaveChanges();
-        }
+        } 
     }
 
     private void EditOrder(Order order)
@@ -197,7 +218,7 @@ internal class OrderingState : AppState
             return;
         }
 
-        var orderProductIds = order.Products.Select(x => x.ProductId).ToList();
+        var orderProductIds = order.Products.Select(x => x.ProductId).ToHashSet();
         var invalidProductIdsToRemove = productIdsToRemove.Except(productIdsToRemove.Intersect(orderProductIds)).ToList();
         if (invalidProductIdsToRemove.Count > 0)
         {
@@ -205,7 +226,7 @@ internal class OrderingState : AppState
             return;
         }
 
-        ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to purchase. Type [Esc] when you are finish.");
+        ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [Esc] when you are finish.");
         ConsoleHelper.PrintInfo("For example: type '1-2 [Enter] 43-1 [Esc]' to add 2 products with ID 1 and 1 product with ID 43");
         var consoleKey = ConsoleKey.Enter;
         var productIdQuantityPairs = new Dictionary<int, int>();
@@ -222,17 +243,20 @@ internal class OrderingState : AppState
                 productIdQuantityPairs.Add(productId, quantity);
             }
 
+            ConsoleHelper.PrintInfo("Press any key to continue. Press [Esc] to quit.");
             consoleKey = Console.ReadKey(false).Key;
         }
 
         var productIdsToUpdate = productIdQuantityPairs.Select(x => x.Key).ToList();
-        var invalidProductIdsToUpdate = productIdsToUpdate.Except(productIdsToUpdate.Intersect(orderProductIds)).ToList();
-        if (invalidProductIdsToUpdate.Count > 0)
-        {
-            ConsoleHelper.PrintError($"The following product IDs cannot be updated because they are not in the order: {string.Join(",", invalidProductIdsToUpdate)}");
-            return;
-        }
+        var productIdsToAdd = productIdQuantityPairs
+            .Where(x => !orderProductIds.Contains(x.Key))
+            .ToDictionary(x => x.Key, x=>x.Value);
 
+        foreach (var (productId, quantity) in productIdsToAdd)
+        {
+            ConsoleHelper.PrintInfo($"Adding [{quantity}] of new product with ID [{productId}]");
+        }
+        
         foreach (var orderProduct in order.Products)
         {
             if (productIdQuantityPairs.TryGetValue(orderProduct.ProductId, out var updatedQuantity))
@@ -250,7 +274,7 @@ internal class OrderingState : AppState
                 x => x.Id,
                 x => x.InventoryCount);
 
-        if (!ValidateProducts(order, products))
+        if (!ValidateOrderProductQuantity(order, products))
         {
             ConsoleHelper.PrintError("Ordered items are invalid");
             return;

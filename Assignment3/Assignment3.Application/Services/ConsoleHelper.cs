@@ -3,6 +3,7 @@ using System.Globalization;
 
 namespace Assignment3.Application.Services;
 
+// TODO(HUY): separate into IConsoleView and IConsoleInputHandler
 internal static class ConsoleHelper
 {
     /// <summary>
