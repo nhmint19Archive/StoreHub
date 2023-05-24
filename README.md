@@ -27,6 +27,14 @@ Run the following command to perform a migration
 dotnet ef migrations add <migration name>
 dotnet ef database update
 ```
+
+### For developers
+
+- To fix db-related errors, a quick fix is to:
+  1. Erase all files in the `Migrations/` folder
+  2. Erase all `.db` files
+  3. Do a fresh migration
+
 ## Coding conventions
 
 ### Naming styles
