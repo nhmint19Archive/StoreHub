@@ -23,6 +23,7 @@ internal class Program
             .AddSingleton<Catalogue>()
             .AddSingleton<MainMenuState>()
             .AddSingleton<BrowsingState>()
+            .AddSingleton<OrderingState>()
             .AddSingleton<SignInState>()
             .AddSingleton<UserSession>()
             .AddSingleton<CustomerProfileState>()
@@ -33,7 +34,8 @@ internal class Program
                 { nameof(BrowsingState), x.GetRequiredService<BrowsingState>() },
                 { nameof(SignInState), x.GetRequiredService<SignInState>() },
                 { nameof(CustomerProfileState), x.GetRequiredService<CustomerProfileState>() },
-                { nameof(AdminProfileState), x.GetRequiredService<AdminProfileState>() }
+                { nameof(AdminProfileState), x.GetRequiredService<AdminProfileState>() },
+                { nameof(OrderingState), x.GetRequiredService<OrderingState>() },
             });
 
 

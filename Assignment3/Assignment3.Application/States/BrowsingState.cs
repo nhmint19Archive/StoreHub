@@ -23,7 +23,6 @@ internal class BrowsingState : AppState
     /// <inheritdoc />
     public override void Run()
     {
-        ShowProducts();
         if (_session.IsUserSignedIn)
         {
             ShowSignedInOptions();
@@ -39,6 +38,7 @@ internal class BrowsingState : AppState
         // TODO: reduce duplication with ShowSignedOutOptions()
         var options = new Dictionary<char, string>()
         {
+            { 'D', "Display Available Products" },
             { 'E', "Exit to Main Menu" },
             { 'O', "Add items to shopping cart" }
         };
@@ -58,6 +58,9 @@ internal class BrowsingState : AppState
         {
             case 'A':
                 ShowFilters();
+                break;
+            case 'D':
+                ShowProducts();
                 break;
             case 'C':
                 _priceFilter = null;
@@ -94,6 +97,7 @@ internal class BrowsingState : AppState
         {
             { 'S', "Sign in to begin purchasing" },
             { 'E', "Exit to Main Menu" },
+            { 'D', "Display Available Products" },
         };
 
         if (_nameFilter != null || _priceFilter != null)
@@ -111,6 +115,9 @@ internal class BrowsingState : AppState
         {
             case 'S':
                 OnStateChanged(this, nameof(SignInState));
+                break;
+            case 'D':
+                ShowProducts();
                 break;
             case 'A':
                 ShowFilters();
@@ -148,7 +155,7 @@ internal class BrowsingState : AppState
                 lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
             }
 
-            _priceFilter = p => p.Price <= upperPrice || p.Price >= lowerPrice;
+            _priceFilter = p => p.Price <= upperPrice && p.Price >= lowerPrice;
         }
     }
 }

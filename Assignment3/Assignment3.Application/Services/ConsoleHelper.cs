@@ -27,7 +27,7 @@ internal static class ConsoleHelper
             input.Length != 1 ||
             !choices.ContainsKey(char.ToUpper(input.First(), CultureInfo.InvariantCulture)))
         {
-            PrintInfo("Please select a valid option");
+            PrintError("Please select a valid option");
             input = Console.ReadLine();
         }
 

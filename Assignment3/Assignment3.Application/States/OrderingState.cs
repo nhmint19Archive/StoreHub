@@ -84,7 +84,7 @@ internal class OrderingState : AppState
     private void AddProductsToShoppingCart()
     {
         var order = new Order(_session.AuthenticatedUser.Email);
-        ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to purchase. Type [Esc] when you are finish.");
+        ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to purchase. Type [Esc] when you are finished.");
         ConsoleHelper.PrintInfo("For example: type '1-2 [Enter] 43-1 [Esc]' to add 2 products with ID 1 and 1 product with ID 43");
         var consoleKey = ConsoleKey.Enter;
         while (consoleKey != ConsoleKey.Escape)
@@ -101,8 +101,11 @@ internal class OrderingState : AppState
                     ProductId = productId,
                     ProductQuantity = productQuantity,
                 });
+
+                ConsoleHelper.PrintInfo($"Added {productQuantity} of items ID [{productId}]");
             }
 
+            ConsoleHelper.PrintInfo("Press [Enter] to continue. Press [Esc] to quit.");
             consoleKey = Console.ReadKey(false).Key;
         }
 
@@ -123,6 +126,7 @@ internal class OrderingState : AppState
 
         try
         {
+            ConsoleHelper.PrintInfo("Saving new order");
             context.Orders.Add(order);
             context.OrderProducts.AddRange(order.Products);
             context.SaveChanges();
