@@ -1,12 +1,10 @@
 using Assignment3.Application.Models;
 using Assignment3.Application.Services;
-using Assignment3.Domain.Data;
 using Assignment3.Domain.Models;
 using CsvHelper;
 using System.Globalization;
 using System.IO;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 
 namespace Assignment3.Application.States;
 
@@ -45,7 +43,7 @@ internal class BrowsingState : AppState
         var options = new Dictionary<char, string>()
         {
             { 'E', "Exit to Main Menu" },
-            { 'S', "Add items to shopping cart" }
+            { 'O', "Add items to shopping cart" }
         };
 
         if (_nameFilter != null || _priceFilter != null)

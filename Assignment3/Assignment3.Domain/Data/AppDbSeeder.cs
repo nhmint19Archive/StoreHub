@@ -1,5 +1,3 @@
-#define DEBUG
-
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
 
@@ -7,12 +5,15 @@ namespace Assignment3.Domain.Data;
 
 public static class AppDbSeeder
 {
+	/// <summary>
+	/// Seed products and user accounts into the database in Debug mode.
+	/// In Release mode, only an Admin account is seeded.
+	/// </summary>
 	public static void SeedData()
 	{
 		using var context = new AppDbContext();
 
-	#if DEBUG
-		// wipe the database
+#if DEBUG
 		context.Products.RemoveRange(context.Products);
 		context.UserAccounts.RemoveRange(context.UserAccounts);
 
@@ -98,6 +99,7 @@ public static class AppDbSeeder
 			Phone = "0123456789",
 			Role = Roles.Customer,
 		};
+
 		user1.SetPassword("minity");
 		var user2 = new UserAccount
 		{
@@ -105,6 +107,7 @@ public static class AppDbSeeder
 			Phone = "0123456780",
 			Role = Roles.Staff,
 		};
+
 		user2.SetPassword("admin");
 		var user3 = new UserAccount
 		{
@@ -112,6 +115,7 @@ public static class AppDbSeeder
 			Phone = "0123456788",
 			Role = Roles.Customer,
 		};
+
 		user3.SetPassword("customer");
 		var user4 = new UserAccount
 		{
@@ -119,6 +123,7 @@ public static class AppDbSeeder
 			Phone = "0123456787",
 			Role = Roles.Staff,
 		};
+
 		user4.SetPassword("staff");
 		var user5 = new UserAccount
 		{
@@ -126,14 +131,10 @@ public static class AppDbSeeder
 			Phone = "0123456786",
 			Role = Roles.Customer,
 		};
+
 		user5.SetPassword("customer");
-		context.UserAccounts.AddRange(new List<UserAccount>()
-		{
-			user1, user2, user3, user4, user5
-		});
-		
-		context.SaveChanges();
-	#endif
+		context.UserAccounts.AddRange(new List<UserAccount>() { user1, user2, user3, user4, user5 });
+#endif
 		
 		// seed admin account if not exists
 		if (!context.UserAccounts.Any(u => u.Role == Roles.Admin))
