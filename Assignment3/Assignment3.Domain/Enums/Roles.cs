@@ -1,4 +1,5 @@
 namespace Assignment3.Domain.Enums;
+
 /// <summary>
 /// User roles.
 /// </summary>

@@ -12,31 +12,31 @@ internal class Program
     {
         var services = RegisterDependencies();
         var appController = services.GetRequiredService<AppController>();
-        using var scope = services.CreateScope();
         appController.Run();
     }
 
     private static ServiceProvider RegisterDependencies()
     {
         var services = new ServiceCollection();
-        _ = services.AddScoped<AppController>();
-        _ = services.AddScoped<Catalogue>();
-        _ = services.AddScoped<MainMenuState>();
-        _ = services.AddScoped<BrowsingState>();
-        _ = services.AddScoped<SignInState>();
-        _ = services.AddScoped<UserSession>();
-        _ = services.AddScoped<CustomerProfileState>();
-        _ = services.AddScoped<AdminProfileState>();
-        _ = services.AddScoped<IReadOnlyDictionary<string, AppState>>(x => new Dictionary<string, AppState>()
-        {
-            { nameof(MainMenuState), x.GetRequiredService<MainMenuState>() },
-            { nameof(BrowsingState), x.GetRequiredService<BrowsingState>() },
-            { nameof(SignInState), x.GetRequiredService<SignInState>() },
-            { nameof(CustomerProfileState), x.GetRequiredService<CustomerProfileState>() },
-            { nameof(AdminProfileState), x.GetRequiredService<AdminProfileState>() }
-        });
+        services
+            .AddSingleton<AppController>()
+            .AddSingleton<Catalogue>()
+            .AddSingleton<MainMenuState>()
+            .AddSingleton<BrowsingState>()
+            .AddSingleton<SignInState>()
+            .AddSingleton<UserSession>()
+            .AddSingleton<CustomerProfileState>()
+            .AddSingleton<AdminProfileState>()
+            .AddSingleton<IReadOnlyDictionary<string, AppState>>(x => new Dictionary<string, AppState>()
+            {
+                { nameof(MainMenuState), x.GetRequiredService<MainMenuState>() },
+                { nameof(BrowsingState), x.GetRequiredService<BrowsingState>() },
+                { nameof(SignInState), x.GetRequiredService<SignInState>() },
+                { nameof(CustomerProfileState), x.GetRequiredService<CustomerProfileState>() },
+                { nameof(AdminProfileState), x.GetRequiredService<AdminProfileState>() }
+            });
 
-        // TODO: register objects here
+
         return services.BuildServiceProvider();
     }
 }

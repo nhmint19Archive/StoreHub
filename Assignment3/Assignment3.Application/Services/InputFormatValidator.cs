@@ -13,11 +13,11 @@ public static class InputFormatValidator
     public static bool ValidateCommaSeparatedNumberList(string input)
     {
         return string.IsNullOrEmpty(input) || 
-            (Regex.IsMatch(input, @"\d+,(\d+)*") &&
+            Regex.IsMatch(input, @"\d+,(\d+)*") &&
             input
                 .Split(",")
                 .Select(x => int.TryParse(x, out var r))
-                .All(x => x));
+                .All(x => x);
     }
 
     /// <summary>

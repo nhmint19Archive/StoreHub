@@ -1,4 +1,5 @@
 namespace Assignment3.Domain.Enums;
+
 /// <summary>
 /// Statuses an order can be in.
 /// </summary>
