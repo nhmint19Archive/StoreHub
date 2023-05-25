@@ -67,4 +67,34 @@ public static class InputFormatValidator
 
         return sum % 10 == 0;
     }
+
+    /// <summary>
+    /// Validate that the input is a decimal number.
+    /// </summary>
+    /// <param name="input">Input string.</param>
+    /// <returns><c>True</c> if the input is a decimal number, otherwise <c>False</c>.</returns>
+    public static bool ValidateDecimal(string input)
+    {
+        return decimal.TryParse(input, out _);
+    }
+
+    /// <summary>
+    /// Validate that the input is a valid unsigned integer.
+    /// </summary>
+    /// <param name="input">Input string.</param>
+    /// <returns><c>True</c> if the input is a valid unsigned integer, otherwise <c>False</c>.</returns>
+    public static bool ValidateUnsignedInteger(string input)
+    {
+        return uint.TryParse(input, out _);
+    }
+
+    /// <summary>
+    /// Validate that the input is a valid integer.
+    /// </summary>
+    /// <param name="input">Input string.</param>
+    /// <returns><c>True</c> if the input is a valid integer, otherwise <c>False</c>.</returns>
+    public static bool ValidateInteger(string input)
+    {
+        return int.TryParse(input, out _);
+    }
 }
