@@ -88,7 +88,12 @@ namespace Assignment3.Application.States
             {
                 _view.Info(string.Empty);
                 _view.Info($"ID [{receipt.Id}]");
-                // TODO: print order details here (date, ID, customer email, etc.)
+                foreach (var product in receipt.Order.Products)
+                {
+                    _view.Info($"{product.Product.Name}-{product.ProductQuantity}");
+                }
+                _view.Info($"Customer: {receipt.Order.CustomerEmail}");
+                _view.Info($"Time: {receipt.Order.Date.ToString()}");
             }
         }
 
