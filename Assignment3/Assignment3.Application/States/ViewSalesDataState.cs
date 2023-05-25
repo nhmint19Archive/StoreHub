@@ -50,7 +50,7 @@ namespace Assignment3.Application.States
         private void PrintSalesData()
         {
             //We can change the path to print out later
-            string currentDir = System.IO.Directory.GetCurrentDirectory();
+            var currentDir = Directory.GetCurrentDirectory();
             var filePath = Path.GetFullPath(Path.Combine(currentDir, @"..\..\..\"));
 
             //TO DO: (HUY) helps me to fix this. I think it's a bad practice but
