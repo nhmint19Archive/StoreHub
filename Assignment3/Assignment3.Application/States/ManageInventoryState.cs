@@ -68,7 +68,8 @@ namespace Assignment3.Application.States
             var options = new Dictionary<char, string>()
             {
                 { 'C', "Add a New Product to the catalogue" },
-                { 'U', "Update a Products Details" },
+                { 'U', "Update a Products Price" },
+                { 'Q', "Update a Products Quantity" },
                 { 'D', "Delete a Product from the catalogue" },
                 { 'E', "Exit to Main Menu" }
             };
@@ -81,7 +82,10 @@ namespace Assignment3.Application.States
                     CreateProduct();
                     break;
                 case 'U':
-                    UpdateProduct();
+                    UpdateProductPrice();
+                    break;
+                case 'Q':
+                    UpdateProductQuantity();
                     break;
                 case 'D':
                     DeleteProduct();
@@ -98,26 +102,58 @@ namespace Assignment3.Application.States
             var Name = ConsoleHelper.AskUserTextInput("Enter the name of the product");
             var Description = ConsoleHelper.AskUserTextInput("Enter the description of the product");
             var Price = ConsoleHelper.AskUserTextInput("Enter the AUD price of the product");
-            var InventoryCount = ConsoleHelper.AskUserTextInput("Enter the quantity of the product");
+            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateDecimal, InputConvertor.ToDecimal, out var price, "Enter the price of the product", "Input must be a decimal value");
+            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateUnsignedInteger, InputConvertor.ToUnsignedInteger, out var quantity, "Enter the quantity of the product", "Input must be a natural number");
 
-            context.Products.AddRange(new List<Product>()
-        {
-            new Product()
-            {
-                Name = Name,
-                Description = Description,
-                Price = Price,
-                InventoryCount = InventoryCount
-            }
-        });
+            context.Products.Add(new Product() { Name, Description, Price, quantity });
         }
-        private void UpdateProduct()
+        private void UpdateProductPrice()
         {
             using var context = new AppDbContext();
+
+            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateInteger, InputConvertor.ToInteger, out var Id, "Enter the ID of the product", "Input must be a integer value");
+            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateDecimal, InputConvertor.ToDecimal, out var Price, "Enter the new price of the product", "Input must be a decimal value");
+
+            foreach (var product in context.Products)
+            {
+                if (product.Id == Id)
+                {
+                    product.Price = Price;
+                    break;
+                }
+            }
+
+        }
+        private void UpdateProductQuantity()
+        {
+            using var context = new AppDbContext();
+
+            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateInteger, InputConvertor.ToInteger, out var Id, "Enter the ID of the product", "Input must be a integer value");
+            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateDecimal, InputConvertor.ToDecimal, out var InventoryCount, "Enter the new quantity of the product", "Input must be a natural number");
+
+            foreach (var product in context.Products)
+            {
+                if (product.Id == Id)
+                {
+                    product.InventoryCount = InventoryCount;
+                    break;
+                }
+            }
         }
         private void DeleteProduct()
         {
             using var context = new AppDbContext();
+
+            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateInteger, InputConvertor.ToInteger, out var Id, "Enter the ID of the product", "Input must be a integer value");
+
+            foreach (var product in context.Products)
+            {
+                if (product.Id == Id)
+                {
+                    context.Remove(product);
+                    break;
+                }
+            }
         }
     }
 }
