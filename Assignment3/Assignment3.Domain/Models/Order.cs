@@ -8,6 +8,7 @@ public class Order
 	public Order(string customerEmail)
 	{
 		CustomerEmail = customerEmail;
+		Date = DateTime.UtcNow;
 	}
 
 	public Invoice Prepare(

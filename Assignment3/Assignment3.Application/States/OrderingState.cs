@@ -3,36 +3,40 @@ using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Application.States;
 
 internal class OrderingState : AppState
 {
     private readonly UserSession _session;
-    public OrderingState(UserSession session)
+    private readonly IConsoleView _view;
+    private readonly IConsoleInputHandler _inputHandler;
+    public OrderingState(UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
     {
         _session = session;
+        _view = view;
+        _inputHandler = inputHandler;
     }
 
     public override void Run()
     {
         if (!_session.IsUserSignedIn)
         {
-            ConsoleHelper.PrintError("Invalid access to ordering page");
+            _view.Error("Invalid access to ordering page");
             OnStateChanged(this, nameof(SignInState));
             return;
         }
 
         if (!_session.IsUserInRole(Roles.Customer))
         {
-            ConsoleHelper.PrintError("Invalid access to ordering page");
-            ConsoleHelper.PrintInfo("Signing out");
+            _view.Error("Invalid access to ordering page");
+            _view.Info("Signing out");
             _session.SignOut();
             OnStateChanged(this, nameof(MainMenuState));
             return;
         }
-
-
+        
         var choices = new Dictionary<char, string>()
         {
             // TODO(HUY): implement a back function using a stack?m  
@@ -47,7 +51,7 @@ internal class OrderingState : AppState
             choices.Add('C', "Confirm Order");
             choices.Add('V', "View Order");
 
-            var input = ConsoleHelper.AskUserOption(choices);
+            var input = _inputHandler.AskUserOption(choices);
             switch (input)
             {
                 case 'E':
@@ -71,7 +75,7 @@ internal class OrderingState : AppState
         else
         {
             choices.Add('A', "Add Order");
-            var input = ConsoleHelper.AskUserOption(choices);
+            var input = _inputHandler.AskUserOption(choices);
             switch (input)
             {
                 case 'A':
@@ -86,24 +90,24 @@ internal class OrderingState : AppState
 
     private void ViewOrder(Order order)
     {
-        ConsoleHelper.PrintInfo($"Pending order [{order.Id}]");
-        ConsoleHelper.PrintInfo($"Creation date: {order.Date}");
-        ConsoleHelper.PrintInfo($"Items:");
-        foreach (var product in order.Products) {
-            ConsoleHelper.PrintInfo($"\tProduct ID: [{product.ProductId}] - Quantity:  {product.ProductQuantity}");
+        _view.Info($"Pending order [{order.Id}]");
+        _view.Info($"Creation date: {order.Date}");
+        _view.Info($"Items:");
+        foreach (var orderProduct in order.Products) {
+            _view.Info($"ID [{orderProduct.ProductId}] {orderProduct.Product.Name} - Quantity:  {orderProduct.ProductQuantity}");
         }
     }
 
     private void AddProductsToShoppingCart()
     {
         var order = new Order(_session.AuthenticatedUser.Email);
-        ConsoleHelper.PrintInfo($"Type the list of product ID - quantity pairs of items you'd like to purchase. Type [{ConsoleKey.Backspace}] when you are finished.");
-        ConsoleHelper.PrintInfo($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Backspace}]' to add 2 products with ID 1 and 1 product with ID 43");
+        _view.Info($"Type the list of product ID - quantity pairs of items you'd like to purchase. Type [{ConsoleKey.Backspace}] when you are finished.");
+        _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Backspace}]' to add 2 products with ID 1 and 1 product with ID 43");
         
         var consoleKey = ConsoleKey.Enter;
         while (consoleKey != ConsoleKey.Backspace)
         {
-            if (ConsoleHelper.TryAskUserTextInput(
+            if (_inputHandler.TryAskUserTextInput(
                     InputFormatValidator.ValidateHyphenSeparatedNumberPair,
                     InputConvertor.ToHyphenSeparatedIntegerPair,
                     out var result,
@@ -111,21 +115,35 @@ internal class OrderingState : AppState
                     "Input must be a pair of hyphen-separated numbers"))
             {
                 var (productId, productQuantity) = result;
-                order.Products.Add(new OrderProduct
+                var isProductAlreadyAdded = false;
+                foreach (var product in order.Products)
                 {
-                    ProductId = productId,
-                    ProductQuantity = productQuantity,
-                });
+                    if (product.ProductId == productId && product.ProductQuantity != productQuantity)
+                    {
+                        isProductAlreadyAdded = true;
+                        product.ProductQuantity = productQuantity;
+                        _view.Info($"Quantity of product ID [{product.ProductId}] changed to {product.ProductQuantity}");
+                    } 
+                }
 
-                ConsoleHelper.PrintInfo($"Added {productQuantity} of product ID [{productId}]");
+                if (!isProductAlreadyAdded)
+                {
+                    order.Products.Add(new OrderProduct
+                    {
+                        ProductId = productId,
+                        ProductQuantity = productQuantity,
+                    });
+                }
+
+                _view.Info($"Added {productQuantity} of product ID [{productId}]");
             }
 
-            consoleKey = ConsoleHelper.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to quit.");
+            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to finish.");
         }
 
         if (order.Products.Count == 0)
         {
-            ConsoleHelper.PrintInfo("No items added to order");
+            _view.Info("No items added to order");
             return;
         }
 
@@ -140,20 +158,20 @@ internal class OrderingState : AppState
 
         if (order.Products.Count > 0 && products.Count > 0 && !ValidateOrderProductQuantity(order, products))
         {
-            ConsoleHelper.PrintError("Ordered items are invalid");
+            _view.Error("Ordered items are invalid");
             return;
         }
 
         try
         {
-            ConsoleHelper.PrintInfo("Saving new order");
+            _view.Info("Saving new order");
             context.Orders.Add(order);
             context.OrderProducts.AddRange(order.Products);
             context.SaveChanges();
         }
         catch
         {
-            ConsoleHelper.PrintError("Failed to process order");
+            _view.Error("Failed to process order");
         }
     }
 
@@ -179,19 +197,21 @@ internal class OrderingState : AppState
             .Select(x => $"Invalid purchase quantity for product with ID [{x.ProductId}] (only {availableProducts[x.ProductId]} are available)")
             .ToList());
 
-        if (errorMessages.Count > 0)
+        if (errorMessages.Count <= 0)
         {
-            ConsoleHelper.PrintErrors(errorMessages);
-            return false;
+            return true;
         }
-
-        return true;
+        
+        _view.Errors(errorMessages);
+        return false;
     }
 
     private Order? GetExistingOrderOrDefault()
     {
         using var context = new AppDbContext();
         return context.Orders
+            .AsNoTracking()
+            .Include(x => x.Products)
             .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email && x.Status == OrderStatus.Unconfirmed)
             .OrderByDescending(x => x.Date)
             .FirstOrDefault();
@@ -201,23 +221,25 @@ internal class OrderingState : AppState
     {
         using var context = new AppDbContext();
         var order = context.Orders.Find(orderId);
-        if (order != null)
+        if (order == null)
         {
-            ConsoleHelper.PrintInfo($"Erasing order [{order.Id}]");
-            context.Orders.Remove(order);
-            context.SaveChanges();
-        } 
+            return;
+        }
+        
+        _view.Info($"Erasing order [{order.Id}]");
+        context.Orders.Remove(order);
+        context.SaveChanges();
     }
 
     private void EditOrder(Order order)
     {
-        if (!ConsoleHelper.TryAskUserTextInput(
+        if (!_inputHandler.TryAskUserTextInput(
                 InputFormatValidator.ValidateCommaSeparatedNumberList,
                 InputConvertor.ToCommaSeparatedIntegerList,
                 out var productIdsToRemove,
-                "Enter a comma separated list of IDs of products to be removed. Press [Enter] if you do not wish to remove any product"))
+                $"Enter a comma separated list of IDs of products to be removed. Press [{ConsoleKey.Enter}] if you do not wish to remove any product"))
         {
-            ConsoleHelper.PrintError("Invalid input. Please type in a list of comma-separated product IDs or press [Enter]");
+            _view.Error("Invalid input. Please type in a list of comma-separated product IDs or press [Enter]");
             return;
         }
 
@@ -225,18 +247,18 @@ internal class OrderingState : AppState
         var invalidProductIdsToRemove = productIdsToRemove.Except(productIdsToRemove.Intersect(orderProductIds)).ToList();
         if (invalidProductIdsToRemove.Count > 0)
         {
-            ConsoleHelper.PrintError($"The following product IDs cannot be removed because they are not in the order: {string.Join(",", invalidProductIdsToRemove)}");
+            _view.Error($"The following product IDs cannot be removed because they are not in the order: {string.Join(",", invalidProductIdsToRemove)}");
             return;
         }
 
-        ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [Esc] when you are finished.");
-        ConsoleHelper.PrintInfo("For example: type '1-2 [Enter] 43-1 [Esc]' to add 2 products with ID 1 and 1 product with ID 43");
+        _view.Info($"Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [{ConsoleKey.Escape}] when you are finished.");
+        _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Escape}]' to add 2 products with ID 1 and 1 product with ID 43");
 
         var productIdQuantityPairs = new Dictionary<int, int>();
         var consoleKey = ConsoleKey.Enter;
         while (consoleKey != ConsoleKey.Escape)
         {
-            if (ConsoleHelper.TryAskUserTextInput(
+            if (_inputHandler.TryAskUserTextInput(
                     InputFormatValidator.ValidateHyphenSeparatedNumberPair,
                     InputConvertor.ToHyphenSeparatedIntegerPair, 
                     out var result,
@@ -247,17 +269,16 @@ internal class OrderingState : AppState
                 productIdQuantityPairs.Add(productId, quantity);
             }
 
-            consoleKey = ConsoleHelper.AskUserKeyInput("Press any key to continue. Press [Esc] to quit.");
+            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Escape}] to quit.");
         }
 
-        var productIdsToUpdate = productIdQuantityPairs.Select(x => x.Key).ToList();
         var productIdsToAdd = productIdQuantityPairs
             .Where(x => !orderProductIds.Contains(x.Key))
             .ToDictionary(x => x.Key, x=>x.Value);
 
         foreach (var (productId, quantity) in productIdsToAdd)
         {
-            ConsoleHelper.PrintInfo($"Adding [{quantity}] of new product with ID [{productId}]");
+            _view.Info($"Adding [{quantity}] of new product with ID [{productId}]");
         }
         
         foreach (var orderProduct in order.Products)
@@ -269,7 +290,7 @@ internal class OrderingState : AppState
         }
 
         using var context = new AppDbContext();
-        var productIdList = order.Products.Select(order => order.ProductId).ToList();
+        var productIdList = order.Products.Select(x => x.ProductId).ToList();
         var products = context.Products
             .Where(x => productIdList.Contains(x.Id) && x.InventoryCount > 0)
             .Select(x => new { x.Id, x.InventoryCount })
@@ -279,7 +300,7 @@ internal class OrderingState : AppState
 
         if (!ValidateOrderProductQuantity(order, products))
         {
-            ConsoleHelper.PrintError("Ordered items are invalid");
+            _view.Error("Ordered items are invalid");
             return;
         }
 
@@ -291,7 +312,7 @@ internal class OrderingState : AppState
         }
         catch
         {
-            ConsoleHelper.PrintError("Failed to process order");
+            _view.Error("Failed to process order");
         }
     }
 

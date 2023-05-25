@@ -9,15 +9,19 @@ internal class BrowsingState : AppState
 {
     private readonly Catalogue _catalogue;
     private readonly UserSession _session;
+    private readonly IConsoleView _view;
+    private readonly IConsoleInputHandler _inputHandler;
     private Expression<Func<Product, bool>>? _priceFilter = null;
     private Expression<Func<Product, bool>>? _nameFilter = null;
 
     public BrowsingState(
         Catalogue catalogue,
-        UserSession session)
+        UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
     {
         _catalogue = catalogue;
         _session = session;
+        _view = view;
+        _inputHandler = inputHandler;
     }
 
     /// <inheritdoc />
@@ -39,20 +43,20 @@ internal class BrowsingState : AppState
         var options = new Dictionary<char, string>()
         {
             { 'D', "Display Available Products" },
-            { 'E', "Exit to Main Menu" },
-            { 'O', "Add items to shopping cart" }
+            { 'E', "Exit To Main Menu" },
+            { 'O', "Manage Order" }
         };
 
         if (_nameFilter != null || _priceFilter != null)
         {
-            options.Add('C', "Clear filter");
+            options.Add('C', "Clear Filter");
         }
         else
         {
-            options.Add('A', "Add filter");
+            options.Add('A', "Add Filter");
         }
 
-        var input = ConsoleHelper.AskUserOption(options);
+        var input = _inputHandler.AskUserOption(options);
 
         switch (input)
         {
@@ -78,14 +82,14 @@ internal class BrowsingState : AppState
     private void ShowProducts()
     {
         var products = _catalogue.GetProducts(_priceFilter, _nameFilter);
-        ConsoleHelper.PrintInfo($"Displaying {products.Count} available products:");
+        _view.Info($"Displaying {products.Count} available products:");
 
         foreach (var product in products)
         {
-            ConsoleHelper.PrintInfo(string.Empty);
-            ConsoleHelper.PrintInfo($"ID [{product.Id}] - Availability: {product.InventoryCount}");
-            ConsoleHelper.PrintInfo($"{product.Name} - {product.Price} AUD");
-            ConsoleHelper.PrintInfo($"{product.Description}");
+            _view.Info(string.Empty);
+            _view.Info($"ID [{product.Id}] - Availability: {product.InventoryCount}");
+            _view.Info($"{product.Name} - {product.Price} AUD");
+            _view.Info($"{product.Description}");
         }
     }
     
@@ -93,7 +97,7 @@ internal class BrowsingState : AppState
     {
         var options = new Dictionary<char, string>()
         {
-            { 'S', "Sign in to begin purchasing" },
+            { 'S', "Sign In To Start Shopping" },
             { 'E', "Exit to Main Menu" },
             { 'D', "Display Available Products" },
         };
@@ -107,7 +111,7 @@ internal class BrowsingState : AppState
             options.Add('A', "Add filter");
         }
 
-        var input = ConsoleHelper.AskUserOption(options);
+        var input = _inputHandler.AskUserOption(options);
 
         switch (input)
         {
@@ -132,7 +136,7 @@ internal class BrowsingState : AppState
 
     private void ShowFilters()
     {
-        while (!ConsoleHelper.TryAskUserTextInput(
+        while (!_inputHandler.TryAskUserTextInput(
                     x => true,
                     x => p => p.Name.Contains(x),
                     out _nameFilter,
@@ -141,7 +145,7 @@ internal class BrowsingState : AppState
         }
 
         var upperPrice = decimal.MaxValue;
-        while (!ConsoleHelper.TryAskUserTextInput(
+        while (!_inputHandler.TryAskUserTextInput(
                    x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
                    out upperPrice,
@@ -151,7 +155,7 @@ internal class BrowsingState : AppState
         }
         
         var lowerPrice = 0m;
-        while (!ConsoleHelper.TryAskUserTextInput(
+        while (!_inputHandler.TryAskUserTextInput(
                    x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
                    out lowerPrice,
