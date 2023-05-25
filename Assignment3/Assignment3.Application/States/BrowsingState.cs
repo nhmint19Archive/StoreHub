@@ -9,21 +9,24 @@ internal class BrowsingState : AppState
 {
     private readonly Catalogue _catalogue;
     private readonly UserSession _session;
+    private readonly IConsoleView _view;
+    private readonly IConsoleInputHandler _inputHandler;
     private Expression<Func<Product, bool>>? _priceFilter = null;
     private Expression<Func<Product, bool>>? _nameFilter = null;
 
     public BrowsingState(
         Catalogue catalogue,
-        UserSession session)
+        UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
     {
         _catalogue = catalogue;
         _session = session;
+        _view = view;
+        _inputHandler = inputHandler;
     }
 
     /// <inheritdoc />
     public override void Run()
     {
-        ShowProducts();
         if (_session.IsUserSignedIn)
         {
             ShowSignedInOptions();
@@ -39,25 +42,29 @@ internal class BrowsingState : AppState
         // TODO: reduce duplication with ShowSignedOutOptions()
         var options = new Dictionary<char, string>()
         {
-            { 'E', "Exit to Main Menu" },
-            { 'O', "Add items to shopping cart" }
+            { 'D', "Display Available Products" },
+            { 'E', "Exit To Main Menu" },
+            { 'O', "Manage Order" }
         };
 
         if (_nameFilter != null || _priceFilter != null)
         {
-            options.Add('C', "Clear filter");
+            options.Add('C', "Clear Filter");
         }
         else
         {
-            options.Add('A', "Add filter");
+            options.Add('A', "Add Filter");
         }
 
-        var input = ConsoleHelper.AskUserOption(options);
+        var input = _inputHandler.AskUserOption(options);
 
         switch (input)
         {
             case 'A':
                 ShowFilters();
+                break;
+            case 'D':
+                ShowProducts();
                 break;
             case 'C':
                 _priceFilter = null;
@@ -75,25 +82,24 @@ internal class BrowsingState : AppState
     private void ShowProducts()
     {
         var products = _catalogue.GetProducts(_priceFilter, _nameFilter);
-        ConsoleHelper.PrintInfo($"Displaying {products.Count} available products:");
+        _view.Info($"Displaying {products.Count} available products:");
 
         foreach (var product in products)
         {
-            ConsoleHelper.PrintInfo(string.Empty);
-            ConsoleHelper.PrintInfo($"ID [{product.Id}] - Availability: {product.InventoryCount}");
-            ConsoleHelper.PrintInfo($"{product.Name} - {product.Price} AUD");
-            ConsoleHelper.PrintInfo($"{product.Description}");
+            _view.Info(string.Empty);
+            _view.Info($"ID [{product.Id}] - Availability: {product.InventoryCount}");
+            _view.Info($"{product.Name} - {product.Price} AUD");
+            _view.Info($"{product.Description}");
         }
     }
-
-    // TODO: move to OrderingState
-
+    
     private void ShowSignedOutOptions()
     {
         var options = new Dictionary<char, string>()
         {
-            { 'S', "Sign in to begin purchasing" },
+            { 'S', "Sign In To Start Shopping" },
             { 'E', "Exit to Main Menu" },
+            { 'D', "Display Available Products" },
         };
 
         if (_nameFilter != null || _priceFilter != null)
@@ -105,12 +111,15 @@ internal class BrowsingState : AppState
             options.Add('A', "Add filter");
         }
 
-        var input = ConsoleHelper.AskUserOption(options);
+        var input = _inputHandler.AskUserOption(options);
 
         switch (input)
         {
             case 'S':
                 OnStateChanged(this, nameof(SignInState));
+                break;
+            case 'D':
+                ShowProducts();
                 break;
             case 'A':
                 ShowFilters();
@@ -127,28 +136,34 @@ internal class BrowsingState : AppState
 
     private void ShowFilters()
     {
-        // TODO(HUY): utilize ConsoleHelper.TryAskUserInput???
-        while (_nameFilter == null) {
-            var productName = ConsoleHelper.AskUserTextInput("Please type the product name filter and press [Enter]");
-            _nameFilter = p => p.Name.Contains(productName);
+        while (!_inputHandler.TryAskUserTextInput(
+                    x => true,
+                    x => p => p.Name.Contains(x),
+                    out _nameFilter,
+                    $"Please type the product name filter or press [{ConsoleKey.Enter}] if you don not want any filter"))
+        {
         }
 
-        while (_priceFilter == null) {
-            var upperPrice = 0m;
-            var upperPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
-            while (!decimal.TryParse(upperPriceStr, out upperPrice)) {
-                ConsoleHelper.PrintError("Invalid input");
-                upperPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
-            }
-
-            var lowerPrice = 0m;
-            var lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
-            while (!decimal.TryParse(lowerPriceStr, out lowerPrice)) {
-                ConsoleHelper.PrintError("Invalid input");
-                lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
-            }
-
-            _priceFilter = p => p.Price <= upperPrice || p.Price >= lowerPrice;
+        var upperPrice = decimal.MaxValue;
+        while (!_inputHandler.TryAskUserTextInput(
+                   x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
+                   x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
+                   out upperPrice,
+                   $"Please type the upper price limit or press [{ConsoleKey.Enter}] if you do not want one",
+                   "Invalid input. Input must be empty or a valid number"))
+        {
         }
+        
+        var lowerPrice = 0m;
+        while (!_inputHandler.TryAskUserTextInput(
+                   x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
+                   x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
+                   out lowerPrice,
+                   $"Please type the lower price limit or press [{ConsoleKey.Enter}] if you do not want one",
+                   "Invalid input. Input must be empty or a valid number"))
+        {
+        }
+        
+        _priceFilter = p => p.Price <= upperPrice && p.Price >= lowerPrice;
     }
 }

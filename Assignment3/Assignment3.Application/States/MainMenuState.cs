@@ -4,8 +4,10 @@ namespace Assignment3.Application.States;
 
 internal class MainMenuState : AppState
 {
-    public MainMenuState()
+    private readonly IConsoleInputHandler _inputHandler;
+    public MainMenuState(IConsoleInputHandler inputHandler)
     {
+        _inputHandler = inputHandler;
     }
 
     /// <inheritdoc />
@@ -17,7 +19,7 @@ internal class MainMenuState : AppState
             { 'A', "Accounts" },
         };
 
-        var input = ConsoleHelper.AskUserOption(
+        var input = _inputHandler.AskUserOption(
             choices,
             "Welcome to All Your Healthy Food Store!");
 

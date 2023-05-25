@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Assignment3.Domain.Data;
+// TODO(HUY): add a wrapper that handle errors gracefully?
+// add a static variable that calls EnsureCreated() when first called.
 public class AppDbContext : DbContext
 {
 	public DbSet<Product> Products { get; set; } = null!;
