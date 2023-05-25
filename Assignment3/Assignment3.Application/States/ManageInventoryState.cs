@@ -129,7 +129,7 @@ namespace Assignment3.Application.States
             using var context = new AppDbContext();
 
             _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateInteger, InputConvertor.ToInteger, out var Id, "Enter the ID of the product", "Input must be a integer value");
-            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateDecimal, InputConvertor.ToDecimal, out var InventoryCount, "Enter the new quantity of the product", "Input must be a natural number");
+            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateUnsignedInteger, InputConvertor.ToUnsignedInteger, out var InventoryCount, "Enter the new quantity of the product", "Input must be a natural number");
 
             foreach (var product in context.Products)
             {
@@ -150,7 +150,7 @@ namespace Assignment3.Application.States
             {
                 if (product.Id == Id)
                 {
-                    context.Remove(product);
+                    context.Products.Remove(product);
                     break;
                 }
             }
