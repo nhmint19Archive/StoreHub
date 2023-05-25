@@ -2,8 +2,19 @@
 
 public class PaypalTransaction : ITransactionMethod
 {
-    public Receipt Execute(Transaction transaction)
+    private readonly string _username;
+
+    public PaypalTransaction(string username)
     {
-        throw new NotImplementedException();
+        _username = username;
+    }
+    public Receipt Execute(Transaction transaction, int orderId)
+    {
+        return new Receipt
+        {
+            OrderId = orderId,
+            Transaction = transaction,
+            TransactionId = transaction.Id
+        };
     }
 }

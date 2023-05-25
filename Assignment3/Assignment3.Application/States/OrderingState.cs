@@ -212,6 +212,7 @@ internal class OrderingState : AppState
         return context.Orders
             .AsNoTracking()
             .Include(x => x.Products)
+            .ThenInclude(x => x.Product)
             .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email && x.Status == OrderStatus.Unconfirmed)
             .OrderByDescending(x => x.Date)
             .FirstOrDefault();
@@ -319,24 +320,24 @@ internal class OrderingState : AppState
     private void ConfirmOrder(Order order)
     {
         var deliveryMethod = AskUserForDeliveryMethod(order.Id);
-        var transactionMethod = AskUserForPaymentMethod(order.Id);
+        var transactionMethod = AskUserForPaymentMethod();
         // TODO: move to CustomerAccount class per assignment 2
         var invoice = order.Prepare(deliveryMethod, transactionMethod);
         invoice.EmailToCustomer();
         var success = invoice.MakePayment();
         if (success)
         {
-            ConsoleHelper.PrintInfo("Order successfully placed");
+            _view.Info("Order successfully placed");
             order.StartDelivery();
             return;
         }
         
-        ConsoleHelper.PrintError("An error occurred whilst processing your order");
+        _view.Info("An error occurred whilst processing your order");
     }
 
     private IDeliveryMethod AskUserForDeliveryMethod(int orderId)
     {
-        var choice = ConsoleHelper.AskUserOption(new Dictionary<char, string>()
+        var choice = _inputHandler.AskUserOption(new Dictionary<char, string>()
             {
                 { 'P', "Pick up at store" },
                 { 'D', "Postal delivery" },
@@ -353,10 +354,10 @@ internal class OrderingState : AppState
     private IDeliveryMethod ProcessPostalDelivery(int orderId)
     { 
         // TODO(HUY): VALIDATE INPUT
-        var streetNumber = ConsoleHelper.AskUserTextInput("Enter your address number");
-        var streetName =  ConsoleHelper.AskUserTextInput("Enter your address street name");
-        var postalCode = ConsoleHelper.AskUserTextInput("Enter your postcode");
-        var apartmentNumber = ConsoleHelper.AskUserTextInput("Enter your apartment number (if applicable)");
+        var streetNumber = _inputHandler.AskUserTextInput("Enter your address number");
+        var streetName =  _inputHandler.AskUserTextInput("Enter your address street name");
+        var postalCode = _inputHandler.AskUserTextInput("Enter your postcode");
+        var apartmentNumber = _inputHandler.AskUserTextInput("Enter your apartment number (if applicable)");
 
         return new PostalDelivery(
             orderId, 
@@ -371,50 +372,85 @@ internal class OrderingState : AppState
         return new Pickup(orderId);
     }
 
-    private ITransactionMethod AskUserForPaymentMethod(int orderId)
+    private ITransactionMethod AskUserForPaymentMethod()
     {                                                
-        var choice = ConsoleHelper.AskUserOption(new Dictionary<char, string>()          
+        var choice = _inputHandler.AskUserOption(new Dictionary<char, string>()          
             {                                                                            
                 { 'P', "Paypal" },                                             
                 { 'A', "Cash" },                   
                 { 'B', "Bank Transfer" },  
                 { 'C', "Credit Card" },                                              
             },                                                                           
-            "Please select a delivery method");
+            "Please select a payment method");
         return choice switch
         {
-            'P' => ProcessPaypalTransaction(orderId),
-            'A' => ProcessCashTransaction(orderId),
-            'B' => ProcessBankTransfer(orderId),  
-            'C' => ProcessCardTransaction(orderId),    
+            'P' => ProcessPaypalTransaction(),
+            'A' => ProcessCashTransaction(),
+            'B' => ProcessBankTransfer(),  
+            'C' => ProcessCardTransaction(),    
             _ => throw new InvalidOperationException(),
         };
     }
 
-    private ITransactionMethod ProcessBankTransfer(int orderId)
+    private ITransactionMethod ProcessBankTransfer()
     {
-        // TODO(HUY): VALIDATE INPUT
-        var bsb = ConsoleHelper.AskUserTextInput("Enter your BSB");     
-        var accountNo =  ConsoleHelper.AskUserTextInput("Enter your account number");
+        var bsb = _inputHandler.AskUserTextInput("Enter your BSB");     
+        var accountNo =  _inputHandler.AskUserTextInput("Enter your account number");
+        // Ask for payment method again if invalid bank account info
+        if (!InputFormatValidator.ValidateBsb(bsb))
+        {
+            _view.Error("BSB is invalid.");
+            return AskUserForPaymentMethod();
+        }
+        if (!InputFormatValidator.ValidateDigits(accountNo))
+        {
+            _view.Error("Account number is invalid.");
+            return AskUserForPaymentMethod();
+        }
         return new BankTransaction(bsb, accountNo);
     }
 
-    private ITransactionMethod ProcessCardTransaction(int orderId)
+    private ITransactionMethod ProcessCardTransaction()
     {
-        // TODO(HUY): VALIDATE INPUT
-        var cardNo = ConsoleHelper.AskUserTextInput("Enter your card number");
-        var cvc = ConsoleHelper.AskUserTextInput("Enter your card CVC");
-        var expiryDate = ConsoleHelper.AskUserTextInput("Enter your card expiry date");
+        var cardNo = _inputHandler.AskUserTextInput("Enter your card number");
+        var cvc = _inputHandler.AskUserTextInput("Enter your card CVC");
+        var expiryDate = _inputHandler.AskUserTextInput("Enter your card expiry date");
+        // Ask for payment method again if invalid card info
+        if (!InputFormatValidator.ValidateCardNumber(cardNo))
+        {
+            _view.Error("Card number is invalid.");
+            return AskUserForPaymentMethod();
+        }
+        if (!InputFormatValidator.ValidateCardCvc(cvc))
+        {
+            _view.Error("Card CVC is invalid.");
+            return AskUserForPaymentMethod();
+        }
+        if (!InputFormatValidator.ValidateCardExpiryDate(expiryDate))
+        {
+            _view.Error("Card expiry date is invalid.");
+            return AskUserForPaymentMethod();
+        }
         return new CreditCardTransaction(cardNo, cvc, DateOnly.FromDateTime(DateTime.Parse(expiryDate))); 
     }
 
-    private ITransactionMethod ProcessCashTransaction(int orderId)
+    private ITransactionMethod ProcessCashTransaction()
     {
-        throw new NotImplementedException();
+        return new CashTransaction();
     }
 
-    private ITransactionMethod ProcessPaypalTransaction(int orderId)
+    private ITransactionMethod ProcessPaypalTransaction()
     {
-        throw new NotImplementedException();
+        var paypal = _inputHandler.AskUserTextInput("Enter your PayPal email or phone number");
+        // Ask for payment method again if invalid paypal info
+        if (InputFormatValidator.ValidateEmail(paypal) 
+            && InputFormatValidator.ValidatePhone(paypal) 
+            )
+        {
+            _view.Error("Paypal username is invalid.");
+            return AskUserForPaymentMethod();
+        }
+
+        return new PaypalTransaction(paypal);
     }
 }

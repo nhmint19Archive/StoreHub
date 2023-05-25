@@ -2,8 +2,8 @@
 
 public class CashTransaction : ITransactionMethod
 {
-    public Receipt Execute(Transaction transaction)
+    public Receipt Execute(Transaction transaction, int orderId)
     {
-        throw new NotImplementedException();
+        return null!;
     }
 }

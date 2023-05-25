@@ -41,7 +41,6 @@ public class Invoice
 
 	public bool MakePayment()
 	{
-        Console.WriteLine("Making payment");
 
         var transaction = new Transaction()
         {
@@ -51,7 +50,10 @@ public class Invoice
 
         try
         {
-	        var receipt = _transactionMethod.Execute(transaction);
+	        var receipt = _transactionMethod.Execute(transaction, _orderId);
+	        if (receipt == null!)
+		        return false;
+	        Console.WriteLine("Making payment");
 	        using var context = new AppDbContext();	        
 	        var order = context.Orders.Find(_orderId) ?? throw new InvalidOperationException();
 	        order.Status = OrderStatus.Confirmed;
