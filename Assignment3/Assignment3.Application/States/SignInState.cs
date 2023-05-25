@@ -113,7 +113,7 @@ internal class SignInState : AppState
             // TODO: jump to another state where staff account details can be changed/ created
             Roles.Admin => ("View admin profile", nameof(AdminProfileState)),
             // TODO: jump to another state where refund requests can be viewed and product inventory can be updated
-            Roles.Staff => ("View staff profile", "StaffState"),
+            Roles.Staff => ("View staff profile", nameof(StaffProfileState)),
             Roles.Customer => ("View customer profile", nameof(CustomerProfileState)),
             _ => throw new NotImplementedException(),
         };

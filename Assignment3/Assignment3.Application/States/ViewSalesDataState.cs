@@ -1,6 +1,9 @@
-﻿using Assignment3.Application.Services;
+﻿using Assignment3.Application.Models;
+using Assignment3.Application.Services;
+using Assignment3.Domain.Data;
 using Assignment3.Domain.Models;
 using CsvHelper;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System;
 using System.Collections.Generic;
 using System.Formats.Asn1;
@@ -13,6 +16,16 @@ namespace Assignment3.Application.States
 {
     internal class ViewSalesDataState : AppState
     {
+        private readonly UserSession _session;
+        private readonly IConsoleView _view;
+        private readonly IConsoleInputHandler _inputHandler;
+        public ViewSalesDataState(
+            UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
+        {
+            _session = session;
+            _view = view;
+            _inputHandler = inputHandler;
+        }
         public void ShowDataOptions()
         {
             var options = new Dictionary<char, string>()
@@ -36,31 +49,50 @@ namespace Assignment3.Application.States
 
         private void PrintSalesData()
         {
-            //TO DO: Change to Write Receipts after Transaction is implemented
-            var product1 = new Product { Id = 1, Name = "Product 1", Description = "This is the first product", Price = 10.5m, InventoryCount = 10 };
-            var product2 = new Product { Id = 2, Name = "Product 2", Description = "This is the second product", Price = 5.25m, InventoryCount = 20 };
-            var productList = new List<Product>
-            {
-                product1,
-                product2
-        };
-
+            //We can change the path to print out later
             string currentDir = System.IO.Directory.GetCurrentDirectory();
             var filePath = Path.GetFullPath(Path.Combine(currentDir, @"..\..\..\"));
-            ConsoleHelper.PrintInfo($"{currentDir}");
 
+            //TO DO: (HUY) helps me to fix this. I think it's a bad practice but
+            //OOP type fucks me up hehe
 
-            using var writer = new StreamWriter($"{filePath}\\fileTest.csv");
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            using var context = new AppDbContext();
+            var receipts = context.Receipts;
+
+            try
             {
-                csv.WriteRecords(productList);
+                using var writer = new StreamWriter($"{filePath}\\fileTest.csv");
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    csv.WriteRecords(receipts);
+                }
+
+                ConsoleHelper.PrintInfo("Successfully export CSV file for Sales Data");
+
+
+            } catch (Exception ex) {
+                throw;
             }
 
         }
 
+        private void ShowReceipts()
+        {
+            using var context = new AppDbContext();
+            var receipts = context.Receipts;
+
+            foreach (var receipt in receipts)
+            {
+                _view.Info(string.Empty);
+                _view.Info($"ID [{receipt.Id}]");
+                _view.Info($"Order ID [{receipt.OrderId}]");
+            }
+        }
+
         public override void Run()
         {
-            throw new NotImplementedException();
+            ShowReceipts();
+            ShowDataOptions();
         }
     }
 }
