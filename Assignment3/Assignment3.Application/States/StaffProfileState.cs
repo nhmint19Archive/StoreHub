@@ -30,6 +30,7 @@ namespace Assignment3.Application.States
             new Dictionary<char, string>()
             {
                 { 'V', "View Data Sales"},
+                { 'M', "Manage Inventory"},
                 { 'E', "Exit to Main Menu" },
             });
 
@@ -37,6 +38,9 @@ namespace Assignment3.Application.States
             {
                 case 'V':
                     ViewSalesData();
+                    break;
+                case 'M':
+                    ManageInventory();
                     break;
                 case 'E':
                     OnStateChanged(this, nameof(MainMenuState));
@@ -47,6 +51,11 @@ namespace Assignment3.Application.States
         private void ViewSalesData()
         {
             OnStateChanged(this, nameof(ViewSalesDataState));
+        }
+        
+        private void ManageInventory()
+        {
+            OnStateChanged(this, nameof(ManageInventoryState));
         }
     }
 }
