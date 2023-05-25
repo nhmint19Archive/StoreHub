@@ -6,6 +6,20 @@ namespace Assignment3.Application.Services;
 
 public static class InputFormatValidator
 {
+    public static readonly Dictionary<string, string> Format = new Dictionary<string, string>()
+    {
+        { "commaSeparated", @"\d+,(\d+)*" },
+        { "hyphenSeparated", $@"\d+-\d+" },
+        { "digits", @"^[0-9]+$" },
+        { "email", @"^[^@\s]+@[^@\s]+\.[^@\s]+$" },
+        { "phone", @"^(\d{10})$" },
+        { "cardNo", @"^(4|5|6)\d{3}[\ \-]?\d{4}[\ \-]?\d{4}[\ \-]?\d{4}$" },
+        { "cvc", @"^\d{3}$" },
+        { "streetName", @"^[a-zA-Z0-9\s.'\-]+$"},
+        { "postalCode", @"^\d{4}$"},
+        { "apartmentNumber", @"^[a-zA-Z0-9\s]+$"}
+    };
+
     /// <summary>
     /// Validate that the input is a comma-separated number list.
     /// </summary>
@@ -13,12 +27,12 @@ public static class InputFormatValidator
     /// <returns><c>True</c> if the input is a comma-separated number list, otherwise <c>False</c>.</returns>
     public static bool ValidateCommaSeparatedNumberList(string input)
     {
-        return string.IsNullOrEmpty(input) || 
-            Regex.IsMatch(input, @"\d+,(\d+)*") &&
-            input
-                .Split(",")
-                .Select(x => int.TryParse(x, out var r))
-                .All(x => x);
+        return string.IsNullOrEmpty(input) ||
+               Regex.IsMatch(input, @"\d+,(\d+)*") &&
+               input
+                   .Split(",")
+                   .Select(x => int.TryParse(x, out var r))
+                   .All(x => x);
     }
 
     /// <summary>
@@ -29,56 +43,32 @@ public static class InputFormatValidator
     public static bool ValidateHyphenSeparatedNumberPair(string input)
     {
         return Regex.IsMatch(input, $@"\d+-\d+") &&
-            input
-                .Split("-")
-                .Select(x => int.TryParse(x, out var r))
-                .All(x => x);
+               input
+                   .Split("-")
+                   .Select(x => int.TryParse(x, out var r))
+                   .All(x => x);
     }
-    
+
     /// <summary>
-    /// Validate that the input only contains digits
+    /// Validate that the input follow a regex.
     /// </summary>
-    /// <param name="input">Input string</param>
+    /// <param name="input">Input string.</param>
+    /// <param name="regex">Regex</param>
     /// <returns></returns>
-    public static bool ValidateDigits(string input)
+    public static bool ValidateRegex(string input, string regex)
     {
-        var regex = @"^[0-9]+$";
         return Regex.IsMatch(input, regex);
     }
 
     /// <summary>
-    /// Validate that the input is email.                 
-    /// </summary>
-    /// <param name="input">Input string.</param>
-    /// <returns></returns>
-    public static bool ValidateEmail(string input)
-    {
-        var regex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-        return Regex.IsMatch(input, regex);
-    }
-    
-    /// <summary>
-    /// Validate that the input is phone number.
-    /// </summary>
-    /// <param name="input">Input string.</param>
-    /// <returns></returns>
-    
-    public static bool ValidatePhone(string input)
-    {
-        var regex = @"^(\d{10})$";
-        return Regex.IsMatch(input, regex);
-    }
-    /// <summary>
-    /// Validate that the input is a valid card number.
+    /// Validate that the credit card number.
     /// </summary>
     /// <param name="cardNumber">Input string.</param>
     /// <returns></returns>
-    
     public static bool ValidateCardNumber(string cardNumber)
     {
         // Check if the card number matches a valid credit card pattern
-        var regex = new Regex(@"^(4|5|6)\d{3}[\ \-]?\d{4}[\ \-]?\d{4}[\ \-]?\d{4}$");
-        if (!regex.IsMatch(cardNumber))
+        if (!ValidateRegex(cardNumber, Format["cardNo"]))
         {
             return false;
         }
@@ -109,18 +99,6 @@ public static class InputFormatValidator
     }
 
     /// <summary>
-    /// Validate that the input is a valid card CVC.
-    /// </summary>
-    /// <param name="cvc">Input string.</param>
-    /// <returns></returns>
-    public static bool ValidateCardCvc(string cvc)
-    {
-        // Check if the card CVC matches regex
-        var regex = @"^\d{3}$";
-        return Regex.IsMatch(cvc, regex);
-    }
-
-    /// <summary>
     /// Validate that the input is a valid card expiry date
     /// </summary>
     /// <param name="expiryDate">Input string.</param>
@@ -143,9 +121,10 @@ public static class InputFormatValidator
                 return true;
             }
         }
+
         return false;
     }
-    
+
     /// <summary>
     /// Validate that the input is a valid Bank BSB.
     /// </summary>
@@ -154,9 +133,9 @@ public static class InputFormatValidator
     public static bool ValidateBsb(string bsb)
     {
         // Check if the BSB has only digits
-        if (!ValidateDigits(bsb))
+        if (!ValidateRegex(bsb, Format["digits"]))
             return false;
-        
+
         // Convert to array
         bsb = new string(bsb.ToArray());
 
@@ -190,5 +169,4 @@ public static class InputFormatValidator
             return false;
         return true;
     }
-
 }

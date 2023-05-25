@@ -352,13 +352,38 @@ internal class OrderingState : AppState
     }
 
     private IDeliveryMethod ProcessPostalDelivery(int orderId)
-    { 
-        // TODO(HUY): VALIDATE INPUT
+    {
         var streetNumber = _inputHandler.AskUserTextInput("Enter your address number");
         var streetName =  _inputHandler.AskUserTextInput("Enter your address street name");
         var postalCode = _inputHandler.AskUserTextInput("Enter your postcode");
         var apartmentNumber = _inputHandler.AskUserTextInput("Enter your apartment number (if applicable)");
 
+        if (!InputFormatValidator.ValidateRegex(streetNumber, InputFormatValidator.Format["digits"]))
+        {
+            _view.Error("Street number is invalid.");
+            return AskUserForDeliveryMethod(orderId);
+        }
+        if (!InputFormatValidator.ValidateRegex(streetName, InputFormatValidator.Format["streetName"]))
+        {
+            _view.Error("Street name is invalid.");
+            return AskUserForDeliveryMethod(orderId);
+        }
+        if (!InputFormatValidator.ValidateRegex(postalCode, InputFormatValidator.Format["postalCode"]))
+        {
+            _view.Error("Postal code is invalid.");
+            return AskUserForDeliveryMethod(orderId);
+        }
+
+        // Allow apartment number to be null
+        if (apartmentNumber == "")
+            apartmentNumber = null;
+        
+        if (apartmentNumber != null && !InputFormatValidator.ValidateRegex(apartmentNumber, InputFormatValidator.Format["apartmentNumber"]))
+        {
+            _view.Error("Apartment number is invalid.");
+            return AskUserForDeliveryMethod(orderId);
+        }
+        
         return new PostalDelivery(
             orderId, 
             int.Parse(streetNumber), 
@@ -402,7 +427,7 @@ internal class OrderingState : AppState
             _view.Error("BSB is invalid.");
             return AskUserForPaymentMethod();
         }
-        if (!InputFormatValidator.ValidateDigits(accountNo))
+        if (!InputFormatValidator.ValidateRegex(accountNo, InputFormatValidator.Format["digits"]))
         {
             _view.Error("Account number is invalid.");
             return AskUserForPaymentMethod();
@@ -421,7 +446,7 @@ internal class OrderingState : AppState
             _view.Error("Card number is invalid.");
             return AskUserForPaymentMethod();
         }
-        if (!InputFormatValidator.ValidateCardCvc(cvc))
+        if (!InputFormatValidator.ValidateRegex(cvc, InputFormatValidator.Format["cvc"]))
         {
             _view.Error("Card CVC is invalid.");
             return AskUserForPaymentMethod();
@@ -443,8 +468,8 @@ internal class OrderingState : AppState
     {
         var paypal = _inputHandler.AskUserTextInput("Enter your PayPal email or phone number");
         // Ask for payment method again if invalid paypal info
-        if (InputFormatValidator.ValidateEmail(paypal) 
-            && InputFormatValidator.ValidatePhone(paypal) 
+        if (!InputFormatValidator.ValidateRegex(paypal, InputFormatValidator.Format["email"]) 
+            && !InputFormatValidator.ValidateRegex(paypal, InputFormatValidator.Format["phone"]) 
             )
         {
             _view.Error("Paypal username is invalid.");
