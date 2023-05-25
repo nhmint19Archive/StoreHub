@@ -79,13 +79,16 @@ namespace Assignment3.Application.States
         private void ShowReceipts()
         {
             using var context = new AppDbContext();
-            var receipts = context.Receipts;
+            var receipts = context.Receipts
+                .Include(x => x.Order)
+                .AsNoTracking()
+                .OrderByDescending(x => x.Order.Date);
 
             foreach (var receipt in receipts)
             {
                 _view.Info(string.Empty);
                 _view.Info($"ID [{receipt.Id}]");
-                _view.Info($"Order ID [{receipt.OrderId}]");
+                // TODO: print order details here (date, ID, customer email, etc.)
             }
         }
 
