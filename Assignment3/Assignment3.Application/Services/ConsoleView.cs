@@ -17,10 +17,10 @@ public class ConsoleView : IConsoleView
     /// <inheritdoc/>
     public void Errors(IReadOnlyCollection<string> errors)
     {
-        ConsoleHelper.PrintError("Error(s):");
+        Error("Error(s):");
         foreach (var error in errors)
         {
-            ConsoleHelper.PrintError(error);
+            Error(error);
         }
     }
 }

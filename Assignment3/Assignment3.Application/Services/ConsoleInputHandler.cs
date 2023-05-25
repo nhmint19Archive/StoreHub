@@ -17,7 +17,7 @@ public class ConsoleInputHandler : IConsoleInputHandler
         IReadOnlyDictionary<char, string> choices,
         string prompt = "Please select an option:")
     {
-        _view.Error(prompt);
+        _view.Info(prompt);
         foreach (var (choice, description) in choices)
         {
             Console.WriteLine($"[{char.ToUpper(choice, CultureInfo.InvariantCulture)}] - {description}");
@@ -67,14 +67,14 @@ public class ConsoleInputHandler : IConsoleInputHandler
         {
             if (!validateFunc(inputStr))
             {
-                ConsoleHelper.PrintError(validationErrorMessage);
+                _view.Error(validationErrorMessage);
                 result = default;
                 return false;
             }
         }
         catch
         {
-            ConsoleHelper.PrintError(validationErrorMessage);
+            _view.Error(validationErrorMessage);
             result = default;
             return false;
         }
@@ -86,7 +86,7 @@ public class ConsoleInputHandler : IConsoleInputHandler
         }
         catch
         {
-            ConsoleHelper.PrintError(conversionErrorMessage);
+            _view.Error(conversionErrorMessage);
             result = default;
             return false;
         }
