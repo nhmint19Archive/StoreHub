@@ -63,15 +63,13 @@ namespace Assignment3.Application.States
             {
                 using var writer = new StreamWriter($"{filePath}\\fileTest.csv");
                 using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-                {
-                    csv.WriteRecords(receipts);
-                }
+                csv.WriteRecords(receipts);
+                _view.Info("Successfully export CSV file for Sales Data");
 
-                ConsoleHelper.PrintInfo("Successfully export CSV file for Sales Data");
-
-
-            } catch (Exception ex) {
-                throw;
+            } 
+            catch (Exception ex) {
+                Debug.Fail(ex.Message);
+                _view.Error("Failed to display sales data");
             }
 
         }
