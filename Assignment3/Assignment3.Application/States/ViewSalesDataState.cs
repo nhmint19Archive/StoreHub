@@ -94,7 +94,7 @@ namespace Assignment3.Application.States
                     _view.Info($"{product.Product.Name}-{product.ProductQuantity}");
                 }
                 _view.Info($"Customer: {receipt.Order.CustomerEmail}");
-                _view.Info($"Time: {receipt.Order.Date.ToString()}");
+                _view.Info(message: $"Time: {receipt.Order.Date}");
             }
         }
 
