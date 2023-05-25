@@ -2,7 +2,6 @@ using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Models;
 using System.Linq.Expressions;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Assignment3.Application.States;
 
@@ -137,7 +136,7 @@ internal class BrowsingState : AppState
                     x => true,
                     x => p => p.Name.Contains(x),
                     out _nameFilter,
-                    "Please type the product name filter or press [Enter] if you don not want any filter"))
+                    $"Please type the product name filter or press [{ConsoleKey.Enter}] if you don not want any filter"))
         {
         }
 
@@ -146,7 +145,7 @@ internal class BrowsingState : AppState
                    x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
                    out upperPrice,
-                   "Please type the upper price limit or press [Enter] if you do not want one",
+                   $"Please type the upper price limit or press [{ConsoleKey.Enter}] if you do not want one",
                    "Invalid input. Input must be empty or a valid number"))
         {
         }
@@ -156,7 +155,7 @@ internal class BrowsingState : AppState
                    x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
                    out lowerPrice,
-                   "Please type the lower price limit or press [Enter] if you do not want one",
+                   $"Please type the lower price limit or press [{ConsoleKey.Enter}] if you do not want one",
                    "Invalid input. Input must be empty or a valid number"))
         {
         }
