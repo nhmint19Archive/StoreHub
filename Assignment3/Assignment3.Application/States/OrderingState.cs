@@ -3,7 +3,6 @@ using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
-using System.Linq;
 
 namespace Assignment3.Application.States;
 
@@ -98,17 +97,18 @@ internal class OrderingState : AppState
     private void AddProductsToShoppingCart()
     {
         var order = new Order(_session.AuthenticatedUser.Email);
-        ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to purchase. Type [Esc] when you are finished.");
-        ConsoleHelper.PrintInfo("For example: type '1-2 [Enter] 43-1 [Esc]' to add 2 products with ID 1 and 1 product with ID 43");
+        ConsoleHelper.PrintInfo($"Type the list of product ID - quantity pairs of items you'd like to purchase. Type [{ConsoleKey.Backspace}] when you are finished.");
+        ConsoleHelper.PrintInfo($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Backspace}]' to add 2 products with ID 1 and 1 product with ID 43");
+        
         var consoleKey = ConsoleKey.Enter;
-
-        while (consoleKey != ConsoleKey.Escape)
+        while (consoleKey != ConsoleKey.Backspace)
         {
             if (ConsoleHelper.TryAskUserTextInput(
                     InputFormatValidator.ValidateHyphenSeparatedNumberPair,
                     InputConvertor.ToHyphenSeparatedIntegerPair,
                     out var result,
-                    "Enter the product ID and quantity"))
+                    "Enter the product ID and quantity",
+                    "Input must be a pair of hyphen-separated numbers"))
             {
                 var (productId, productQuantity) = result;
                 order.Products.Add(new OrderProduct
@@ -120,7 +120,13 @@ internal class OrderingState : AppState
                 ConsoleHelper.PrintInfo($"Added {productQuantity} of product ID [{productId}]");
             }
 
-            consoleKey = ConsoleHelper.AskUserKeyInput("Press any key to continue. Press [Esc] to quit.");
+            consoleKey = ConsoleHelper.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to quit.");
+        }
+
+        if (order.Products.Count == 0)
+        {
+            ConsoleHelper.PrintInfo("No items added to order");
+            return;
         }
 
         var productIdList = order.Products.Select(x => x.ProductId).ToList();
@@ -170,7 +176,7 @@ internal class OrderingState : AppState
         errorMessages.AddRange(
             validProducts
             .Where(x => x.ProductQuantity > availableProducts[x.ProductId])
-            .Select(x => $"Invalid purchase quantity for product with ID [{x.ProductId}] (only {availableProducts[x.ProductId]} are available")
+            .Select(x => $"Invalid purchase quantity for product with ID [{x.ProductId}] (only {availableProducts[x.ProductId]} are available)")
             .ToList());
 
         if (errorMessages.Count > 0)
@@ -223,7 +229,7 @@ internal class OrderingState : AppState
             return;
         }
 
-        ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [Esc] when you are finish.");
+        ConsoleHelper.PrintInfo("Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [Esc] when you are finished.");
         ConsoleHelper.PrintInfo("For example: type '1-2 [Enter] 43-1 [Esc]' to add 2 products with ID 1 and 1 product with ID 43");
 
         var productIdQuantityPairs = new Dictionary<int, int>();
@@ -234,7 +240,8 @@ internal class OrderingState : AppState
                     InputFormatValidator.ValidateHyphenSeparatedNumberPair,
                     InputConvertor.ToHyphenSeparatedIntegerPair, 
                     out var result,
-                    "Enter the product ID and new quantity"))
+                    "Enter the product ID and new quantity",
+                    "Input must be a pair of hyphen-separated numbers"))
             {
                 var (productId, quantity) = result;
                 productIdQuantityPairs.Add(productId, quantity);

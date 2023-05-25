@@ -2,6 +2,7 @@ using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Models;
 using System.Linq.Expressions;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Assignment3.Application.States;
 
@@ -88,9 +89,7 @@ internal class BrowsingState : AppState
             ConsoleHelper.PrintInfo($"{product.Description}");
         }
     }
-
-    // TODO: move to OrderingState
-
+    
     private void ShowSignedOutOptions()
     {
         var options = new Dictionary<char, string>()
@@ -134,28 +133,34 @@ internal class BrowsingState : AppState
 
     private void ShowFilters()
     {
-        // TODO(HUY): utilize ConsoleHelper.TryAskUserInput???
-        while (_nameFilter == null) {
-            var productName = ConsoleHelper.AskUserTextInput("Please type the product name filter and press [Enter]");
-            _nameFilter = p => p.Name.Contains(productName);
+        while (!ConsoleHelper.TryAskUserTextInput(
+                    x => true,
+                    x => p => p.Name.Contains(x),
+                    out _nameFilter,
+                    "Please type the product name filter or press [Enter] if you don not want any filter"))
+        {
         }
 
-        while (_priceFilter == null) {
-            var upperPrice = 0m;
-            var upperPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
-            while (!decimal.TryParse(upperPriceStr, out upperPrice)) {
-                ConsoleHelper.PrintError("Invalid input");
-                upperPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
-            }
-
-            var lowerPrice = 0m;
-            var lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type the upper price limit and press [Enter]");
-            while (!decimal.TryParse(lowerPriceStr, out lowerPrice)) {
-                ConsoleHelper.PrintError("Invalid input");
-                lowerPriceStr = ConsoleHelper.AskUserTextInput("Please type in a valid number");
-            }
-
-            _priceFilter = p => p.Price <= upperPrice && p.Price >= lowerPrice;
+        var upperPrice = decimal.MaxValue;
+        while (!ConsoleHelper.TryAskUserTextInput(
+                   x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
+                   x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
+                   out upperPrice,
+                   "Please type the upper price limit or press [Enter] if you do not want one",
+                   "Invalid input. Input must be empty or a valid number"))
+        {
         }
+        
+        var lowerPrice = 0m;
+        while (!ConsoleHelper.TryAskUserTextInput(
+                   x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
+                   x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
+                   out lowerPrice,
+                   "Please type the lower price limit or press [Enter] if you do not want one",
+                   "Invalid input. Input must be empty or a valid number"))
+        {
+        }
+        
+        _priceFilter = p => p.Price <= upperPrice && p.Price >= lowerPrice;
     }
 }

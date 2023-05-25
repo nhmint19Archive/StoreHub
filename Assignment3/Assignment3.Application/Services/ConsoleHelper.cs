@@ -58,7 +58,9 @@ internal static class ConsoleHelper
     public static ConsoleKey AskUserKeyInput(string prompt = "Please enter your key:")
     {
         PrintInfo(prompt);
-        return Console.ReadKey(false).Key;
+        var result = Console.ReadKey(false).Key;
+        Console.WriteLine();
+        return result;
     }
 
     /// <summary>
