@@ -1,5 +1,6 @@
 ﻿using Assignment3.Application.Controllers;
 using Assignment3.Application.Models;
+using Assignment3.Application.Services;
 using Assignment3.Application.States;
 using Assignment3.Domain.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,10 +25,13 @@ internal class Program
     {
         var services = new ServiceCollection();
         services
+            .AddSingleton<IConsoleView, ConsoleView>()
+            .AddSingleton<IConsoleInputHandler, ConsoleInputHandler>()
             .AddSingleton<AppController>()
             .AddSingleton<Catalogue>()
             .AddSingleton<MainMenuState>()
             .AddSingleton<BrowsingState>()
+            .AddSingleton<OrderingState>()
             .AddSingleton<SignInState>()
             .AddSingleton<UserSession>()
             .AddSingleton<CustomerProfileState>()
