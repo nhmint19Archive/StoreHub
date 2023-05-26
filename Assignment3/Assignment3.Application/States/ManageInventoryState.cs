@@ -26,7 +26,8 @@ namespace Assignment3.Application.States
             _view = view;
             _inputHandler = inputHandler;
         }
-
+        
+        /// <inheritdoc/>
         public override void Run()
         {
             if (!_session.IsUserSignedIn)
@@ -44,7 +45,8 @@ namespace Assignment3.Application.States
                 OnStateChanged(this, nameof(MainMenuState));
                 return;
             }
-
+            
+            // TODO: refactor this to make the behavior similar to BrowsingState for consistency
             var products = _catalogue.GetProducts();
             _view.Info($"Displaying {products.Count} available products:");
             foreach (var product in products)
@@ -54,7 +56,6 @@ namespace Assignment3.Application.States
 
             while (!SelectOption())
             {}
-            
         }
 
         private void ShowProduct(Product product)
@@ -77,7 +78,7 @@ namespace Assignment3.Application.States
                     { 'E', "Exit to Main Menu" }
                 };
 
-            var input = ConsoleHelper.AskUserOption(options);
+            var input = _inputHandler.AskUserOption(options);
 
             switch (input)
             {
@@ -103,18 +104,19 @@ namespace Assignment3.Application.States
 
         private void CreateProduct()
         {
+            var name = _inputHandler.AskUserTextInput("Enter the name of the product");
+            var description = _inputHandler.AskUserTextInput("Enter the description of the product");
             
-            var name = ConsoleHelper.AskUserTextInput("Enter the name of the product");
-            var description = ConsoleHelper.AskUserTextInput("Enter the description of the product");
-            decimal price = 0;
-            uint inventoryCount = 0;
+            decimal price;
             while (!_inputHandler.TryAskUserTextInput(
                    x => decimal.TryParse(x, out _),
-                   x => decimal.Parse(x),
+                   decimal.Parse,
                    out price,
                    $"Please type the price of the product",
                    "Invalid input. Input must be empty or a valid number"))
             {}
+            
+            uint inventoryCount;
             while (!_inputHandler.TryAskUserTextInput(
                    x => uint.TryParse(x, out _),
                    x => uint.Parse(x),
@@ -124,7 +126,14 @@ namespace Assignment3.Application.States
             {}
             
             using var context = new AppDbContext();
-            context.Products.Add(new Product() { Name = name, Description = description, Price = price, InventoryCount = inventoryCount });
+            context.Products.Add(new Product()
+            {
+                Name = name, 
+                Description = description, 
+                Price = price, 
+                InventoryCount = inventoryCount,
+            });
+            
             context.SaveChanges();
         }
 
@@ -149,19 +158,16 @@ namespace Assignment3.Application.States
 
             using var context = new AppDbContext();
             var product = context.Products.Find(id);
-            if (product != null)
-            {
-                product.Price = price;
-                context.Products.Update(product);
-                context.SaveChanges();
-                ShowProduct(product);
-            }
-            else
+            if (product == null)
             {
                 _view.Error("Could not find product with that ID.");
+                return;
             }
-
-
+            
+            product.Price = price;
+            context.Products.Update(product);
+            context.SaveChanges();
+            ShowProduct(product);
         }
         private void UpdateProductQuantity()
         {
@@ -184,43 +190,38 @@ namespace Assignment3.Application.States
 
             using var context = new AppDbContext();
             var product = context.Products.Find(id);
-            if (product != null)
-            {
-                product.InventoryCount = inventoryCount;
-                context.Products.Update(product);
-                context.SaveChanges();
-                ShowProduct(product);
-            }
-            else
+            if (product == null)
             {
                 _view.Error("Could not find product with that ID.");
+                return;
             }
-            
 
+            product.InventoryCount = inventoryCount;
+            context.Products.Update(product);
+            context.SaveChanges();
         }
         private void DeleteProduct()
         {
-            int id = -1;
+            int id;
             while (!_inputHandler.TryAskUserTextInput(
-                   x => int.TryParse(x, out _),
-                   x => int.Parse(x),
-                   out id,
-                   $"Please type the ID of the product",
-                   "Invalid input. Input must be empty or a valid number"))
-            { }
-
+                       x => int.TryParse(x, out _),
+                       x => int.Parse(x),
+                       out id,
+                       $"Please type the ID of the product",
+                       "Invalid input. Input must be empty or a valid number"))
+            {
+            }
+            
             using var context = new AppDbContext();
             var product = context.Products.Find(id);
-            if (product != null)
-            {
-                context.Products.Remove(product);
-                context.SaveChanges();
-            }
-            else
+            if (product == null)
             {
                 _view.Error("Could not find product with that ID.");
+                return;
             }
 
+            context.Products.Remove(product);
+            context.SaveChanges();
         }
     }
 }
