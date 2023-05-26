@@ -26,6 +26,11 @@ internal class AdminProfileState : AppState
             OnStateChanged(this, nameof(MainMenuState));
         }
 
+        ConsoleHelper.PrintInfo("Staff Profile");
+        ConsoleHelper.PrintInfo($"Email: {_session.AuthenticatedUser.Email}");
+        ConsoleHelper.PrintInfo($"Phone: {_session.AuthenticatedUser.Phone}");
+        ConsoleHelper.PrintInfo($"Registration Date: {_session.AuthenticatedUser.RegistryDate.ToLocalTime()}");
+
         var input = ConsoleHelper.AskUserOption(
             new Dictionary<char, string>()
             {
