@@ -159,7 +159,7 @@ namespace Assignment3.Application.States
             }
             else
             {
-                _view.Info("Could not find product with that ID.");
+                _view.Error("Could not find product with that ID.");
             }
 
 
@@ -193,7 +193,7 @@ namespace Assignment3.Application.States
             }
             else
             {
-                _view.Info("Could not find product with that ID.");
+                _view.Error("Could not find product with that ID.");
             }
             
 
@@ -218,7 +218,7 @@ namespace Assignment3.Application.States
             }
             else
             {
-                _view.Info("Could not find product with that ID.");
+                _view.Error("Could not find product with that ID.");
             }
 
         }
