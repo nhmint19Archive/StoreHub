@@ -45,27 +45,25 @@ namespace Assignment3.Application.States
                 return;
             }
 
-            bool exit = false;
-            while (!exit)
+            var products = _catalogue.GetProducts();
+            _view.Info($"Displaying {products.Count} available products:");
+            foreach (var product in products)
             {
-                ShowProducts();
-                exit = SelectOption();
+                ShowProduct(product);
             }
+
+            while (!SelectOption())
+            {}
             
         }
 
-        private void ShowProducts()
+        private void ShowProduct(Product product)
         {
-            var products = _catalogue.GetProducts();
-            _view.Info($"Displaying {products.Count} available products:");
 
-            foreach (var product in products)
-            {
-                _view.Info(string.Empty);
-                _view.Info($"ID [{product.Id}] - Availability: {product.InventoryCount}");
-                _view.Info($"{product.Name} - {product.Price} AUD");
-                _view.Info($"{product.Description}");
-            }
+            _view.Info(string.Empty);
+            _view.Info($"ID [{product.Id}] - Availability: {product.InventoryCount}");
+            _view.Info($"{product.Name} - {product.Price} AUD");
+            _view.Info($"{product.Description}");
         }
 
         private bool SelectOption()
@@ -128,8 +126,8 @@ namespace Assignment3.Application.States
             using var context = new AppDbContext();
             context.Products.Add(new Product() { Name = name, Description = description, Price = price, InventoryCount = inventoryCount });
             context.SaveChanges();
-
         }
+
         private void UpdateProductPrice()
         {
             int id = -1;
@@ -156,6 +154,7 @@ namespace Assignment3.Application.States
                 product.Price = price;
                 context.Products.Update(product);
                 context.SaveChanges();
+                ShowProduct(product);
             }
             else
             {
@@ -190,6 +189,7 @@ namespace Assignment3.Application.States
                 product.InventoryCount = inventoryCount;
                 context.Products.Update(product);
                 context.SaveChanges();
+                ShowProduct(product);
             }
             else
             {
