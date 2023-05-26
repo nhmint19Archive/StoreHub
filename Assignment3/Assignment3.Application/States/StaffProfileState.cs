@@ -37,25 +37,15 @@ namespace Assignment3.Application.States
             switch (input)
             {
                 case 'V':
-                    ViewSalesData();
+                    OnStateChanged(this, nameof(ViewSalesDataState));
                     break;
                 case 'M':
-                    ManageInventory();
+                    OnStateChanged(this, nameof(ManageInventoryState));
                     break;
                 case 'E':
                     OnStateChanged(this, nameof(MainMenuState));
                     break;
             }
-        }
-
-        private void ViewSalesData()
-        {
-            OnStateChanged(this, nameof(ViewSalesDataState));
-        }
-        
-        private void ManageInventory()
-        {
-            OnStateChanged(this, nameof(ManageInventoryState));
         }
     }
 }
