@@ -45,8 +45,13 @@ namespace Assignment3.Application.States
                 return;
             }
 
-            ShowProducts();
-            SelectOption();
+            bool exit = false;
+            while (!exit)
+            {
+                ShowProducts();
+                exit = SelectOption();
+            }
+            
         }
 
         private void ShowProducts()
@@ -63,16 +68,16 @@ namespace Assignment3.Application.States
             }
         }
 
-        private void SelectOption()
+        private bool SelectOption()
         {
             var options = new Dictionary<char, string>()
-            {
-                { 'C', "Add a New Product to the catalogue" },
-                { 'U', "Update a Products Price" },
-                { 'Q', "Update a Products Quantity" },
-                { 'D', "Delete a Product from the catalogue" },
-                { 'E', "Exit to Main Menu" }
-            };
+                {
+                    { 'C', "Add a New Product to the catalogue" },
+                    { 'U', "Update a Products Price" },
+                    { 'Q', "Update a Products Quantity" },
+                    { 'D', "Delete a Product from the catalogue" },
+                    { 'E', "Exit to Main Menu" }
+                };
 
             var input = ConsoleHelper.AskUserOption(options);
 
@@ -92,68 +97,105 @@ namespace Assignment3.Application.States
                     break;
                 case 'E':
                     OnStateChanged(this, nameof(MainMenuState));
-                    break;
+                    return true;
             }
+            return false;
+
         }
 
         private void CreateProduct()
         {
-            using var context = new AppDbContext();
-            var Name = ConsoleHelper.AskUserTextInput("Enter the name of the product");
-            var Description = ConsoleHelper.AskUserTextInput("Enter the description of the product");
-            var Price = ConsoleHelper.AskUserTextInput("Enter the AUD price of the product");
-            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateDecimal, InputConvertor.ToDecimal, out var price, "Enter the price of the product", "Input must be a decimal value");
-            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateUnsignedInteger, InputConvertor.ToUnsignedInteger, out var quantity, "Enter the quantity of the product", "Input must be a natural number");
+            try
+            {
+                using var context = new AppDbContext();
+                var Name = ConsoleHelper.AskUserTextInput("Enter the name of the product");
+                var Description = ConsoleHelper.AskUserTextInput("Enter the description of the product");
+                _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateDecimal, InputConvertor.ToDecimal, out var Price, "Enter the price of the product", "Input must be a decimal value");
+                _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateUnsignedInteger, InputConvertor.ToUnsignedInteger, out var InventoryCount, "Enter the quantity of the product", "Input must be a natural number");
 
-            context.Products.Add(new Product() { Name, Description, Price, quantity });
+                context.Products.Add(new Product() { Name = Name, Description = Description, Price = Price, InventoryCount = InventoryCount });
+                context.SaveChanges();
+            }
+            catch
+            {
+                _view.Info("Failed to Create Product");
+            }
+            
         }
         private void UpdateProductPrice()
         {
-            using var context = new AppDbContext();
-
-            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateInteger, InputConvertor.ToInteger, out var Id, "Enter the ID of the product", "Input must be a integer value");
-            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateDecimal, InputConvertor.ToDecimal, out var Price, "Enter the new price of the product", "Input must be a decimal value");
-
-            foreach (var product in context.Products)
+            try
             {
-                if (product.Id == Id)
+                using var context = new AppDbContext();
+
+                _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateInteger, InputConvertor.ToInteger, out var Id, "Enter the ID of the product", "Input must be a integer value");
+                _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateDecimal, InputConvertor.ToDecimal, out var Price, "Enter the new price of the product", "Input must be a decimal value");
+
+                foreach (var product in context.Products)
                 {
-                    product.Price = Price;
-                    break;
+                    if (product.Id == Id)
+                    {
+                        product.Price = Price;
+                        break;
+                    }
                 }
+                context.SaveChanges();
             }
+            catch
+            {
+                _view.Info("Failed to Update Price of Product");
+            }
+            
 
         }
         private void UpdateProductQuantity()
         {
-            using var context = new AppDbContext();
-
-            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateInteger, InputConvertor.ToInteger, out var Id, "Enter the ID of the product", "Input must be a integer value");
-            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateUnsignedInteger, InputConvertor.ToUnsignedInteger, out var InventoryCount, "Enter the new quantity of the product", "Input must be a natural number");
-
-            foreach (var product in context.Products)
+            try
             {
-                if (product.Id == Id)
+                using var context = new AppDbContext();
+
+                _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateInteger, InputConvertor.ToInteger, out var Id, "Enter the ID of the product", "Input must be a integer value");
+                _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateUnsignedInteger, InputConvertor.ToUnsignedInteger, out var InventoryCount, "Enter the new quantity of the product", "Input must be a natural number");
+
+                foreach (var product in context.Products)
                 {
-                    product.InventoryCount = InventoryCount;
-                    break;
+                    if (product.Id == Id)
+                    {
+                        product.InventoryCount = InventoryCount;
+                        break;
+                    }
                 }
+                context.SaveChanges();
             }
+            catch
+            {
+                _view.Info("Failed to Update Quantity of Product");
+            }
+            
         }
         private void DeleteProduct()
         {
-            using var context = new AppDbContext();
-
-            _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateInteger, InputConvertor.ToInteger, out var Id, "Enter the ID of the product", "Input must be a integer value");
-
-            foreach (var product in context.Products)
+            try
             {
-                if (product.Id == Id)
+                using var context = new AppDbContext();
+
+                _inputHandler.TryAskUserTextInput(InputFormatValidator.ValidateInteger, InputConvertor.ToInteger, out var Id, "Enter the ID of the product", "Input must be a integer value");
+
+                foreach (var product in context.Products)
                 {
-                    context.Products.Remove(product);
-                    break;
+                    if (product.Id == Id)
+                    {
+                        context.Products.Remove(product);
+                        break;
+                    }
                 }
+                context.SaveChanges();
             }
+            catch
+            {
+                _view.Info("Failed to Delete Product");
+            }
+            
         }
     }
 }
