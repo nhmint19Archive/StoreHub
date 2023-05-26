@@ -10,7 +10,8 @@ public class BankTransaction : ITransactionMethod
         _bsb = bsb;
         _accountNo = accountNo;
     }
-    public Receipt Execute(Transaction transaction)
+
+    public Receipt Execute(Transaction transaction, Order order)
     {
         throw new NotImplementedException();
     }

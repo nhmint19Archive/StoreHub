@@ -31,6 +31,10 @@ internal class Program
             .AddSingleton<UserSession>()
             .AddSingleton<CustomerProfileState>()
             .AddSingleton<AdminProfileState>()
+            .AddSingleton<StaffProfileState>()
+            .AddSingleton<OrderingState>()
+            .AddSingleton<ViewSalesDataState>()
+            .AddSingleton<ManageInventoryState>()
             .AddSingleton<IReadOnlyDictionary<string, AppState>>(x => new Dictionary<string, AppState>()
             {
                 { nameof(MainMenuState), x.GetRequiredService<MainMenuState>() },
@@ -38,7 +42,10 @@ internal class Program
                 { nameof(SignInState), x.GetRequiredService<SignInState>() },
                 { nameof(CustomerProfileState), x.GetRequiredService<CustomerProfileState>() },
                 { nameof(AdminProfileState), x.GetRequiredService<AdminProfileState>() },
+                { nameof(StaffProfileState), x.GetRequiredService<StaffProfileState>() },
                 { nameof(OrderingState), x.GetRequiredService<OrderingState>() },
+                { nameof(ViewSalesDataState), x.GetRequiredService<ViewSalesDataState>() },
+                { nameof(ManageInventoryState), x.GetRequiredService<ManageInventoryState>() }
             });
 
 

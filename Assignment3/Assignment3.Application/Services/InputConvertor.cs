@@ -1,4 +1,6 @@
-﻿namespace Assignment3.Application.Services;
+﻿using System.Globalization;
+
+namespace Assignment3.Application.Services;
 
 /// <summary>
 /// Convert raw user inputs into the specified format.

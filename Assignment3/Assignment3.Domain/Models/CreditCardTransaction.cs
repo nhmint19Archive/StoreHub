@@ -12,8 +12,15 @@ public class CreditCardTransaction : ITransactionMethod
         _cvc = cvc;
         _expiryDate = expiryDate;
     }
-    public Receipt Execute(Transaction transaction)
+    public Receipt Execute(Transaction transaction, Order order)
     {
-        throw new NotImplementedException();
+        var receipt = new Receipt
+        {
+            Order = order,
+            TransactionId = transaction.Id,
+            Transaction = transaction
+        };
+
+        return receipt;
     }
 }
