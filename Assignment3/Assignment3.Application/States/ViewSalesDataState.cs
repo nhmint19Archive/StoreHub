@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Formats.Asn1;
 using System.Globalization;
 using System.Linq;
@@ -80,6 +81,8 @@ namespace Assignment3.Application.States
             using var context = new AppDbContext();
             var receipts = context.Receipts
                 .Include(x => x.Order)
+                .ThenInclude(x => x.Products)
+                .ThenInclude(x => x.Product)
                 .AsNoTracking()
                 .OrderByDescending(x => x.Order.Date);
 
@@ -87,10 +90,15 @@ namespace Assignment3.Application.States
             {
                 _view.Info(string.Empty);
                 _view.Info($"ID [{receipt.Id}]");
-                foreach (var product in receipt.Order.Products)
+
+                decimal totalPrice = 0;
+
+                foreach (var orderProduct in receipt.Order.Products)
                 {
-                    _view.Info($"{product.Product.Name}-{product.ProductQuantity}");
+                    _view.Info($"{orderProduct.Product.Name}-{orderProduct.ProductQuantity}");
+                    totalPrice += orderProduct.Product.Price * orderProduct.ProductQuantity;
                 }
+                _view.Info($"Total: ${totalPrice}");
                 _view.Info($"Customer: {receipt.Order.CustomerEmail}");
                 _view.Info(message: $"Time: {receipt.Order.Date}");
             }

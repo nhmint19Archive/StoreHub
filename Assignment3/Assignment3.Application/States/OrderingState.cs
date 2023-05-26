@@ -194,7 +194,7 @@ internal class OrderingState : AppState
         errorMessages.AddRange(
             validProducts
             .Where(x => x.ProductQuantity > availableProducts[x.ProductId])
-            .Select(x => $"Invalid purchase quantity for product with ID [{x.ProductId}] (only {availableProducts[x.ProductId]} are available)")
+            .Select(selector: x => $"Invalid purchase quantity for product with ID [{x.ProductId}] (only {availableProducts[x.ProductId]} are available)")
             .ToList());
 
         if (errorMessages.Count <= 0)
@@ -212,6 +212,7 @@ internal class OrderingState : AppState
         return context.Orders
             .AsNoTracking()
             .Include(x => x.Products)
+            .ThenInclude(x => x.Product)
             .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email && x.Status == OrderStatus.Unconfirmed)
             .OrderByDescending(x => x.Date)
             .FirstOrDefault();
