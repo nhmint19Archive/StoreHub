@@ -93,7 +93,8 @@ internal class OrderingState : AppState
         _view.Info($"Pending order [{order.Id}]");
         _view.Info($"Creation date: {order.Date}");
         _view.Info($"Items:");
-        foreach (var orderProduct in order.Products) {
+        foreach (var orderProduct in order.Products) 
+        {
             _view.Info($"ID [{orderProduct.ProductId}] {orderProduct.Product.Name} - Quantity:  {orderProduct.ProductQuantity}");
         }
     }
@@ -103,43 +104,47 @@ internal class OrderingState : AppState
         var order = new Order(_session.AuthenticatedUser.Email);
         _view.Info($"Type the list of product ID - quantity pairs of items you'd like to purchase. Type [{ConsoleKey.Backspace}] when you are finished.");
         _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Backspace}]' to add 2 products with ID 1 and 1 product with ID 43");
-        
-        var consoleKey = ConsoleKey.Enter;
-        while (consoleKey != ConsoleKey.Backspace)
+
+        do
         {
-            if (_inputHandler.TryAskUserTextInput(
+            if (!_inputHandler.TryAskUserTextInput(
                     InputFormatValidator.ValidateHyphenSeparatedNumberPair,
                     InputConvertor.ToHyphenSeparatedIntegerPair,
                     out var result,
                     "Enter the product ID and quantity",
                     "Input must be a pair of hyphen-separated numbers"))
             {
-                var (productId, productQuantity) = result;
-                var isProductAlreadyAdded = false;
-                foreach (var product in order.Products)
+                continue;
+            }
+            
+            var (productId, productQuantity) = result;
+            var isProductAlreadyAdded = false;
+            foreach (var product in order.Products)
+            {
+                if (product.ProductId != productId || product.ProductQuantity == productQuantity)
                 {
-                    if (product.ProductId == productId && product.ProductQuantity != productQuantity)
-                    {
-                        isProductAlreadyAdded = true;
-                        product.ProductQuantity = productQuantity;
-                        _view.Info($"Quantity of product ID [{product.ProductId}] changed to {product.ProductQuantity}");
-                    } 
+                    continue;
                 }
-
-                if (!isProductAlreadyAdded)
-                {
-                    order.Products.Add(new OrderProduct
-                    {
-                        ProductId = productId,
-                        ProductQuantity = productQuantity,
-                    });
-                }
-
-                _view.Info($"Added {productQuantity} of product ID [{productId}]");
+                
+                isProductAlreadyAdded = true;
+                product.ProductQuantity = productQuantity;
+                _view.Info(
+                    $"Quantity of product ID [{product.ProductId}] changed to {product.ProductQuantity}");
             }
 
-            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to finish.");
-        }
+            if (!isProductAlreadyAdded)
+            {
+                order.Products.Add(new OrderProduct
+                {
+                    ProductId = productId,
+                    ProductQuantity = productQuantity,
+                });
+            }
+
+            _view.Info($"Added {productQuantity} of product ID [{productId}]");
+        } 
+        while (_inputHandler.AskUserKeyInput(
+                     $"Press any key to continue. Press [{ConsoleKey.Backspace}] to finish.") != ConsoleKey.Backspace);
 
         if (order.Products.Count == 0)
         {
@@ -252,27 +257,27 @@ internal class OrderingState : AppState
             return;
         }
 
-        _view.Info($"Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [{ConsoleKey.Escape}] when you are finished.");
-        _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Escape}]' to add 2 products with ID 1 and 1 product with ID 43");
+        _view.Info($"Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [{ConsoleKey.Backspace}] when you are finished.");
+        _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Backspace}]' to add 2 products with ID 1 and 1 product with ID 43");
 
         var productIdQuantityPairs = new Dictionary<int, int>();
-        var consoleKey = ConsoleKey.Enter;
-        while (consoleKey != ConsoleKey.Escape)
+        do
         {
-            if (_inputHandler.TryAskUserTextInput(
+            if (!_inputHandler.TryAskUserTextInput(
                     InputFormatValidator.ValidateHyphenSeparatedNumberPair,
-                    InputConvertor.ToHyphenSeparatedIntegerPair, 
+                    InputConvertor.ToHyphenSeparatedIntegerPair,
                     out var result,
                     "Enter the product ID and new quantity",
                     "Input must be a pair of hyphen-separated numbers"))
             {
-                var (productId, quantity) = result;
-                productIdQuantityPairs.Add(productId, quantity);
+                continue;
             }
-
-            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Escape}] to quit.");
-        }
-
+            
+            var (productId, quantity) = result;
+            productIdQuantityPairs.Add(productId, quantity);
+        } while (_inputHandler.AskUserKeyInput(
+                     $"Press any key to continue. Press [{ConsoleKey.Backspace}] to quit.") != ConsoleKey.Backspace);
+        
         var productIdsToAdd = productIdQuantityPairs
             .Where(x => !orderProductIds.Contains(x.Key))
             .ToDictionary(x => x.Key, x=>x.Value);
