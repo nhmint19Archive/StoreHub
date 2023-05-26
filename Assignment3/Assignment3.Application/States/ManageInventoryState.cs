@@ -132,7 +132,7 @@ namespace Assignment3.Application.States
         }
         private void UpdateProductPrice()
         {
-            int id = 0;
+            int id = -1;
             decimal price = 0;
             while (!_inputHandler.TryAskUserTextInput(
                    x => int.TryParse(x, out _),
@@ -166,7 +166,7 @@ namespace Assignment3.Application.States
         }
         private void UpdateProductQuantity()
         {
-            int id = 0;
+            int id = -1;
             uint inventoryCount = 0;
             while (!_inputHandler.TryAskUserTextInput(
                    x => int.TryParse(x, out _),
@@ -200,7 +200,7 @@ namespace Assignment3.Application.States
         }
         private void DeleteProduct()
         {
-            int id = 0;
+            int id = -1;
             while (!_inputHandler.TryAskUserTextInput(
                    x => int.TryParse(x, out _),
                    x => int.Parse(x),
