@@ -13,10 +13,6 @@ internal class Program
     {
         var services = RegisterDependencies();
         var appController = services.GetRequiredService<AppController>();
-
-        
-        
-
         appController.Run();
     }
 
