@@ -16,7 +16,9 @@ internal class BrowsingState : AppState
 
     public BrowsingState(
         Catalogue catalogue,
-        UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
+        UserSession session,
+        IConsoleView view,
+        IConsoleInputHandler inputHandler)
     {
         _catalogue = catalogue;
         _session = session;
@@ -98,7 +100,6 @@ internal class BrowsingState : AppState
         var options = new Dictionary<char, string>()
         {
             { 'S', "Sign In To Start Shopping" },
-            { 'P', "Print Sales Data" },
             { 'E', "Exit to Main Menu" },
             { 'D', "Display Available Products" },
         };
@@ -138,7 +139,7 @@ internal class BrowsingState : AppState
     private void ShowFilters()
     {
         while (!_inputHandler.TryAskUserTextInput(
-                    x => true,
+                    _ => true,
                     x => p => p.Name.Contains(x),
                     out _nameFilter,
                     $"Please type the product name filter or press [{ConsoleKey.Enter}] if you don not want any filter"))

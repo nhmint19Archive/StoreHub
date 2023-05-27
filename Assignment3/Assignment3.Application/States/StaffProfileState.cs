@@ -7,31 +7,36 @@ namespace Assignment3.Application.States
     internal class StaffProfileState : AppState
     {
         private readonly UserSession _session;
-        public StaffProfileState(UserSession session)
+        private readonly IConsoleView _view;
+        private readonly IConsoleInputHandler _inputHandler;
+        public StaffProfileState(UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
         {
             _session = session;
+            _view = view;
+            _inputHandler = inputHandler;
         }
         public override void Run()
         {
             if (!_session.IsUserInRole(Roles.Staff))
             {
-                ConsoleHelper.PrintError("Invalid access to customer page");
-                ConsoleHelper.PrintInfo("Signing out");
+                _view.Error("Invalid access to customer page");
+                _view.Info("Signing out");
                 _session.SignOut();
                 OnStateChanged(this, nameof(MainMenuState));
             }
 
-            var input = ConsoleHelper.AskUserOption(
+            var input = _inputHandler.AskUserOption(
             new Dictionary<char, string>()
             {
-                { 'V', "View Data Sales"},
-                { 'M', "Manage Inventory"},
+                { 'D', "View Data Sales" },
+                { 'V', "View My Profile" },
+                { 'M', "Manage Inventory" },
                 { 'E', "Exit to Main Menu" },
             });
 
             switch (input)
             {
-                case 'V':
+                case 'D':
                     OnStateChanged(this, nameof(ViewSalesDataState));
                     break;
                 case 'M':
@@ -40,7 +45,17 @@ namespace Assignment3.Application.States
                 case 'E':
                     OnStateChanged(this, nameof(MainMenuState));
                     break;
+                case 'V':
+                    ShowProfile();
+                    break;
             }
+        }
+
+        private void ShowProfile()
+        {
+            _view.Info($"Email: {_session.AuthenticatedUser.Email}");
+            _view.Info($"Phone: {_session.AuthenticatedUser.Phone}");
+            _view.Info($"Registration Date: {_session.AuthenticatedUser.RegistryDate.ToLocalTime()}");
         }
     }
 }

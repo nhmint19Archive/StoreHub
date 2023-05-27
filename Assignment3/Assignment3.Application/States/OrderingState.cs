@@ -12,7 +12,10 @@ internal class OrderingState : AppState
     private readonly UserSession _session;
     private readonly IConsoleView _view;
     private readonly IConsoleInputHandler _inputHandler;
-    public OrderingState(UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
+    public OrderingState(
+        UserSession session, 
+        IConsoleView view, 
+        IConsoleInputHandler inputHandler)
     {
         _session = session;
         _view = view;
@@ -166,18 +169,17 @@ internal class OrderingState : AppState
             _view.Error("Ordered items are invalid");
             return;
         }
-
-        try
-        {
-            _view.Info("Saving new order");
-            context.Orders.Add(order);
-            context.OrderProducts.AddRange(order.Products);
-            context.SaveChanges();
-        }
-        catch
+        
+        _view.Info("Saving new order");
+        context.Orders.Add(order);
+        context.OrderProducts.AddRange(order.Products);
+        if (!context.TrySaveChanges())
         {
             _view.Error("Failed to process order");
+            return;
         }
+        
+        _view.Info($"Order [{order.Id}] successfully created");
     }
 
     private bool ValidateOrderProductQuantity(Order order, IReadOnlyDictionary<int, uint> availableProducts)
@@ -234,7 +236,13 @@ internal class OrderingState : AppState
         
         _view.Info($"Erasing order [{order.Id}]");
         context.Orders.Remove(order);
-        context.SaveChanges();
+        if (!context.TrySaveChanges())
+        {
+            _view.Error("Failed to delete existing order");
+            return;
+        }
+        
+        _view.Info($"Order [{order.Id}] successfully deleted.");
     }
 
     private void EditOrder(Order order)
@@ -309,17 +317,15 @@ internal class OrderingState : AppState
             _view.Error("Ordered items are invalid");
             return;
         }
-
-        try
+        context.Orders.Update(order);
+        context.OrderProducts.UpdateRange(order.Products);
+        if (!context.TrySaveChanges())
         {
-            context.Orders.Update(order);
-            context.OrderProducts.UpdateRange(order.Products);
-            context.SaveChanges();
+            _view.Error("Failed to update order");
+            return;
         }
-        catch
-        {
-            _view.Error("Failed to process order");
-        }
+        
+        _view.Info("Order successfully updated");
     }
 
     private void ConfirmOrder(Order order)

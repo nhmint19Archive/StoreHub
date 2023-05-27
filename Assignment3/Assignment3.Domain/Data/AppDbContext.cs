@@ -1,4 +1,5 @@
-﻿using Assignment3.Domain.Enums;
+﻿using System.Diagnostics;
+using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -19,6 +20,20 @@ public class AppDbContext : DbContext
 	{
 		const string connectionString = "Data Source=AllYourHealthyDb.db";
 		_ = optionsBuilder.UseSqlite(connectionString);
+	}
+
+	public bool TrySaveChanges()
+	{
+		try
+		{
+			SaveChanges();
+			return true;
+		}
+		catch (Exception e)
+		{
+			Debug.Fail(e.Message, e.StackTrace);
+			return false;
+		}
 	}
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)

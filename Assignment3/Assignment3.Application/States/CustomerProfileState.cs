@@ -8,10 +8,17 @@ namespace Assignment3.Application.States;
 
 internal class CustomerProfileState : AppState
 {
-    private readonly UserSession _session;
-    public CustomerProfileState(UserSession session)
+    private readonly UserSession _session;    
+    private readonly IConsoleView _view;
+    private readonly IConsoleInputHandler _inputHandler;
+    public CustomerProfileState(
+        UserSession session,        
+        IConsoleView view,
+        IConsoleInputHandler inputHandler)
     {
         _session = session;
+        _view = view;
+        _inputHandler = inputHandler;
     }
 
     /// <inheritdoc /> 
@@ -19,8 +26,8 @@ internal class CustomerProfileState : AppState
     {
         if (!_session.IsUserInRole(Roles.Customer))
         {
-            ConsoleHelper.PrintError("Invalid access to customer page");
-            ConsoleHelper.PrintInfo("Signing out");
+            _view.Error("Invalid access to customer page");
+            _view.Info("Signing out");
             _session.SignOut();
             OnStateChanged(this, nameof(MainMenuState));
         }
@@ -31,13 +38,10 @@ internal class CustomerProfileState : AppState
             { 'C', "Change account details" },
             { 'E', "Exit to Main Menu" },
             { 'R', "Request refund" },
+            { 'P', "View My Profile" }
         };
 
-        ConsoleHelper.PrintInfo("Customer Profile");
-        ConsoleHelper.PrintInfo($"Email: {_session.AuthenticatedUser.Email}");
-        ConsoleHelper.PrintInfo($"Phone: {_session.AuthenticatedUser.Phone}");
-        ConsoleHelper.PrintInfo($"Registration Date: {_session.AuthenticatedUser.RegistryDate.ToLocalTime()}");
-        var input = ConsoleHelper.AskUserOption(choices);
+        var input = _inputHandler.AskUserOption(choices);
 
         switch (input)
         {
@@ -53,18 +57,20 @@ internal class CustomerProfileState : AppState
             case 'R':
                 RequestRefund();
                 break;
+            case 'P':
+                ShowProfile();
+                break;
         }        
     }
 
     private void ChangeAccountDetails()
     {
-        var newPhoneNumber = ConsoleHelper.AskUserTextInput("Enter your new phone number or press enter if you do not want to change your phone number");
-        var newPassword = ConsoleHelper.AskUserTextInput("Enter your new password or press enter if you do not want to change your password");
-
-        // TODO(HUY): VALIDATE INPUT
+        var newPhoneNumber = _inputHandler.AskUserTextInput("Enter your new phone number or press enter if you do not want to change your phone number");
+        var newPassword = _inputHandler.AskUserTextInput("Enter your new password or press enter if you do not want to change your password");
+        
         if (string.IsNullOrEmpty(newPhoneNumber) && string.IsNullOrEmpty(newPassword))
         {
-            ConsoleHelper.PrintInfo("No details changed");
+            _view.Info("No details changed");
             return;
         }
 
@@ -72,8 +78,8 @@ internal class CustomerProfileState : AppState
         var userAccount = context.UserAccounts.Find(_session.AuthenticatedUser.Email);
         if (userAccount == null)
         {
-            ConsoleHelper.PrintError("Unable to find customer account");
-            ConsoleHelper.PrintInfo("Signing out");
+            _view.Error("Unable to find customer account");
+            _view.Info("Signing out");
             _session.SignOut();
             OnStateChanged(this, nameof(MainMenuState));
             return;
@@ -92,25 +98,18 @@ internal class CustomerProfileState : AppState
         var validationResults = ModelValidator.ValidateObject(userAccount);
         if (validationResults.Count != 0)
         {
-            ConsoleHelper.PrintErrors(validationResults);
+            _view.Errors(validationResults);
             return;
         }
 
-        try
+        context.UserAccounts.Update(userAccount);
+        if (!context.TrySaveChanges())
         {
-            context.UserAccounts.Update(userAccount);
-            context.SaveChanges();
-        }
-        catch (Exception e) // TODO: catch more specific exception
-        {
-            ConsoleHelper.PrintError("Failed to change customer details.");
-#if DEBUG
-            Console.WriteLine(e.Message);
-#endif
+            _view.Error("Failed to change customer details.");
             return;
         }
 
-        ConsoleHelper.PrintInfo("Successfully changed customer details");
+        _view.Info("Successfully changed customer details");
     }
 
     private void RequestRefund()
@@ -121,5 +120,12 @@ internal class CustomerProfileState : AppState
     private void ViewOrders()
     {
         OnStateChanged(this, nameof(ViewOrderState));
+    }
+
+    private void ShowProfile()
+    {
+        _view.Info($"Email: {_session.AuthenticatedUser.Email}");
+        _view.Info($"Phone: {_session.AuthenticatedUser.Phone}");
+        _view.Info($"Registration Date: {_session.AuthenticatedUser.RegistryDate.ToLocalTime()}");
     }
 }

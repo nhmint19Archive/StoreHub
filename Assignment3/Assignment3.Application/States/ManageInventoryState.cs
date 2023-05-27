@@ -3,12 +3,7 @@ using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Assignment3.Domain.Services;
 
 namespace Assignment3.Application.States
 {
@@ -19,7 +14,11 @@ namespace Assignment3.Application.States
         private readonly IConsoleView _view;
         private readonly IConsoleInputHandler _inputHandler;
 
-        public ManageInventoryState(Catalogue catalogue, UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
+        public ManageInventoryState(
+            Catalogue catalogue, 
+            UserSession session, 
+            IConsoleView view, 
+            IConsoleInputHandler inputHandler)
         {
             _catalogue = catalogue;
             _session = session;
@@ -37,7 +36,7 @@ namespace Assignment3.Application.States
                 return;
             }
 
-            if (!_session.IsUserInRole(Roles.Staff))
+            if (!_session.IsUserInRole(Roles.Staff) && !_session.IsUserInRole(Roles.Admin))
             {
                 _view.Error("Invalid access to ordering page");
                 _view.Info("Signing out");
@@ -60,7 +59,6 @@ namespace Assignment3.Application.States
 
         private void ShowProduct(Product product)
         {
-
             _view.Info(string.Empty);
             _view.Info($"ID [{product.Id}] - Availability: {product.InventoryCount}");
             _view.Info($"{product.Name} - {product.Price} AUD");
@@ -104,58 +102,94 @@ namespace Assignment3.Application.States
 
         private void CreateProduct()
         {
-            var name = _inputHandler.AskUserTextInput("Enter the name of the product");
-            var description = _inputHandler.AskUserTextInput("Enter the description of the product");
+            var name = _inputHandler.AskUserTextInput($"Enter the name of the product. Press [{ConsoleKey.Enter}] to exit.");
+            if (string.IsNullOrEmpty(name))
+            {
+                _view.Info("No product created.");
+                return;
+            }
             
-            decimal price;
-            while (!_inputHandler.TryAskUserTextInput(
-                   x => decimal.TryParse(x, out _),
-                   decimal.Parse,
-                   out price,
-                   $"Please type the price of the product",
-                   "Invalid input. Input must be empty or a valid number"))
-            {}
+            var description = _inputHandler.AskUserTextInput($"Enter the description of the product. Press [{ConsoleKey.Enter}] to exit.");
+            if (string.IsNullOrEmpty(description))
+            {
+                _view.Info("No product created.");
+                return;
+            }
             
-            uint inventoryCount;
+            decimal? price;
             while (!_inputHandler.TryAskUserTextInput(
-                   x => uint.TryParse(x, out _),
-                   x => uint.Parse(x),
+                       x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
+                       x => string.IsNullOrEmpty(x) ? null : decimal.Parse(x),
+                       out price,
+                       $"Please type the price of the product. Press [{ConsoleKey.Enter}] to exit.",
+                       "Invalid input. Input must be empty or a valid number"))
+            { }
+
+            if (price == null)
+            {
+                _view.Info("No product created.");
+                return;
+            }
+            
+            uint? inventoryCount;
+            while (!_inputHandler.TryAskUserTextInput(
+                       x => string.IsNullOrEmpty(x) || uint.TryParse(x, out _),
+                       x => string.IsNullOrEmpty(x) ? null : uint.Parse(x),
                    out inventoryCount,
-                   $"Please type the quantity of the product",
+                   $"Please type the quantity of the product. Press [{ConsoleKey.Enter}] to exit.",
                    "Invalid input. Input must be empty or a valid number"))
-            {}
+            { }
+
+            if (inventoryCount == null)
+            {
+                _view.Info("No product created.");
+                return;
+            }
+
+            var product = new Product()
+            {
+                Name = name,
+                Description = description,
+                Price = price.Value,
+                InventoryCount = inventoryCount.Value,
+            };
+
+            var errors = ModelValidator.ValidateObject(product);
+            if (errors.Count > 0)
+            {
+                _view.Errors(errors);
+                return;
+            }
             
             using var context = new AppDbContext();
-            context.Products.Add(new Product()
+            context.Products.Add(product);
+            if (!context.TrySaveChanges())
             {
-                Name = name, 
-                Description = description, 
-                Price = price, 
-                InventoryCount = inventoryCount,
-            });
+                _view.Error("Failed to add product.");
+                return;
+            }
             
-            context.SaveChanges();
+            _view.Info($"Product [{product.Id}] successfully added.");
+            ShowProduct(product);
         }
 
         private void UpdateProductPrice()
         {
-            int id = -1;
-            decimal price = 0;
+            int? id;
             while (!_inputHandler.TryAskUserTextInput(
-                   x => int.TryParse(x, out _),
-                   x => int.Parse(x),
-                   out id,
-                   $"Please type the ID of the product",
-                   "Invalid input. Input must be empty or a valid number"))
-            { }
-            while (!_inputHandler.TryAskUserTextInput(
-                   x => decimal.TryParse(x, out _),
-                   x => decimal.Parse(x),
-                   out price,
-                   $"Please type the price of the product",
-                   "Invalid input. Input must be empty or a valid number"))
-            { }
-
+                       x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
+                       x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
+                       out id,
+                       $"Please type the ID of the product. Press [{ConsoleKey.Enter}] to exit."))
+            {
+            }
+            
+            if (id == null)
+            {
+                _view.Info("No product updated");
+                return;
+            }
+            
             using var context = new AppDbContext();
             var product = context.Products.Find(id);
             if (product == null)
@@ -164,30 +198,53 @@ namespace Assignment3.Application.States
                 return;
             }
             
-            product.Price = price;
+            _view.Info($"Product ID [{product.Id}] - {product.Name}");
+            _view.Info($"Current price: ${product.Price}");
+            
+            decimal? price;
+            while (!_inputHandler.TryAskUserTextInput(
+                   x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
+                   x => string.IsNullOrEmpty(x) ? null : decimal.Parse(x),
+                    out price,
+                   $"Please type the price of the product. Press [{ConsoleKey.Enter}] to exit.",
+                   "Invalid input. Input must be empty or a valid number"))
+            { }
+            
+            if (price == null)
+            {
+                _view.Info("No product updated");
+                return;
+            }
+            
+            product.Price = price.Value;
             context.Products.Update(product);
-            context.SaveChanges();
+            if (!context.TrySaveChanges())
+            {
+                _view.Error("Failed to update product.");
+                return;
+            }
+
+            _view.Info($"Product [{id}] successfully updated.");
             ShowProduct(product);
         }
+        
         private void UpdateProductQuantity()
         {
-            int id = -1;
-            uint inventoryCount = 0;
+            int? id;
             while (!_inputHandler.TryAskUserTextInput(
-                   x => int.TryParse(x, out _),
-                   x => int.Parse(x),
-                   out id,
-                   $"Please type the ID of the product",
-                   "Invalid input. Input must be empty or a valid number"))
+                       x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
+                       x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
+                       out id,
+                       $"Please type the ID of the product. Press [{ConsoleKey.Enter}] to exit.",
+                       "Invalid input. Input must be empty or a valid number"))
             { }
-            while (!_inputHandler.TryAskUserTextInput(
-                   x => uint.TryParse(x, out _),
-                   x => uint.Parse(x),
-                   out inventoryCount,
-                   $"Please type the quantity of the product",
-                   "Invalid input. Input must be empty or a valid number"))
-            { }
-
+            
+            if (id == null)
+            {
+                _view.Info("No product updated");
+                return;
+            }
+            
             using var context = new AppDbContext();
             var product = context.Products.Find(id);
             if (product == null)
@@ -195,21 +252,49 @@ namespace Assignment3.Application.States
                 _view.Error("Could not find product with that ID.");
                 return;
             }
-
-            product.InventoryCount = inventoryCount;
-            context.Products.Update(product);
-            context.SaveChanges();
+            
+            _view.Info($"Product ID [{product.Id}] - {product.Name}");
+            _view.Info($"Current stock: ${product.InventoryCount}");
+            
+            uint? inventoryCount;
+            while (!_inputHandler.TryAskUserTextInput(
+                   x => string.IsNullOrEmpty(x) || uint.TryParse(x, out _),
+                   x => string.IsNullOrEmpty(x) ? null : uint.Parse(x),
+                   out inventoryCount,
+                   $"Please type the quantity of the product",
+                   "Invalid input. Input must be a valid number"))
+            { }
+            
+            if (inventoryCount == null)
+            {
+                _view.Info("No product updated");
+                return;
+            }
+            
+            product.InventoryCount = inventoryCount.Value;
+            if (!context.TrySaveChanges())
+            {
+                _view.Error("Failed to update product.");
+                return;
+            }
+            
+            _view.Info($"Product [{id}] successfully updated.");
         }
         private void DeleteProduct()
         {
-            int id;
+            int? id;
             while (!_inputHandler.TryAskUserTextInput(
-                       x => int.TryParse(x, out _),
-                       x => int.Parse(x),
+                       x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
+                       x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                        out id,
-                       $"Please type the ID of the product",
+                       $"Please type the ID of the product. Press [{ConsoleKey.Enter}] to exit.",
                        "Invalid input. Input must be empty or a valid number"))
+            { }
+
+            if (id == null)
             {
+                _view.Info("No product deleted");
+                return;
             }
             
             using var context = new AppDbContext();
@@ -221,7 +306,13 @@ namespace Assignment3.Application.States
             }
 
             context.Products.Remove(product);
-            context.SaveChanges();
+            if (!context.TrySaveChanges())
+            {
+                _view.Error("Failed to delete product.");
+                return;
+            }
+            
+            _view.Info($"Product [{id}] successfully deleted.");
         }
     }
 }
