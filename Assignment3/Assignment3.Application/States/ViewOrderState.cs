@@ -65,23 +65,31 @@ namespace Assignment3.Application.States
                 .ThenInclude(x => x.Product)
                 .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email)
                 .OrderByDescending(x => x.Date);
-            
-            foreach (var order in orders)
+
+            if (orders.Count() > 0)
             {
-                _view.Info(string.Empty);
-                _view.Info($"Order ID [{order.Id}]");
-
-                var totalPrice = 0m;
-                foreach (var orderProduct in order.Products)
+                foreach (var order in orders)
                 {
-                    _view.Info($"{orderProduct.Product.Name}-{orderProduct.ProductQuantity}");
-                    totalPrice += orderProduct.Product.Price * orderProduct.ProductQuantity;
-                }
+                    _view.Info(string.Empty);
+                    _view.Info($"Order ID [{order.Id}]");
 
-                _view.Info($"Total: ${totalPrice}");
-                _view.Info($"Time: {order.Date}");
-                _view.Info($"Status: {order.Status}");
+                    var totalPrice = 0m;
+                    foreach (var orderProduct in order.Products)
+                    {
+                        _view.Info($"{orderProduct.Product.Name}-{orderProduct.ProductQuantity}");
+                        totalPrice += orderProduct.Product.Price * orderProduct.ProductQuantity;
+                    }
+
+                    _view.Info($"Total: ${totalPrice}");
+                    _view.Info($"Time: {order.Date}");
+                    _view.Info($"Status: {order.Status}");
+                }
             }
+            else
+            {
+                _view.Info($"You have no orders");
+            }
+            
         }
     }
 }
