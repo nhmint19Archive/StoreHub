@@ -56,10 +56,10 @@ namespace Assignment3.Application.States
         {
             using var context = new AppDbContext();
             var orders = context.Orders
-                .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email)
+                .AsNoTracking()
                 .Include(x => x.Products)
                 .ThenInclude(x => x.Product)
-                .AsNoTracking()
+                .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email)
                 .OrderByDescending(x => x.Date);
 
 
