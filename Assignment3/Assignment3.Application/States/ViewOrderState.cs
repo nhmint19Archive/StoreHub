@@ -18,7 +18,9 @@ namespace Assignment3.Application.States
         private readonly IConsoleInputHandler _inputHandler;
 
         public ViewOrderState(
-            UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
+            UserSession session, 
+            IConsoleView view, 
+            IConsoleInputHandler inputHandler)
         {
             _session = session;
             _view = view;
@@ -30,7 +32,7 @@ namespace Assignment3.Application.States
         {
             if (!_session.IsUserInRole(Roles.Customer))
             {
-                _view.Error("Invalid access to staff page");
+                _view.Error("Invalid access to customer page");
                 _view.Info("Signing out");
                 _session.SignOut();
                 OnStateChanged(this, nameof(MainMenuState));
@@ -69,8 +71,7 @@ namespace Assignment3.Application.States
                 _view.Info(string.Empty);
                 _view.Info($"Order ID [{order.Id}]");
 
-                decimal totalPrice = 0;
-
+                var totalPrice = 0m;
                 foreach (var orderProduct in order.Products)
                 {
                     _view.Info($"{orderProduct.Product.Name}-{orderProduct.ProductQuantity}");
