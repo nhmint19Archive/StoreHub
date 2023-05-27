@@ -1,5 +1,5 @@
 ﻿namespace Assignment3.Domain.Models;
 public interface ITransactionMethod
 {
-    Receipt Execute(Transaction transaction, int orderId);
+    Receipt Execute(Transaction transaction, Order order);
 }

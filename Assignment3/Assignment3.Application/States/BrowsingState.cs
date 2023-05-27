@@ -16,7 +16,9 @@ internal class BrowsingState : AppState
 
     public BrowsingState(
         Catalogue catalogue,
-        UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
+        UserSession session,
+        IConsoleView view,
+        IConsoleInputHandler inputHandler)
     {
         _catalogue = catalogue;
         _session = session;
@@ -137,24 +139,24 @@ internal class BrowsingState : AppState
     private void ShowFilters()
     {
         while (!_inputHandler.TryAskUserTextInput(
-                    x => true,
+                    _ => true,
                     x => p => p.Name.Contains(x),
                     out _nameFilter,
                     $"Please type the product name filter or press [{ConsoleKey.Enter}] if you don not want any filter"))
         {
         }
 
-        var upperPrice = decimal.MaxValue;
+        decimal upperPrice;
         while (!_inputHandler.TryAskUserTextInput(
                    x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
-                   x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
+                   x => string.IsNullOrEmpty(x) ?  decimal.MaxValue : decimal.Parse(x),
                    out upperPrice,
                    $"Please type the upper price limit or press [{ConsoleKey.Enter}] if you do not want one",
                    "Invalid input. Input must be empty or a valid number"))
         {
         }
         
-        var lowerPrice = 0m;
+        decimal lowerPrice;
         while (!_inputHandler.TryAskUserTextInput(
                    x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
