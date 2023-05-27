@@ -6,9 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Application.States
 {
-    /*ViewOrderState stays as seperate views so in the future we can add more options like "reorder" or "rating"*/
-    /*For now, such options are not implemented so there's only option to Exit to Main Menu as right now*/
-
+    /// <summary>
+    /// Allows a customer to view their order history.
+    /// Currently, there is only one option in this state, but it is expected to handle features such as
+    /// rating an order or  re-order it.
+    /// </summary>
     internal class ViewOrderState : AppState
     {
         private readonly UserSession _session;
@@ -23,6 +25,7 @@ namespace Assignment3.Application.States
             _inputHandler = inputHandler;
         }
 
+        /// <inheritdoc />
         public override void Run()
         {
             if (!_session.IsUserInRole(Roles.Customer))
@@ -33,22 +36,18 @@ namespace Assignment3.Application.States
                 OnStateChanged(this, nameof(MainMenuState));
             }
 
-            ShowOrders();
-            ShowDataOptions();
-        }
-
-        private void ShowDataOptions()
-        {
-            /*More options to add in the future*/
             var options = new Dictionary<char, string>()
             {
-                { 'E', "Exit to Main Menu" }
+                { 'E', "Exit to Main Menu" },
+                { 'V', "View order history" }
             };
 
             var input = _inputHandler.AskUserOption(options);
-
             switch (input)
-            {
+            {                
+                case 'V':
+                    ShowOrders();
+                    break;
                 case 'E':
                     OnStateChanged(this, nameof(CustomerProfileState));
                     break;
@@ -64,12 +63,11 @@ namespace Assignment3.Application.States
                 .ThenInclude(x => x.Product)
                 .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email)
                 .OrderByDescending(x => x.Date);
-
-
+            
             foreach (var order in orders)
             {
                 _view.Info(string.Empty);
-                _view.Info($"[Order - {order.Id}]");
+                _view.Info($"[Order -[{order.Id}]");
 
                 decimal totalPrice = 0;
 

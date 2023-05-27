@@ -23,6 +23,7 @@ namespace Assignment3.Application.States
             _inputHandler = inputHandler;
         }
 
+        /// <inheritdoc />
         public override void Run()
         {
             ShowDataOptions();

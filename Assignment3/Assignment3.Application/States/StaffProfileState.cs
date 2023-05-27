@@ -15,6 +15,8 @@ namespace Assignment3.Application.States
             _view = view;
             _inputHandler = inputHandler;
         }
+        
+        /// <inheritdoc />
         public override void Run()
         {
             if (!_session.IsUserInRole(Roles.Staff))

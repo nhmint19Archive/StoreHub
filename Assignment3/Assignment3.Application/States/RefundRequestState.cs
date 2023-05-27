@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Application.States
 {
+    
     internal class RefundRequestState : AppState
     {
         private readonly UserSession _session;
@@ -19,55 +20,24 @@ namespace Assignment3.Application.States
             _view = view;
             _inputHandler = inputHandler;
         }
+        
+        /// <inheritdoc />
         public override void Run()
         {
             if (!_session.IsUserInRole(Roles.Customer))
             {
-                ConsoleHelper.PrintError("Invalid access to staff page");
-                ConsoleHelper.PrintInfo("Signing out");
+                _view.Error("Invalid access to staff page");
+                _view.Info("Signing out");
                 _session.SignOut();
                 OnStateChanged(this, nameof(MainMenuState));
+                return;
             }
-
-            ShowConfirmedOrder();
-            ShowDataOptions();
-        }
-
-        private void ShowConfirmedOrder()
-        {
-            using var context = new AppDbContext();
-            var orders = context.Orders
-                .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email && x.Status == OrderStatus.Confirmed)
-                .Include(x => x.Products)
-                .ThenInclude(x => x.Product)
-                .AsNoTracking()
-                .OrderByDescending(x => x.Date);
-
-            _view.Info("For the last week, you have paid for: ");
-            foreach (var order in orders)
-            {
-                _view.Info(string.Empty);
-                _view.Info($"[Order - {order.Id}]");
-
-                decimal totalPrice = 0;
-
-                foreach (var orderProduct in order.Products)
-                {
-                    _view.Info($"{orderProduct.Product.Name}-{orderProduct.ProductQuantity}");
-                    totalPrice += orderProduct.Product.Price * orderProduct.ProductQuantity;
-                }
-
-                _view.Info($"Total: ${totalPrice}");
-                _view.Info(message: $"Time: {order.Date}");
-            }
-        }
-
-        private void ShowDataOptions()
-        {
+            
             var options = new Dictionary<char, string>()
             {
                 { 'E', "Exit to Main Menu" },
                 { 'V', "View My Requests" },
+                { 'S', "Show confirmed orders" },
                 { 'R', "Request Refund" }
             };
 
@@ -84,6 +54,37 @@ namespace Assignment3.Application.States
                 case 'E':
                     OnStateChanged(this, nameof(CustomerProfileState));
                     break;
+                case 'S':
+                    ShowConfirmedOrder();
+                    break;
+            }
+        }
+
+        private void ShowConfirmedOrder()
+        {
+            using var context = new AppDbContext();
+            var orders = context.Orders
+                .AsNoTracking()
+                .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email && x.Status == OrderStatus.Confirmed)
+                .Include(x => x.Products)
+                .ThenInclude(x => x.Product)
+                .OrderByDescending(x => x.Date);
+
+            _view.Info("For the last week, you have paid for: ");
+            foreach (var order in orders)
+            {
+                _view.Info(string.Empty);
+                _view.Info($"[Order - {order.Id}]");
+
+                var totalPrice = 0m;
+                foreach (var orderProduct in order.Products)
+                {
+                    _view.Info($"{orderProduct.Product.Name}-{orderProduct.ProductQuantity}");
+                    totalPrice += orderProduct.Product.Price * orderProduct.ProductQuantity;
+                }
+
+                _view.Info($"Total: ${totalPrice}");
+                _view.Info(message: $"Time: {order.Date}");
             }
         }
 
@@ -94,54 +95,64 @@ namespace Assignment3.Application.States
                 .Where(x => x.Order.CustomerEmail == _session.AuthenticatedUser.Email)
                 .Include(x => x.Order)
                 .ThenInclude(x => x.Products)
-                .ThenInclude(x => x.Product);
+                .ThenInclude(x => x.Product)
+                .ToList();
 
-            if (requests.Any())
+            if (requests.Count == 0)
             {
-                foreach (var request in requests)
+                _view.Info("No refund requests available");
+                return;
+            }
+            
+            foreach (var request in requests)
+            {
+                _view.Info($"Request for Order {request.OrderId}: ");
+                
+                var totalPrice = 0m;
+                foreach (var orderProduct in request.Order.Products)
                 {
-                    _view.Info($"Request for Order {request.OrderId}: ");
-                    decimal totalPrice = 0;
-
-                    foreach (var orderProduct in request.Order.Products)
-                    {
-                        _view.Info($"{orderProduct.Product.Name} - {orderProduct.ProductQuantity}"); 
-                        totalPrice += orderProduct.Product.Price * orderProduct.ProductQuantity;
-                    }
-
-                    _view.Info($"Total: ${totalPrice}");
-                    _view.Info($"Request Date: {request.Date}");
-                    _view.Info($"Request Status: {request.RequestStatus}");
+                    _view.Info($"{orderProduct.Product.Name} - {orderProduct.ProductQuantity}"); 
+                    totalPrice += orderProduct.Product.Price * orderProduct.ProductQuantity;
                 }
+
+                _view.Info($"Total: ${totalPrice}");
+                _view.Info($"Request Date: {request.Date}");
+                _view.Info($"Request Status: {request.RequestStatus}");
+                _view.Info($"Comment from the store: {request.StaffComment}");
             }
         }
 
         private void RequestRefund()
         {
-            _view.Info($"Type the orderID you'd like to request a refund: ");
-            var orderToRequest = 0;
+            int? orderToRefundId;
+            while (!_inputHandler.TryAskUserTextInput(
+                       x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
+                       x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
+                       out orderToRefundId,
+                       $"Type the order ID you'd like to request a refund. Press [{ConsoleKey.Enter}] if you do not want one",
+                       "Invalid input. Input must be empty or a valid number"))
+            { }
 
-            while (!int.TryParse(_inputHandler.AskUserTextInput(), out orderToRequest))
+            if (orderToRefundId == null)
             {
-                _view.Info("Invalid input, please type again: ");
+                _view.Info("No refund requested.");
+                return;
             }
-
+            
             using var context = new AppDbContext();
-            var order = context.Orders.Find(orderToRequest);
-
+            var order = context.Orders.Find(orderToRefundId);
             if (order == null)
             {
                 _view.Error("Cannot find your order. Please do it again");
                 return;
             }
-            
-            var requests = context.RefundRequests.Find(orderToRequest);
 
+            var requests = context.RefundRequests.Find(orderToRefundId);
             if (requests != null)
             {
-                _view.Error($"You already requested a refund for order [{orderToRequest}]");
+                _view.Error($"You already requested a refund for order [{orderToRefundId}]");
                 return;
-            } 
+            }
 
             var description = _inputHandler.AskUserTextInput("Please provide description for your request: ");
             var request = new RefundRequest { Order = order, Description = description };
@@ -152,11 +163,8 @@ namespace Assignment3.Application.States
                 _view.Error("Failed to process refund request");
                 return;
             }
-            
-            _view.Info("Refund has been sent successfully. Please wait for the store to process your request.");
-            
-            
 
+            _view.Info("Refund has been sent successfully. Please wait for the store to process your request.");
         }
     }
 }

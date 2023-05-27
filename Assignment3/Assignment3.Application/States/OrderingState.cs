@@ -22,6 +22,7 @@ internal class OrderingState : AppState
         _inputHandler = inputHandler;
     }
 
+    /// <inheritdoc />
     public override void Run()
     {
         if (!_session.IsUserSignedIn)
