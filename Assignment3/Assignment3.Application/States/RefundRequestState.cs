@@ -2,25 +2,27 @@
 using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
-using Assignment3.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Assignment3.Application.States
 {
-    internal class ViewOrderState : AppState
+    internal class RefundRequestState : AppState
     {
         private readonly UserSession _session;
         private readonly IConsoleView _view;
         private readonly IConsoleInputHandler _inputHandler;
-
-        public ViewOrderState(
+        public RefundRequestState(
             UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
         {
             _session = session;
             _view = view;
             _inputHandler = inputHandler;
         }
-
         public override void Run()
         {
             if (!_session.IsUserInRole(Roles.Customer))
@@ -31,38 +33,21 @@ namespace Assignment3.Application.States
                 OnStateChanged(this, nameof(MainMenuState));
             }
 
-            ShowOrders();
+            ShowConfirmedOrder();
             ShowDataOptions();
         }
 
-        private void ShowDataOptions()
-        {
-            var options = new Dictionary<char, string>()
-            {
-                { 'E', "Exit to Main Menu" }
-            };
-
-            var input = _inputHandler.AskUserOption(options);
-
-            switch (input)
-            {
-                case 'E':
-                    OnStateChanged(this, nameof(CustomerProfileState));
-                    break;
-            }
-        }
-
-        private void ShowOrders()
+        private void ShowConfirmedOrder()
         {
             using var context = new AppDbContext();
             var orders = context.Orders
-                .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email)
+                .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email && x.Status == OrderStatus.Confirmed)
                 .Include(x => x.Products)
                 .ThenInclude(x => x.Product)
                 .AsNoTracking()
                 .OrderByDescending(x => x.Date);
 
-
+            _view.Info("For the last week, you have paid for: ");
             foreach (var order in orders)
             {
                 _view.Info(string.Empty);
@@ -78,8 +63,52 @@ namespace Assignment3.Application.States
 
                 _view.Info($"Total: ${totalPrice}");
                 _view.Info(message: $"Time: {order.Date}");
-                _view.Info($"Status: {order.Status}");
             }
+        }
+
+        private void ShowDataOptions()
+        {
+            var options = new Dictionary<char, string>()
+            {
+                { 'E', "Exit to Main Menu" },
+                { 'R', "Request Refund" }
+            };
+
+            var input = _inputHandler.AskUserOption(options);
+
+            switch (input)
+            {
+                case 'R':
+                    RequestRefund();
+                    break;
+                case 'E':
+                    OnStateChanged(this, nameof(CustomerProfileState));
+                    break;
+            }
+        }
+
+        private void RequestRefund()
+        {
+            _view.Info($"Type the orderID you'd like to request a refund. Type [{ConsoleKey.Backspace}] to cancel");
+            var orderToRequest = _inputHandler.AskUserTextInput("Order ID: ");
+
+
+            try
+            {
+                using var context = new AppDbContext();
+/*                var orders = context.Orders
+                    .Where(x => x.Id == */
+
+            } catch
+            {
+                _view.Error("Failed to process order");
+            }
+
+
+
+
+
+
         }
     }
 }
