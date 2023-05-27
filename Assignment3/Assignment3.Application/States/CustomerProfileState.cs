@@ -102,17 +102,10 @@ internal class CustomerProfileState : AppState
             return;
         }
 
-        try
-        {
-            context.UserAccounts.Update(userAccount);
-            context.SaveChanges();
-        }
-        catch (Exception e) // TODO: catch more specific exception
+        context.UserAccounts.Update(userAccount);
+        if (!context.TrySaveChanges())
         {
             _view.Error("Failed to change customer details.");
-#if DEBUG
-            Console.WriteLine(e.Message);
-#endif
             return;
         }
 

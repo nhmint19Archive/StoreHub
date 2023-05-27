@@ -4,7 +4,6 @@ using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
 using Assignment3.Domain.Services;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Assignment3.Application.States;
 
@@ -43,6 +42,7 @@ internal class AdminProfileState : AppState
                 { 'A', "Alter a staff account" },
                 { 'C', "Create a new staff account" },
                 { 'E', "Exit to Main Menu" },
+                { 'M', "Manage inventory"}
             });
 
         switch (input)
@@ -62,6 +62,9 @@ internal class AdminProfileState : AppState
             case 'E':
                 OnStateChanged(this, nameof(MainMenuState));
                 break;
+            case 'M':
+                OnStateChanged(this, nameof(ManageInventoryState));
+                return;
         }
     }
 
@@ -104,20 +107,13 @@ internal class AdminProfileState : AppState
         }
 
         using var context = new AppDbContext();
-        try
+        context.UserAccounts.Add(newStaffAccount);
+        if (!context.TrySaveChanges())
         {
-            context.UserAccounts.Add(newStaffAccount);
-            context.SaveChanges();
-        }
-        catch (Exception e) // TODO: catch more specific exception
-        {
-            _view.Error("Failed to register new staff account. Perhaps an account with this email already exists?");
-#if DEBUG
-            Console.WriteLine(e.Message);
-#endif
+            _view.Error("Failed to create staff account");
             return;
         }
-
+        
         _view.Info("Successfully created staff account");
     }
 
@@ -163,18 +159,11 @@ internal class AdminProfileState : AppState
             _view.Errors(validationResults);
             return;
         }
-
-        try
-        {
-            context.UserAccounts.Update(staffAccount);
-            context.SaveChanges();
-        }
-        catch (Exception e)
+        
+        context.UserAccounts.Update(staffAccount);
+        if (!context.TrySaveChanges())
         {
             _view.Error("Failed to change customer details.");
-#if DEBUG
-            Console.WriteLine(e.Message);
-#endif
             return;
         }
 

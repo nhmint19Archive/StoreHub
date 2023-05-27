@@ -67,11 +67,11 @@ internal class SignInState : AppState
 
     private void ResetPassword()
     {
-        var email = _inputHandler.AskUserTextInput("Enter the email of your account");
-        while (string.IsNullOrEmpty(email))
+        var email = _inputHandler.AskUserTextInput($"Enter the email of your account. Press [{ConsoleKey.Enter}] to exit.");
+        if (string.IsNullOrEmpty(email))
         {
-            _view.Error("Email cannot be empty");
-            _inputHandler.AskUserTextInput("Please enter a valid email");
+            _view.Info("No account password reset");
+            return;
         }
 
         using var context = new AppDbContext();
@@ -88,17 +88,11 @@ internal class SignInState : AppState
         var newPassword = _inputHandler.AskUserTextInput("Enter your new password");
         account.SetPassword(newPassword);
         
-        try
+
+        context.UserAccounts.Update(account);
+        if (!context.TrySaveChanges())
         {
-            context.UserAccounts.Update(account);
-            context.SaveChanges();
-        }
-        catch (Exception e) // TODO: catch more specific exception
-        {
-            _view.Error("Failed to update the account password");
-#if DEBUG
-            Console.WriteLine(e.Message);
-#endif
+            _view.Error("Failed to change account password");
             return;
         }
 
@@ -144,10 +138,21 @@ internal class SignInState : AppState
 
     private void CreateCustomerAccount()
     {
-        var email = _inputHandler.AskUserTextInput("Choose your email");
-        var phone = _inputHandler.AskUserTextInput("Choose your phone number");
+        var email = _inputHandler.AskUserTextInput($"Choose your email. Press [{ConsoleKey.Enter}] to exit.");
+        if (string.IsNullOrEmpty(email))
+        {
+            _view.Info("No account created.");
+            return;
+        }
+        
+        var phone = _inputHandler.AskUserTextInput($"Choose your phone number. Press [{ConsoleKey.Enter}] to exit.");
+        if (string.IsNullOrEmpty(phone))
+        {
+            _view.Info("No account created.");
+            return;
+        }
+        
         var password = _inputHandler.AskUserTextInput("Choose your password");
-
         var newUserAccount = new CustomerAccount()
         {
             Email = email,
@@ -164,20 +169,13 @@ internal class SignInState : AppState
         }
 
         using var context = new AppDbContext();
-        try
-        {
-            context.UserAccounts.Add(newUserAccount);
-            context.SaveChanges();
-        }
-        catch (Exception e) // TODO: catch more specific exception
+        context.UserAccounts.Add(newUserAccount);
+        if (!context.TrySaveChanges())
         {
             _view.Error("Failed to register new customer account. Perhaps an account with this email already exists?");
-#if DEBUG
-            Console.WriteLine(e.Message);
-#endif
             return;
         }
-
+        
         _session.SignIn(newUserAccount);
         _view.Info("Successfully signed in");
     }
