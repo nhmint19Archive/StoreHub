@@ -129,35 +129,34 @@ namespace Assignment3.Application.States
             using var context = new AppDbContext();
             var order = context.Orders.Find(orderToRequest);
 
-            if (order != null)
+            if (order == null)
             {
-                var requests = context.RefundRequests
-                    .Where(x => x.OrderId == orderToRequest);
-
-                if (requests != null)
-                {
-                    _view.Info($"You already request a refund for order {orderToRequest}");
-                } else
-                {
-                    var description = _inputHandler.AskUserTextInput("Please provide description for your request: ");
-                    var request = new RefundRequest { Order = order, Description = description };
-
-                    context.RefundRequests.Add(request);
-                    if (!context.TrySaveChanges())
-                    {
-                        _view.Error("Failed to process order");
-                        return;
-                    }
-                    else
-                    {
-                        _view.Info("Refund has been sent successfully. Please wait for the store to process your request.");
-                    }
-                }
+                _view.Error("Cannot find your order. Please do it again");
+                return;
             }
-            else
+            
+            var requests = context.RefundRequests.Find(orderToRequest);
+
+            if (requests != null)
             {
-                _view.Info("Cannot find your order. Please do it again");
+                _view.Error($"You already requested a refund for order [{orderToRequest}]");
+                return;
+            } 
+
+            var description = _inputHandler.AskUserTextInput("Please provide description for your request: ");
+            var request = new RefundRequest { Order = order, Description = description };
+
+            context.RefundRequests.Add(request);
+            if (!context.TrySaveChanges())
+            {
+                _view.Error("Failed to process refund request");
+                return;
             }
+            
+            _view.Info("Refund has been sent successfully. Please wait for the store to process your request.");
+            
+            
+
         }
     }
 }
