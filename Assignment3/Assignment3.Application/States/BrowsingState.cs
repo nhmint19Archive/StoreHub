@@ -100,7 +100,6 @@ internal class BrowsingState : AppState
         var options = new Dictionary<char, string>()
         {
             { 'S', "Sign In To Start Shopping" },
-            { 'P', "Print Sales Data" },
             { 'E', "Exit to Main Menu" },
             { 'D', "Display Available Products" },
         };
