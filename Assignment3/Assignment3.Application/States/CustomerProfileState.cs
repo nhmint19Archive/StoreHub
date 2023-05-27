@@ -38,12 +38,9 @@ internal class CustomerProfileState : AppState
             { 'C', "Change account details" },
             { 'E', "Exit to Main Menu" },
             { 'R', "Request refund" },
+            { 'P', "View My Profile" }
         };
 
-        _view.Info("Customer Profile");
-        _view.Info($"Email: {_session.AuthenticatedUser.Email}");
-        _view.Info($"Phone: {_session.AuthenticatedUser.Phone}");
-        _view.Info($"Registration Date: {_session.AuthenticatedUser.RegistryDate.ToLocalTime()}");
         var input = _inputHandler.AskUserOption(choices);
 
         switch (input)
@@ -59,6 +56,9 @@ internal class CustomerProfileState : AppState
                 break;
             case 'R':
                 RequestRefund();
+                break;
+            case 'P':
+                ShowProfile();
                 break;
         }        
     }
@@ -120,5 +120,12 @@ internal class CustomerProfileState : AppState
     private void ViewOrders()
     {
         throw new NotImplementedException();
+    }
+
+    private void ShowProfile()
+    {
+        _view.Info($"Email: {_session.AuthenticatedUser.Email}");
+        _view.Info($"Phone: {_session.AuthenticatedUser.Phone}");
+        _view.Info($"Registration Date: {_session.AuthenticatedUser.RegistryDate.ToLocalTime()}");
     }
 }

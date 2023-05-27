@@ -46,12 +46,12 @@ namespace Assignment3.Application.States
                     OnStateChanged(this, nameof(MainMenuState));
                     break;
                 case 'V':
-                    ShowStaffProfile();
+                    ShowProfile();
                     break;
             }
         }
 
-        private void ShowStaffProfile()
+        private void ShowProfile()
         {
             _view.Info($"Email: {_session.AuthenticatedUser.Email}");
             _view.Info($"Phone: {_session.AuthenticatedUser.Phone}");
