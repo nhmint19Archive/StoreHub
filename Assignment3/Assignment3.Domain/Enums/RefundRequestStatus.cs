@@ -18,5 +18,5 @@ public enum RefundRequestStatus
     /// <summary>
     /// Request has been confirmed for refund
     /// </summary>
-    Confirmed
+    Accepted
 }

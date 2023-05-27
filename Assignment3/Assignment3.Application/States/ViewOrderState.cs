@@ -2,7 +2,6 @@
 using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
-using Assignment3.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Application.States
