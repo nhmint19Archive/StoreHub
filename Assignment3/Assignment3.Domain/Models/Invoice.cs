@@ -52,7 +52,10 @@ public class Invoice
         {
 	        var receipt = _transactionMethod.Execute(transaction, _orderId);
 	        if (receipt == null!)
-		        return false;
+	        {
+		        Console.WriteLine("Waiting for payment");
+		        return true;
+	        }
 	        Console.WriteLine("Making payment");
 	        using var context = new AppDbContext();	        
 	        var order = context.Orders.Find(_orderId) ?? throw new InvalidOperationException();

@@ -6,20 +6,6 @@ namespace Assignment3.Application.Services;
 
 public static class InputFormatValidator
 {
-    public static readonly Dictionary<string, string> Format = new Dictionary<string, string>()
-    {
-        { "commaSeparated", @"\d+,(\d+)*" },
-        { "hyphenSeparated", $@"\d+-\d+" },
-        { "digits", @"^[0-9]+$" },
-        { "email", @"^[^@\s]+@[^@\s]+\.[^@\s]+$" },
-        { "phone", @"^(\d{10})$" },
-        { "cardNo", @"^(4|5|6)\d{3}[\ \-]?\d{4}[\ \-]?\d{4}[\ \-]?\d{4}$" },
-        { "cvc", @"^\d{3}$" },
-        { "streetName", @"^[a-zA-Z0-9\s.'\-]+$"},
-        { "postalCode", @"^\d{4}$"},
-        { "apartmentNumber", @"^[a-zA-Z0-9\s]+$"}
-    };
-
     /// <summary>
     /// Validate that the input is a comma-separated number list.
     /// </summary>
@@ -28,7 +14,7 @@ public static class InputFormatValidator
     public static bool ValidateCommaSeparatedNumberList(string input)
     {
         return string.IsNullOrEmpty(input) ||
-               Regex.IsMatch(input, @"\d+,(\d+)*") &&
+               Regex.IsMatch(input, RegexConstants.CommaSeparatedRegex) &&
                input
                    .Split(",")
                    .Select(x => int.TryParse(x, out var r))
@@ -42,22 +28,11 @@ public static class InputFormatValidator
     /// <returns><c>True</c> if the input is a hypen-separated pair of number, otherwise <c>False</c>.</returns>
     public static bool ValidateHyphenSeparatedNumberPair(string input)
     {
-        return Regex.IsMatch(input, $@"\d+-\d+") &&
+        return Regex.IsMatch(input, RegexConstants.HyphenSeparatedRegex) &&
                input
                    .Split("-")
                    .Select(x => int.TryParse(x, out var r))
                    .All(x => x);
-    }
-
-    /// <summary>
-    /// Validate that the input follow a regex.
-    /// </summary>
-    /// <param name="input">Input string.</param>
-    /// <param name="regex">Regex</param>
-    /// <returns></returns>
-    public static bool ValidateRegex(string input, string regex)
-    {
-        return Regex.IsMatch(input, regex);
     }
 
     /// <summary>
@@ -68,7 +43,7 @@ public static class InputFormatValidator
     public static bool ValidateCardNumber(string cardNumber)
     {
         // Check if the card number matches a valid credit card pattern
-        if (!ValidateRegex(cardNumber, Format["cardNo"]))
+        if (!Regex.IsMatch(cardNumber, RegexConstants.CardNoRegex))
         {
             return false;
         }
@@ -105,11 +80,15 @@ public static class InputFormatValidator
     /// <returns></returns>
     public static bool ValidateCardExpiryDate(string expiryDate)
     {
-        string format = "MM/yy";
+        var format = "MM/yy";
 
         // Check if the expiry date follows the format
-        if (DateTime.TryParseExact(expiryDate, format, null, System.Globalization.DateTimeStyles.None,
-                out DateTime parsedDate))
+        if (DateTime.TryParseExact(
+            expiryDate,
+            format,
+            null,
+            System.Globalization.DateTimeStyles.None,
+            out DateTime parsedDate))
         {
             // Check if the parsed date is in the future / card not expired
             var currentMonth = DateTime.Now.Month;
@@ -133,21 +112,25 @@ public static class InputFormatValidator
     public static bool ValidateBsb(string bsb)
     {
         // Check if the BSB has only digits
-        if (!ValidateRegex(bsb, Format["digits"]))
+        if (!Regex.IsMatch(bsb, RegexConstants.DigitsRegex))
+        {
             return false;
+        }
 
         // Convert to array
         bsb = new string(bsb.ToArray());
 
         // Check if the BSB has six digits
         if (bsb.Length != 6)
+        {
             return false;
+        }
 
-        /*  The Australia BSB has 6 digits with this format
-         *  First 2 numbers: bank code
-         *  3rd number: state code
-         *  3 last number: branch code
-         **/
+    /*  The Australia BSB has 6 digits with this format
+     *  First 2 numbers: bank code
+     *  3rd number: state code
+     *  3 last number: branch code
+     **/
         // Extract bank, state, and branch codes
         var bankCode = bsb.Substring(0, 2);
         var stateCode = bsb.Substring(2, 1);
@@ -156,17 +139,24 @@ public static class InputFormatValidator
         // Validate bank code (between 01 and 99)
         int bank;
         if (!int.TryParse(bankCode, out bank) || bank < 1 || bank > 99)
+        {
             return false;
+        }
 
         // Validate state code (between 0 and 9)
         int state;
         if (!int.TryParse(stateCode, out state) || state < 0 || state > 9)
+        {
             return false;
+        }
 
         // Validate branch code (between 001 and 999)
         int branch;
         if (!int.TryParse(branchCode, out branch) || branch < 1 || branch > 999)
+        {
             return false;
+        }
+
         return true;
     }
 }

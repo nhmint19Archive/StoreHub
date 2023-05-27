@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
@@ -252,12 +253,12 @@ internal class OrderingState : AppState
             return;
         }
 
-        _view.Info($"Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [{ConsoleKey.Escape}] when you are finished.");
-        _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Escape}]' to add 2 products with ID 1 and 1 product with ID 43");
+        _view.Info($"Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [{ConsoleKey.Backspace}] when you are finished.");
+        _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Backspace}]' to add 2 products with ID 1 and 1 product with ID 43");
 
         var productIdQuantityPairs = new Dictionary<int, int>();
         var consoleKey = ConsoleKey.Enter;
-        while (consoleKey != ConsoleKey.Escape)
+        while (consoleKey != ConsoleKey.Backspace)
         {
             if (_inputHandler.TryAskUserTextInput(
                     InputFormatValidator.ValidateHyphenSeparatedNumberPair,
@@ -270,7 +271,7 @@ internal class OrderingState : AppState
                 productIdQuantityPairs.Add(productId, quantity);
             }
 
-            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Escape}] to quit.");
+            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to quit.");
         }
 
         var productIdsToAdd = productIdQuantityPairs
@@ -353,43 +354,44 @@ internal class OrderingState : AppState
 
     private IDeliveryMethod ProcessPostalDelivery(int orderId)
     {
-        var streetNumber = _inputHandler.AskUserTextInput("Enter your address number");
-        var streetName =  _inputHandler.AskUserTextInput("Enter your address street name");
-        var postalCode = _inputHandler.AskUserTextInput("Enter your postcode");
-        var apartmentNumber = _inputHandler.AskUserTextInput("Enter your apartment number (if applicable)");
-
-        if (!InputFormatValidator.ValidateRegex(streetNumber, InputFormatValidator.Format["digits"]))
+        var consoleKey = ConsoleKey.Enter;
+        while (consoleKey != ConsoleKey.Backspace)
         {
-            _view.Error("Street number is invalid.");
-            return AskUserForDeliveryMethod(orderId);
+            if ((_inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexConstants.DigitsRegex),
+                    int.Parse,
+                    out var streetNumber,
+                    $"Enter your address number",
+                    "Street number is invalid.")) &&
+                (_inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexConstants.StreetNameRegex),
+                    x => x,
+                    out var streetName,
+                    $"Enter your address street name",
+                    "Street name is invalid.")) && 
+                (_inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexConstants.PostalCodeRegex),
+                    int.Parse,
+                    out var postalCode,
+                    $"Enter your postal code",
+                    "Postal code is invalid.")) &&
+                (_inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexConstants.ApartmentNoRegex),
+                    x => string.IsNullOrEmpty(x) ? null : x,
+                    out var apartmentNo,
+                    $"Enter your apartment number (if applicable)",
+                    "Apartment number is invalid.")))
+            {
+                return new PostalDelivery(
+                    orderId, 
+                    streetNumber, 
+                    streetName, 
+                    postalCode, 
+                    apartmentNo);
+            }
+            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to return to delivery options");
         }
-        if (!InputFormatValidator.ValidateRegex(streetName, InputFormatValidator.Format["streetName"]))
-        {
-            _view.Error("Street name is invalid.");
-            return AskUserForDeliveryMethod(orderId);
-        }
-        if (!InputFormatValidator.ValidateRegex(postalCode, InputFormatValidator.Format["postalCode"]))
-        {
-            _view.Error("Postal code is invalid.");
-            return AskUserForDeliveryMethod(orderId);
-        }
-
-        // Allow apartment number to be null
-        if (apartmentNumber == "")
-            apartmentNumber = null;
-        
-        if (apartmentNumber != null && !InputFormatValidator.ValidateRegex(apartmentNumber, InputFormatValidator.Format["apartmentNumber"]))
-        {
-            _view.Error("Apartment number is invalid.");
-            return AskUserForDeliveryMethod(orderId);
-        }
-        
-        return new PostalDelivery(
-            orderId, 
-            int.Parse(streetNumber), 
-            streetName, 
-             int.Parse(postalCode), 
-            apartmentNumber);
+        return AskUserForDeliveryMethod(orderId);
     }
 
     private IDeliveryMethod ProcessPickupMethod(int orderId)
@@ -419,44 +421,58 @@ internal class OrderingState : AppState
 
     private ITransactionMethod ProcessBankTransfer()
     {
-        var bsb = _inputHandler.AskUserTextInput("Enter your BSB");     
-        var accountNo =  _inputHandler.AskUserTextInput("Enter your account number");
-        // Ask for payment method again if invalid bank account info
-        if (!InputFormatValidator.ValidateBsb(bsb))
+        var consoleKey = ConsoleKey.Enter;
+        while (consoleKey != ConsoleKey.Backspace)
         {
-            _view.Error("BSB is invalid.");
-            return AskUserForPaymentMethod();
+            if ((_inputHandler.TryAskUserTextInput(
+                    InputFormatValidator.ValidateBsb,
+                    x => x,
+                    out var bsb,
+                    $"Enter your BSB:",
+                    "BSB is invalid.")) &&
+                (_inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexConstants.DigitsRegex),
+                    x => x,
+                    out var accountNo,
+                    $"Enter your account number:",
+                    "Account number is invalid.")))
+            {
+                return new BankTransaction(bsb, accountNo);
+            }
+            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to return to payment options");
         }
-        if (!InputFormatValidator.ValidateRegex(accountNo, InputFormatValidator.Format["digits"]))
-        {
-            _view.Error("Account number is invalid.");
-            return AskUserForPaymentMethod();
-        }
-        return new BankTransaction(bsb, accountNo);
+        return AskUserForPaymentMethod();
     }
 
     private ITransactionMethod ProcessCardTransaction()
     {
-        var cardNo = _inputHandler.AskUserTextInput("Enter your card number");
-        var cvc = _inputHandler.AskUserTextInput("Enter your card CVC");
-        var expiryDate = _inputHandler.AskUserTextInput("Enter your card expiry date");
-        // Ask for payment method again if invalid card info
-        if (!InputFormatValidator.ValidateCardNumber(cardNo))
+        var consoleKey = ConsoleKey.Enter;
+        while (consoleKey != ConsoleKey.Backspace)
         {
-            _view.Error("Card number is invalid.");
-            return AskUserForPaymentMethod();
+            if ((_inputHandler.TryAskUserTextInput(
+                InputFormatValidator.ValidateCardNumber,
+                x => x,
+                out var cardNo,
+                $"Enter your card number:",
+                "Card number is invalid.")) &&
+            (_inputHandler.TryAskUserTextInput(
+                x => Regex.IsMatch(x, RegexConstants.CvcRegex),
+                x => x,
+                out var cvc,
+                $"Enter your card CVC:",
+                "Card CVC is invalid.")) && 
+            (_inputHandler.TryAskUserTextInput(
+                InputFormatValidator.ValidateCardExpiryDate,
+                x => DateOnly.FromDateTime(DateTime.Parse(x)),
+                out var expiryDate,
+                $"Enter your card expiry date:",
+                "Card Expiry Date is invalid.")))
+            {
+                return new CreditCardTransaction(cardNo, cvc, expiryDate);
+            }
+            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to return to payment options");
         }
-        if (!InputFormatValidator.ValidateRegex(cvc, InputFormatValidator.Format["cvc"]))
-        {
-            _view.Error("Card CVC is invalid.");
-            return AskUserForPaymentMethod();
-        }
-        if (!InputFormatValidator.ValidateCardExpiryDate(expiryDate))
-        {
-            _view.Error("Card expiry date is invalid.");
-            return AskUserForPaymentMethod();
-        }
-        return new CreditCardTransaction(cardNo, cvc, DateOnly.FromDateTime(DateTime.Parse(expiryDate))); 
+        return AskUserForPaymentMethod();
     }
 
     private ITransactionMethod ProcessCashTransaction()
@@ -466,16 +482,21 @@ internal class OrderingState : AppState
 
     private ITransactionMethod ProcessPaypalTransaction()
     {
-        var paypal = _inputHandler.AskUserTextInput("Enter your PayPal email or phone number");
-        // Ask for payment method again if invalid paypal info
-        if (!InputFormatValidator.ValidateRegex(paypal, InputFormatValidator.Format["email"]) 
-            && !InputFormatValidator.ValidateRegex(paypal, InputFormatValidator.Format["phone"]) 
-            )
+        var consoleKey = ConsoleKey.Enter;
+        while (consoleKey != ConsoleKey.Backspace)
         {
-            _view.Error("Paypal username is invalid.");
-            return AskUserForPaymentMethod();
+            if (_inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexConstants.EmailRegex) || 
+                         Regex.IsMatch(x, RegexConstants.PhoneRegex),
+                    x => x,
+                    out var paypal,
+                    $"Enter your PayPal email or phone number:",
+                    "PayPal username is invalid."))
+            {
+                return new PaypalTransaction(paypal);
+            }
+            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to return to payment options");
         }
-
-        return new PaypalTransaction(paypal);
+        return AskUserForPaymentMethod();
     }
 }
