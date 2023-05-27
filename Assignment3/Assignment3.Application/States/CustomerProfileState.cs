@@ -114,12 +114,12 @@ internal class CustomerProfileState : AppState
 
     private void RequestRefund()
     {
-        throw new NotImplementedException();
+        OnStateChanged(this, nameof(RefundRequestState));
     }
 
     private void ViewOrders()
     {
-        throw new NotImplementedException();
+        OnStateChanged(this, nameof(ViewOrderState));
     }
 
     private void ShowProfile()

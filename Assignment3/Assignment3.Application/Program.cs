@@ -58,6 +58,8 @@ internal class Program
             .AddSingleton<StaffProfileState>()
             .AddSingleton<OrderingState>()
             .AddSingleton<ViewSalesDataState>()
+            .AddSingleton<ViewOrderState>()
+            .AddSingleton<RefundRequestState>()
             .AddSingleton<ManageInventoryState>()
             .AddSingleton<IReadOnlyDictionary<string, AppState>>(x => new Dictionary<string, AppState>()
             {
@@ -69,7 +71,9 @@ internal class Program
                 { nameof(StaffProfileState), x.GetRequiredService<StaffProfileState>() },
                 { nameof(OrderingState), x.GetRequiredService<OrderingState>() },
                 { nameof(ViewSalesDataState), x.GetRequiredService<ViewSalesDataState>() },
-                { nameof(ManageInventoryState), x.GetRequiredService<ManageInventoryState>() }
+                { nameof(ManageInventoryState), x.GetRequiredService<ManageInventoryState>() },
+                { nameof(ViewOrderState), x.GetRequiredService<ViewOrderState>() },
+                { nameof(RefundRequestState), x.GetRequiredService<RefundRequestState>() }
             });
 
         return services.BuildServiceProvider();
