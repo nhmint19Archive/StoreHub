@@ -139,7 +139,7 @@ internal class BrowsingState : AppState
     private void ShowFilters()
     {
         while (!_inputHandler.TryAskUserTextInput(
-                    x => true,
+                    _ => true,
                     x => p => p.Name.Contains(x),
                     out _nameFilter,
                     $"Please type the product name filter or press [{ConsoleKey.Enter}] if you don not want any filter"))

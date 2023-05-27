@@ -9,10 +9,7 @@ namespace Assignment3.Application.States
         private readonly UserSession _session;
         private readonly IConsoleView _view;
         private readonly IConsoleInputHandler _inputHandler;
-        public StaffProfileState(
-            UserSession session, 
-            IConsoleView view, 
-            IConsoleInputHandler inputHandler)
+        public StaffProfileState(UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
         {
             _session = session;
             _view = view;
@@ -31,14 +28,15 @@ namespace Assignment3.Application.States
             var input = _inputHandler.AskUserOption(
             new Dictionary<char, string>()
             {
-                { 'V', "View Sales Data"},
-                { 'M', "Manage Inventory"},
+                { 'D', "View Data Sales" },
+                { 'V', "View My Profile" },
+                { 'M', "Manage Inventory" },
                 { 'E', "Exit to Main Menu" },
             });
 
             switch (input)
             {
-                case 'V':
+                case 'D':
                     OnStateChanged(this, nameof(ViewSalesDataState));
                     break;
                 case 'M':
@@ -47,7 +45,17 @@ namespace Assignment3.Application.States
                 case 'E':
                     OnStateChanged(this, nameof(MainMenuState));
                     break;
+                case 'V':
+                    ShowStaffProfile();
+                    break;
             }
+        }
+
+        private void ShowStaffProfile()
+        {
+            _view.Info($"Email: {_session.AuthenticatedUser.Email}");
+            _view.Info($"Phone: {_session.AuthenticatedUser.Phone}");
+            _view.Info($"Registration Date: {_session.AuthenticatedUser.RegistryDate.ToLocalTime()}");
         }
     }
 }

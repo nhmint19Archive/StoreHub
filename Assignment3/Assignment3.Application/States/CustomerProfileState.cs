@@ -67,8 +67,7 @@ internal class CustomerProfileState : AppState
     {
         var newPhoneNumber = _inputHandler.AskUserTextInput("Enter your new phone number or press enter if you do not want to change your phone number");
         var newPassword = _inputHandler.AskUserTextInput("Enter your new password or press enter if you do not want to change your password");
-
-        // TODO(HUY): VALIDATE INPUT
+        
         if (string.IsNullOrEmpty(newPhoneNumber) && string.IsNullOrEmpty(newPassword))
         {
             _view.Info("No details changed");

@@ -116,7 +116,6 @@ internal class SignInState : AppState
 
         var (prompt, newStateName) = _session.AuthenticatedUser.Role switch
         {
-            // TODO: jump to another state where staff account details can be changed/ created
             Roles.Admin => ("View admin profile and other options", nameof(AdminProfileState)),
             // TODO: jump to another state where refund requests can be viewed and product inventory can be updated
             Roles.Staff => ("View staff profile and other options", nameof(StaffProfileState)),
@@ -185,17 +184,23 @@ internal class SignInState : AppState
 
     private void SignIn()
     {
-        var email = _inputHandler.AskUserTextInput("Enter account email");
-        var password = _inputHandler.AskUserTextInput("Enter password");
-        if (string.IsNullOrEmpty(email))
+        if (!_inputHandler.TryAskUserTextInput(
+                x => !string.IsNullOrEmpty(x),
+                x => x,
+                out var email,
+                "Enter account email",
+                "Email must not be empty"))
         {
-            _view.Error("Email must not be empty");
             return;
         }
-
-        if (string.IsNullOrEmpty(password))
+        
+        if (!_inputHandler.TryAskUserTextInput(
+                x => !string.IsNullOrEmpty(x),
+                x => x,
+                out var password,
+                "Enter account password",
+                "Password must not be empty"))
         {
-            _view.Error("Password must not be empty");
             return;
         }
 

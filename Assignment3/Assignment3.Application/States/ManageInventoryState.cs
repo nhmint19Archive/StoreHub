@@ -3,6 +3,7 @@ using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
+using Assignment3.Domain.Services;
 
 namespace Assignment3.Application.States
 {
@@ -58,7 +59,6 @@ namespace Assignment3.Application.States
 
         private void ShowProduct(Product product)
         {
-
             _view.Info(string.Empty);
             _view.Info($"ID [{product.Id}] - Availability: {product.InventoryCount}");
             _view.Info($"{product.Name} - {product.Price} AUD");
@@ -105,6 +105,7 @@ namespace Assignment3.Application.States
             var name = _inputHandler.AskUserTextInput("Enter the name of the product");
             var description = _inputHandler.AskUserTextInput("Enter the description of the product");
             
+            // TODO: press enter to exit
             decimal price;
             while (!_inputHandler.TryAskUserTextInput(
                    x => decimal.TryParse(x, out _),
@@ -122,38 +123,44 @@ namespace Assignment3.Application.States
                    $"Please type the quantity of the product",
                    "Invalid input. Input must be empty or a valid number"))
             {}
+
+            var product = new Product()
+            {
+                Name = name,
+                Description = description,
+                Price = price,
+                InventoryCount = inventoryCount,
+            };
+
+            var errors = ModelValidator.ValidateObject(product);
+            if (errors.Count > 0)
+            {
+                _view.Errors(errors);
+                return;
+            }
             
             using var context = new AppDbContext();
-            context.Products.Add(new Product()
-            {
-                Name = name, 
-                Description = description, 
-                Price = price, 
-                InventoryCount = inventoryCount,
-            });
-            
+            context.Products.Add(product);
             context.SaveChanges();
         }
 
         private void UpdateProductPrice()
         {
-            int id = -1;
-            decimal price = 0;
+            int? id;
             while (!_inputHandler.TryAskUserTextInput(
-                   x => int.TryParse(x, out _),
-                   x => int.Parse(x),
-                   out id,
-                   $"Please type the ID of the product",
-                   "Invalid input. Input must be empty or a valid number"))
-            { }
-            while (!_inputHandler.TryAskUserTextInput(
-                   x => decimal.TryParse(x, out _),
-                   x => decimal.Parse(x),
-                   out price,
-                   $"Please type the price of the product",
-                   "Invalid input. Input must be empty or a valid number"))
-            { }
-
+                       x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
+                       x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
+                       out id,
+                       $"Please type the ID of the product. Press [{ConsoleKey.Enter}] to exit."))
+            {
+                return;
+            }
+            
+            if (id == null)
+            {
+                _view.Info("No product updated");
+            }
+            
             using var context = new AppDbContext();
             var product = context.Products.Find(id);
             if (product == null)
@@ -161,6 +168,18 @@ namespace Assignment3.Application.States
                 _view.Error("Could not find product with that ID.");
                 return;
             }
+            
+            _view.Info($"Product ID [{product.Id}] - {product.Name}");
+            _view.Info($"Current price: ${product.Price}");
+            
+            decimal price;
+            while (!_inputHandler.TryAskUserTextInput(
+                   x => decimal.TryParse(x, out _),
+                   decimal.Parse,
+                   out price,
+                   $"Please type the price of the product",
+                   "Invalid input. Input must be a valid number"))
+            { }
             
             product.Price = price;
             context.Products.Update(product);
@@ -170,24 +189,22 @@ namespace Assignment3.Application.States
         
         private void UpdateProductQuantity()
         {
-            int id;
+            int? id;
             while (!_inputHandler.TryAskUserTextInput(
-                   x => int.TryParse(x, out _),
-                   int.Parse,
-                   out id,
-                   $"Please type the ID of the product",
-                   "Invalid input. Input must be empty or a valid number"))
-            { }
+                       x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
+                       x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
+                       out id,
+                       $"Please type the ID of the product. Press [{ConsoleKey.Enter}] to exit.",
+                       "Invalid input. Input must be empty or a valid number"))
+            {
+                return;
+            }
             
-            uint inventoryCount;
-            while (!_inputHandler.TryAskUserTextInput(
-                   x => uint.TryParse(x, out _),
-                   convertFunc: uint.Parse,
-                   out inventoryCount,
-                   $"Please type the quantity of the product",
-                   "Invalid input. Input must be empty or a valid number"))
-            { }
-
+            if (id == null)
+            {
+                _view.Info("No product updated");
+            }
+            
             using var context = new AppDbContext();
             var product = context.Products.Find(id);
             if (product == null)
@@ -195,21 +212,39 @@ namespace Assignment3.Application.States
                 _view.Error("Could not find product with that ID.");
                 return;
             }
-
+            
+            _view.Info($"Product ID [{product.Id}] - {product.Name}");
+            _view.Info($"Current stock: ${product.InventoryCount}");
+            
+            uint inventoryCount;
+            while (!_inputHandler.TryAskUserTextInput(
+                   x => uint.TryParse(x, out _),
+                   convertFunc: uint.Parse,
+                   out inventoryCount,
+                   $"Please type the quantity of the product",
+                   "Invalid input. Input must be a valid number"))
+            { }
+            
             product.InventoryCount = inventoryCount;
             context.Products.Update(product);
             context.SaveChanges();
         }
         private void DeleteProduct()
         {
-            int id;
+            int? id;
             while (!_inputHandler.TryAskUserTextInput(
-                       x => int.TryParse(x, out _),
-                       x => int.Parse(x),
+                       x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
+                       x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                        out id,
-                       $"Please type the ID of the product",
+                       $"Please type the ID of the product. Press [{ConsoleKey.Enter}] to exit.",
                        "Invalid input. Input must be empty or a valid number"))
             {
+                return;
+            }
+
+            if (id == null)
+            {
+                _view.Info("No product deleted");
             }
             
             using var context = new AppDbContext();
