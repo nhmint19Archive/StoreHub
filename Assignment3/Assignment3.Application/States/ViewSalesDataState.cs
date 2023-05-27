@@ -1,6 +1,7 @@
 ﻿using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
+using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
 using CsvHelper;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +37,7 @@ namespace Assignment3.Application.States
                 { 'P', "Print Sales Data" }
             };
 
-            var input = ConsoleHelper.AskUserOption(options);
+            var input = _inputHandler.AskUserOption(options);
 
             switch (input)
             {
@@ -54,9 +55,6 @@ namespace Assignment3.Application.States
             //We can change the path to print out later
             var currentDir = Directory.GetCurrentDirectory();
             var filePath = Path.GetFullPath(Path.Combine(currentDir, @"..\..\..\"));
-
-            //TO DO: (HUY) helps me to fix this. I think it's a bad practice but
-            //OOP type fucks me up hehe
 
             using var context = new AppDbContext();
             var receipts = context.Receipts;
@@ -106,6 +104,14 @@ namespace Assignment3.Application.States
 
         public override void Run()
         {
+            if (!_session.IsUserInRole(Roles.Staff))
+            {
+                ConsoleHelper.PrintError("Invalid access to staff page");
+                ConsoleHelper.PrintInfo("Signing out");
+                _session.SignOut();
+                OnStateChanged(this, nameof(MainMenuState));
+            }
+
             ShowReceipts();
             ShowDataOptions();
         }

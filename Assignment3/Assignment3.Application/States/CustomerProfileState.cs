@@ -120,6 +120,6 @@ internal class CustomerProfileState : AppState
 
     private void ViewOrders()
     {
-        throw new NotImplementedException();
+        OnStateChanged(this, nameof(ViewOrderState));
     }
 }
