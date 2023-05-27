@@ -25,8 +25,8 @@ namespace Assignment3.Application.States
         {
             if (!_session.IsUserInRole(Roles.Customer))
             {
-                ConsoleHelper.PrintError("Invalid access to staff page");
-                ConsoleHelper.PrintInfo("Signing out");
+                _view.Error("Invalid access to staff page");
+                _view.Info("Signing out");
                 _session.SignOut();
                 OnStateChanged(this, nameof(MainMenuState));
             }
