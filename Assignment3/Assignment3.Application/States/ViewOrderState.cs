@@ -77,7 +77,7 @@ namespace Assignment3.Application.States
                 }
 
                 _view.Info($"Total: ${totalPrice}");
-                _view.Info(message: $"Time: {order.Date}");
+                _view.Info($"Time: {order.Date}");
                 _view.Info($"Status: {order.Status}");
             }
         }
