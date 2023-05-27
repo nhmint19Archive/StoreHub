@@ -9,11 +9,17 @@ namespace Assignment3.Application.States;
 
 internal class SignInState : AppState
 {
-    private readonly UserSession _session;
+    private readonly UserSession _session;  
+    private readonly IConsoleView _view;
+    private readonly IConsoleInputHandler _inputHandler;
     public SignInState(
-        UserSession session)
+        UserSession session, 
+        IConsoleView view, 
+        IConsoleInputHandler inputHandler)
     {
         _session = session;
+        _view = view;
+        _inputHandler = inputHandler;
     }
 
     /// <inheritdoc />
@@ -33,7 +39,7 @@ internal class SignInState : AppState
 
     private void ShowSignedOutOptions()
     {
-        var input = ConsoleHelper.AskUserOption(
+        var input = _inputHandler.AskUserOption(
             new Dictionary<char, string>()
             {
                 { 'S', "Sign in with an existing account" },
@@ -61,25 +67,25 @@ internal class SignInState : AppState
 
     private void ResetPassword()
     {
-        var email = ConsoleHelper.AskUserTextInput("Enter the email of your account");
+        var email = _inputHandler.AskUserTextInput("Enter the email of your account");
         while (string.IsNullOrEmpty(email))
         {
-            ConsoleHelper.PrintError("Email cannot be empty");
-            ConsoleHelper.AskUserTextInput("Please enter a valid email");
+            _view.Error("Email cannot be empty");
+            _inputHandler.AskUserTextInput("Please enter a valid email");
         }
 
         using var context = new AppDbContext();
         var account = context.UserAccounts.Find(email);
         if (account == null)
         {
-            ConsoleHelper.PrintError($"No account with the email '{email}' exists");
+            _view.Error($"No account with the email '{email}' exists");
             return;
         }
 
         // pretend that the user receives and enters the correct reset code
-        _ = ConsoleHelper.AskUserTextInput("Enter the reset code sent to your email");
+        _ = _inputHandler.AskUserTextInput("Enter the reset code sent to your email");
         
-        var newPassword = ConsoleHelper.AskUserTextInput("Enter your new password");
+        var newPassword = _inputHandler.AskUserTextInput("Enter your new password");
         account.SetPassword(newPassword);
         
         try
@@ -89,7 +95,7 @@ internal class SignInState : AppState
         }
         catch (Exception e) // TODO: catch more specific exception
         {
-            ConsoleHelper.PrintError("Failed to update the account password");
+            _view.Error("Failed to update the account password");
 #if DEBUG
             Console.WriteLine(e.Message);
 #endif
@@ -97,7 +103,7 @@ internal class SignInState : AppState
         }
 
         _session.SignIn(account);
-        ConsoleHelper.PrintInfo("Successfully signed in");
+        _view.Info("Successfully signed in");
     }
 
     private void ShowSignedInOptions()
@@ -120,13 +126,13 @@ internal class SignInState : AppState
 
         choices.Add('V', prompt);
 
-        var input = ConsoleHelper.AskUserOption(choices);
+        var input = _inputHandler.AskUserOption(choices);
 
         switch (input)
         {
             case 'S':
                 _session.SignOut();
-                ConsoleHelper.PrintInfo("Signed out successfully");
+                _view.Info("Signed out successfully");
                 break;
             case 'V':
                 OnStateChanged(this, newStateName);
@@ -139,9 +145,9 @@ internal class SignInState : AppState
 
     private void CreateCustomerAccount()
     {
-        var email = ConsoleHelper.AskUserTextInput("Choose your email");
-        var phone = ConsoleHelper.AskUserTextInput("Choose your phone number");
-        var password = ConsoleHelper.AskUserTextInput("Choose your password");
+        var email = _inputHandler.AskUserTextInput("Choose your email");
+        var phone = _inputHandler.AskUserTextInput("Choose your phone number");
+        var password = _inputHandler.AskUserTextInput("Choose your password");
 
         var newUserAccount = new CustomerAccount()
         {
@@ -154,7 +160,7 @@ internal class SignInState : AppState
         var validationResults = ModelValidator.ValidateObject(newUserAccount);
         if (validationResults.Count != 0)
         {
-            ConsoleHelper.PrintErrors(validationResults);
+            _view.Errors(validationResults);
             return;
         }
 
@@ -166,7 +172,7 @@ internal class SignInState : AppState
         }
         catch (Exception e) // TODO: catch more specific exception
         {
-            ConsoleHelper.PrintError("Failed to register new customer account. Perhaps an account with this email already exists?");
+            _view.Error("Failed to register new customer account. Perhaps an account with this email already exists?");
 #if DEBUG
             Console.WriteLine(e.Message);
 #endif
@@ -174,22 +180,22 @@ internal class SignInState : AppState
         }
 
         _session.SignIn(newUserAccount);
-        ConsoleHelper.PrintInfo("Successfully signed in");
+        _view.Info("Successfully signed in");
     }
 
     private void SignIn()
     {
-        var email = ConsoleHelper.AskUserTextInput("Enter account email");
-        var password = ConsoleHelper.AskUserTextInput("Enter password");
+        var email = _inputHandler.AskUserTextInput("Enter account email");
+        var password = _inputHandler.AskUserTextInput("Enter password");
         if (string.IsNullOrEmpty(email))
         {
-            ConsoleHelper.PrintError("Email must not be empty");
+            _view.Error("Email must not be empty");
             return;
         }
 
         if (string.IsNullOrEmpty(password))
         {
-            ConsoleHelper.PrintError("Password must not be empty");
+            _view.Error("Password must not be empty");
             return;
         }
 
@@ -197,17 +203,17 @@ internal class SignInState : AppState
         var userAccount = context.UserAccounts.FirstOrDefault(x => x.Email == email);
         if (userAccount == null)
         {
-            ConsoleHelper.PrintError($"No account with the email '{email}' exists");
+            _view.Error($"No account with the email '{email}' exists");
             return;
         }
 
         if (!userAccount.Authenticate(password))
         {
-            ConsoleHelper.PrintError("Incorrect password");
+            _view.Error("Incorrect password");
             return;
         }
 
         _session.SignIn(userAccount);
-        ConsoleHelper.PrintInfo("Successfully signed in");
+        _view.Info("Successfully signed in");
     }
 }

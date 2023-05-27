@@ -12,7 +12,10 @@ internal class OrderingState : AppState
     private readonly UserSession _session;
     private readonly IConsoleView _view;
     private readonly IConsoleInputHandler _inputHandler;
-    public OrderingState(UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
+    public OrderingState(
+        UserSession session, 
+        IConsoleView view, 
+        IConsoleInputHandler inputHandler)
     {
         _session = session;
         _view = view;

@@ -3,12 +3,6 @@ using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assignment3.Application.States
 {
@@ -19,7 +13,11 @@ namespace Assignment3.Application.States
         private readonly IConsoleView _view;
         private readonly IConsoleInputHandler _inputHandler;
 
-        public ManageInventoryState(Catalogue catalogue, UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
+        public ManageInventoryState(
+            Catalogue catalogue, 
+            UserSession session, 
+            IConsoleView view, 
+            IConsoleInputHandler inputHandler)
         {
             _catalogue = catalogue;
             _session = session;
@@ -169,20 +167,22 @@ namespace Assignment3.Application.States
             context.SaveChanges();
             ShowProduct(product);
         }
+        
         private void UpdateProductQuantity()
         {
-            int id = -1;
-            uint inventoryCount = 0;
+            int id;
             while (!_inputHandler.TryAskUserTextInput(
                    x => int.TryParse(x, out _),
-                   x => int.Parse(x),
+                   int.Parse,
                    out id,
                    $"Please type the ID of the product",
                    "Invalid input. Input must be empty or a valid number"))
             { }
+            
+            uint inventoryCount;
             while (!_inputHandler.TryAskUserTextInput(
                    x => uint.TryParse(x, out _),
-                   x => uint.Parse(x),
+                   convertFunc: uint.Parse,
                    out inventoryCount,
                    $"Please type the quantity of the product",
                    "Invalid input. Input must be empty or a valid number"))

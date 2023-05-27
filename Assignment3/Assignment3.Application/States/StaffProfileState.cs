@@ -1,35 +1,37 @@
 ﻿using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assignment3.Application.States
 {
     internal class StaffProfileState : AppState
     {
         private readonly UserSession _session;
-        public StaffProfileState(UserSession session)
+        private readonly IConsoleView _view;
+        private readonly IConsoleInputHandler _inputHandler;
+        public StaffProfileState(
+            UserSession session, 
+            IConsoleView view, 
+            IConsoleInputHandler inputHandler)
         {
             _session = session;
+            _view = view;
+            _inputHandler = inputHandler;
         }
         public override void Run()
         {
             if (!_session.IsUserInRole(Roles.Staff))
             {
-                ConsoleHelper.PrintError("Invalid access to customer page");
-                ConsoleHelper.PrintInfo("Signing out");
+                _view.Error("Invalid access to customer page");
+                _view.Info("Signing out");
                 _session.SignOut();
                 OnStateChanged(this, nameof(MainMenuState));
             }
 
-            var input = ConsoleHelper.AskUserOption(
+            var input = _inputHandler.AskUserOption(
             new Dictionary<char, string>()
             {
-                { 'V', "View Data Sales"},
+                { 'V', "View Sales Data"},
                 { 'M', "Manage Inventory"},
                 { 'E', "Exit to Main Menu" },
             });
