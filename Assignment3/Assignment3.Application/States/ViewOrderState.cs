@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Application.States
 {
+    /*ViewOrderState stays as seperate views so in the future we can add more options like "reorder" or "rating"*/
+    /*For now, such options are not implemented so there's only option to Exit to Main Menu as right now*/
+
     internal class ViewOrderState : AppState
     {
         private readonly UserSession _session;
@@ -36,6 +39,7 @@ namespace Assignment3.Application.States
 
         private void ShowDataOptions()
         {
+            /*More options to add in the future*/
             var options = new Dictionary<char, string>()
             {
                 { 'E', "Exit to Main Menu" }
