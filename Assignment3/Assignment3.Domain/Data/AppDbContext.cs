@@ -15,6 +15,7 @@ public class AppDbContext : DbContext
 	public DbSet<OrderProduct> OrderProducts { get; set; } = null!;
 	public DbSet<Receipt> Receipts { get; set; } = null!;
 	public DbSet<Transaction> Transactions { get; set; } = null!;
+	public DbSet<RefundRequest> RefundRequests { get; set; }
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
@@ -78,5 +79,14 @@ public class AppDbContext : DbContext
 		modelBuilder
 			.Entity<OrderProduct>()
 			.HasKey(x => new { x.OrderId, x.ProductId });
+
+		modelBuilder
+			.Entity<RefundRequest>()
+			.HasKey(x => x.Id);
+
+		modelBuilder
+			.Entity<RefundRequest>()
+			.HasOne(x => x.Order);
+
     }
 }

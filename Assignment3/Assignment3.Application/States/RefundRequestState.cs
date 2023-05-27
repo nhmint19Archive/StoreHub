@@ -2,12 +2,8 @@
 using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
+using Assignment3.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assignment3.Application.States
 {
@@ -71,6 +67,7 @@ namespace Assignment3.Application.States
             var options = new Dictionary<char, string>()
             {
                 { 'E', "Exit to Main Menu" },
+                { 'V', "View My Requests" },
                 { 'R', "Request Refund" }
             };
 
@@ -78,6 +75,9 @@ namespace Assignment3.Application.States
 
             switch (input)
             {
+                case 'V':
+                    ShowRequests();
+                    break;
                 case 'R':
                     RequestRefund();
                     break;
@@ -87,28 +87,78 @@ namespace Assignment3.Application.States
             }
         }
 
+        private void ShowRequests()
+        {
+            using var context = new AppDbContext();
+            var requests = context.RefundRequests
+                .Where(x => x.Order.CustomerEmail == _session.AuthenticatedUser.Email)
+                .Include(x => x.Order)
+                .ThenInclude(x => x.Products)
+                .ThenInclude(x => x.Product);
+
+            if (requests.Any())
+            {
+                foreach (var request in requests)
+                {
+                    _view.Info($"Request for Order {request.OrderId}: ");
+                    decimal totalPrice = 0;
+
+                    foreach (var orderProduct in request.Order.Products)
+                    {
+                        _view.Info($"{orderProduct.Product.Name} - {orderProduct.ProductQuantity}"); 
+                        totalPrice += orderProduct.Product.Price * orderProduct.ProductQuantity;
+                    }
+
+                    _view.Info($"Total: ${totalPrice}");
+                    _view.Info($"Request Date: {request.Date}");
+                    _view.Info($"Request Status: {request.RequestStatus}");
+                }
+            }
+        }
+
         private void RequestRefund()
         {
-            _view.Info($"Type the orderID you'd like to request a refund. Type [{ConsoleKey.Backspace}] to cancel");
-            var orderToRequest = _inputHandler.AskUserTextInput("Order ID: ");
+            _view.Info($"Type the orderID you'd like to request a refund: ");
+            var orderToRequest = 0;
 
-
-            try
+            while (!int.TryParse(_inputHandler.AskUserTextInput(), out orderToRequest))
             {
-                using var context = new AppDbContext();
-/*                var orders = context.Orders
-                    .Where(x => x.Id == */
-
-            } catch
-            {
-                _view.Error("Failed to process order");
+                _view.Info("Invalid input, please type again: ");
             }
 
+            using var context = new AppDbContext();
+            var order = context.Orders.Find(orderToRequest);
 
+            if (order != null)
+            {
+                var requests = context.RefundRequests
+                    .Where(x => x.OrderId == orderToRequest);
 
+                if (requests != null)
+                {
+                    _view.Info($"You already request a refund for order {orderToRequest}");
+                } else
+                {
+                    var description = _inputHandler.AskUserTextInput("Please provide description for your request: ");
+                    var request = new RefundRequest { Order = order, Description = description };
 
-
-
+                    context.RefundRequests.Add(request);
+                    if (!context.TrySaveChanges())
+                    {
+                        _view.Error("Failed to process order");
+                        return;
+                    }
+                    else
+                    {
+                        _view.Info("Refund has been sent successfully. Please wait for the store to process your request.");
+                    }
+                }
+            }
+            else
+            {
+                _view.Info("Cannot find your order. Please do it again");
+            }
         }
     }
 }
+
