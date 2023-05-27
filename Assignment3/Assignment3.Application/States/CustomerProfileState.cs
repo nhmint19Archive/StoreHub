@@ -110,6 +110,7 @@ internal class CustomerProfileState : AppState
         }
 
         _view.Info("Successfully changed customer details");
+        _session.SignIn(userAccount);
     }
 
     private void RequestRefund()

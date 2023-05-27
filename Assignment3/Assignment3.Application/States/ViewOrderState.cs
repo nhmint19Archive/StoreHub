@@ -67,7 +67,7 @@ namespace Assignment3.Application.States
             foreach (var order in orders)
             {
                 _view.Info(string.Empty);
-                _view.Info($"[Order -[{order.Id}]");
+                _view.Info($"Order ID [{order.Id}]");
 
                 decimal totalPrice = 0;
 
