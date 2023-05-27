@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using Assignment3.Application.Models;
 using Assignment3.Domain.Models;
 
 namespace Assignment3.Application.Services;
@@ -14,7 +15,7 @@ public static class InputFormatValidator
     public static bool ValidateCommaSeparatedNumberList(string input)
     {
         return string.IsNullOrEmpty(input) ||
-               Regex.IsMatch(input, RegexConstants.CommaSeparatedRegex) &&
+               Regex.IsMatch(input, RegexPatterns.CommaSeparatedDigits) &&
                input
                    .Split(",")
                    .Select(x => int.TryParse(x, out var r))
@@ -28,7 +29,7 @@ public static class InputFormatValidator
     /// <returns><c>True</c> if the input is a hypen-separated pair of number, otherwise <c>False</c>.</returns>
     public static bool ValidateHyphenSeparatedNumberPair(string input)
     {
-        return Regex.IsMatch(input, RegexConstants.HyphenSeparatedRegex) &&
+        return Regex.IsMatch(input, RegexPatterns.HyphenSeparatedDigits) &&
                input
                    .Split("-")
                    .Select(x => int.TryParse(x, out var r))
@@ -43,7 +44,7 @@ public static class InputFormatValidator
     public static bool ValidateCardNumber(string cardNumber)
     {
         // Check if the card number matches a valid credit card pattern
-        if (!Regex.IsMatch(cardNumber, RegexConstants.CardNoRegex))
+        if (!Regex.IsMatch(cardNumber, RegexPatterns.CardNo))
         {
             return false;
         }
@@ -112,7 +113,7 @@ public static class InputFormatValidator
     public static bool ValidateBsb(string bsb)
     {
         // Check if the BSB has only digits
-        if (!Regex.IsMatch(bsb, RegexConstants.DigitsRegex))
+        if (!Regex.IsMatch(bsb, RegexPatterns.DigitsOnly))
         {
             return false;
         }
@@ -125,34 +126,32 @@ public static class InputFormatValidator
         {
             return false;
         }
-
-    /*  The Australia BSB has 6 digits with this format
-     *  First 2 numbers: bank code
-     *  3rd number: state code
-     *  3 last number: branch code
-     **/
+        
+        /*  The Australia BSB has 6 digits with this format
+         *  First 2 numbers: bank code
+         *  3rd number: state code
+         *  3 last number: branch code
+         **/
+        
         // Extract bank, state, and branch codes
         var bankCode = bsb.Substring(0, 2);
         var stateCode = bsb.Substring(2, 1);
         var branchCode = bsb.Substring(3, 3);
 
         // Validate bank code (between 01 and 99)
-        int bank;
-        if (!int.TryParse(bankCode, out bank) || bank < 1 || bank > 99)
+        if (!int.TryParse(bankCode, out var bank) || bank < 1 || bank > 99)
         {
             return false;
         }
 
         // Validate state code (between 0 and 9)
-        int state;
-        if (!int.TryParse(stateCode, out state) || state < 0 || state > 9)
+        if (!int.TryParse(stateCode, out var state) || state < 0 || state > 9)
         {
             return false;
         }
 
         // Validate branch code (between 001 and 999)
-        int branch;
-        if (!int.TryParse(branchCode, out branch) || branch < 1 || branch > 999)
+        if (!int.TryParse(branchCode, out var branch) || branch < 1 || branch > 999)
         {
             return false;
         }
