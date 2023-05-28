@@ -5,6 +5,7 @@ using CsvHelper;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 
 namespace Assignment3.Application.States
 {
@@ -63,10 +64,48 @@ namespace Assignment3.Application.States
             try
             {            
                 using var context = new AppDbContext();
-                var receipts = context.Receipts.AsNoTracking().AsEnumerable();
-                using var writer = new StreamWriter($"fileTest.csv");
-                using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-                csv.WriteRecords(receipts);
+                var receipts = context.Receipts
+                    .Include(x => x.Order)
+                    .ThenInclude(x => x.Products)
+                    .ThenInclude(x => x.Product)
+                    .AsNoTracking()
+                    .AsEnumerable();
+
+                var csvData = new List<string[]>();
+
+                foreach (var receipt in receipts)
+                {
+                    var totalPrice = 0m;
+                    foreach (var orderProduct in receipt.Order.Products)
+                    {
+                        totalPrice += orderProduct.Product.Price * orderProduct.ProductQuantity;
+                    }
+
+                    var stringData = new string[] { 
+                        $"{receipt.Id}", 
+                        $"{receipt.OrderId}", 
+                        $"{receipt.Order.Status}", 
+                        $"{receipt.Order.Date}",
+                        $"{receipt.Order.CustomerEmail}",
+                        $"{totalPrice}"
+                    };
+
+                    csvData.Add(stringData);
+                }
+
+                using (StreamWriter sw = new StreamWriter($"sales_data.csv", false, Encoding.UTF8))
+                {
+                    // Write column headers
+                    sw.WriteLine("ID,OrderId,Status,Date,Customer Email,Amount");
+
+                    // Write data rows
+                    foreach (string[] rowData in csvData)
+                    {
+                        string line = string.Join(",", rowData);
+                        sw.WriteLine(line);
+                    }
+                }
+
                 _view.Info("Successfully export CSV file for Sales Data");
             } 
             catch (Exception ex) {
