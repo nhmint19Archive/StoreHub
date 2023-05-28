@@ -93,7 +93,7 @@ internal class OrderingState : AppState
     {
         _view.Info($"Pending order [{order.Id}]");
         _view.Info($"Creation date: {order.Date}");
-        _view.Info($"{order.Products.Count} Items:");
+        _view.Info($"{order.Products.Count} Item(s):");
         foreach (var orderProduct in order.Products) {
             _view.Info($"ID [{orderProduct.ProductId}] {orderProduct.Product.Name} - Quantity:  {orderProduct.ProductQuantity}");
         }
