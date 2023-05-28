@@ -349,7 +349,6 @@ internal class OrderingState : AppState
             return;
         }
         
-        // TODO: move to CustomerAccount class per assignment 2
         order.Finalize(deliveryMethod, transactionMethod);
         var success = order.Confirm();
         if (success)
