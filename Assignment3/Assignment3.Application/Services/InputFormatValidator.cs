@@ -1,7 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using Assignment3.Application.Models;
-using Assignment3.Domain.Models;
 
 namespace Assignment3.Application.Services;
 

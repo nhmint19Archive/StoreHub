@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-using Assignment3.Domain.Data;
+﻿using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
