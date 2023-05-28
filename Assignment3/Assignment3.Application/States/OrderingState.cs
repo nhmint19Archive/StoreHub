@@ -49,7 +49,7 @@ internal class OrderingState : AppState
         if (order != null)
         {
             choices.Add('E', "Edit Order");
-            choices.Add('D', "Delete existing order and make a new one");
+            choices.Add('D', "Delete existing order");
             choices.Add('C', "Confirm Order");
             choices.Add('V', "View Order");
 
