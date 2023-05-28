@@ -143,7 +143,7 @@ internal class OrderingState : AppState
                 }
                 else
                 {
-                    consoleKey = ConsoleKey.Backspace;
+                    break;
                 }
                 
             }
@@ -274,7 +274,7 @@ internal class OrderingState : AppState
                 }
                 else
                 {
-                    consoleKey = ConsoleKey.Backspace;
+                    break;
                 }
             }
         }
