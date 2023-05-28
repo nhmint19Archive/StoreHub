@@ -254,7 +254,7 @@ namespace Assignment3.Application.States
             }
             
             _view.Info($"Product ID [{product.Id}] - {product.Name}");
-            _view.Info($"Current stock: ${product.InventoryCount}");
+            _view.Info($"Current stock: {product.InventoryCount}");
             
             uint? inventoryCount;
             while (!_inputHandler.TryAskUserTextInput(
