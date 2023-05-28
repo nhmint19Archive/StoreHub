@@ -261,9 +261,13 @@ internal class OrderingState : AppState
                         context.SaveChanges();
                         _view.Info($"Successfully removed product ID [{id}]");
                     }
+                    consoleKey = _inputHandler.AskUserKeyInput($"Press any key to input another product ID. Press [{ConsoleKey.Backspace}] to exit.");
+                }
+                else
+                {
+                    consoleKey = ConsoleKey.Backspace;
                 }
             }
-            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to input another product ID. Press [{ConsoleKey.Backspace}] to exit.");
         }
 
         AddProductsToShoppingCart();
