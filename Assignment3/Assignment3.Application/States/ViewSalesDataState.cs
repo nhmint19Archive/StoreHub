@@ -55,13 +55,13 @@ namespace Assignment3.Application.States
         {
             // we can change the path to print out later
             var currentDir = Directory.GetCurrentDirectory();
-            var filePath = Path.GetFullPath(Path.Combine(currentDir, @"..\..\..\"));
+            //var filePath = Path.GetFullPath(Path.Combine(currentDir, @"..\..\..\"));
 
             try
             {            
                 using var context = new AppDbContext();
                 var receipts = context.Receipts.AsNoTracking().AsEnumerable();
-                using var writer = new StreamWriter($"{filePath}\\fileTest.csv");
+                using var writer = new StreamWriter($"fileTest.csv");
                 using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
                 csv.WriteRecords(receipts);
                 _view.Info("Successfully export CSV file for Sales Data");
