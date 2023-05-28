@@ -161,7 +161,7 @@ internal class BrowsingState : AppState
         decimal lowerPrice;
         while (!_inputHandler.TryAskUserTextInput(
                    x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
-                   x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
+                   x => string.IsNullOrEmpty(x) ? decimal.MinValue : decimal.Parse(x),
                    out lowerPrice,
                    $"Please type the lower price limit or press [{ConsoleKey.Enter}] if you do not want one",
                    "Invalid input. Input must be empty or a valid number"))
