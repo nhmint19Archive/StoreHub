@@ -67,10 +67,6 @@ namespace Assignment3.Application.States
                     .ThenInclude(x => x.Product)
                     .AsNoTracking()
                     .AsEnumerable();
-                /*using var writer = new StreamWriter($"fileTest.csv");*/
-                /*using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-                csv.WriteRecords(receipts);
-                _view.Info("Successfully export CSV file for Sales Data");*/
 
                 var csvData = new List<string[]>();
 
