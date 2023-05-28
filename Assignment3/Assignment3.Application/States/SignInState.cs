@@ -112,7 +112,6 @@ internal class SignInState : AppState
         var (prompt, newStateName) = _session.AuthenticatedUser.Role switch
         {
             Roles.Admin => ("View admin options", nameof(AdminProfileState)),
-            // TODO: jump to another state where refund requests can be viewed and product inventory can be updated
             Roles.Staff => ("View staff options", nameof(StaffProfileState)),
             Roles.Customer => ("View customer options", nameof(CustomerProfileState)),
             _ => throw new NotImplementedException(),

@@ -44,7 +44,6 @@ internal class BrowsingState : AppState
 
     private void ShowSignedInOptions()
     {
-        // TODO: reduce duplication with ShowSignedOutOptions()
         var options = new Dictionary<char, string>()
         {
             { 'D', "Display Available Products" },
