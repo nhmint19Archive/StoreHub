@@ -44,7 +44,6 @@ internal class OrderingState : AppState
         
         var choices = new Dictionary<char, string>()
         {
-            // TODO(HUY): implement a back function using a stack?m  
             { 'B', "Back to Browsing" },
         };
 
