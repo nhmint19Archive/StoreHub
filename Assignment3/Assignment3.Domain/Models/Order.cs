@@ -44,7 +44,8 @@ public class Order
 		{
 			return false;
 		}
-		
+
+		Status = OrderStatus.Confirmed;
 		StartDelivery();
 		SendReceiptToCustomer();
 		return true;
