@@ -142,7 +142,7 @@ internal class BrowsingState : AppState
     {
         while (!_inputHandler.TryAskUserTextInput(
                     _ => true,
-                    x => p => p.Name.Contains(x),
+                    x => string.IsNullOrEmpty(x) ? null : p => p.Name.Contains(x),
                     out _nameFilter,
                     $"Please type the product name filter or press [{ConsoleKey.Enter}] if you don not want any filter"))
         {
@@ -168,6 +168,13 @@ internal class BrowsingState : AppState
         {
         }
         
-        _priceFilter = p => p.Price <= upperPrice && p.Price >= lowerPrice;
+        if (upperPrice == decimal.MaxValue && lowerPrice == default)
+        {
+            _priceFilter = null;
+        }
+        else
+        {
+            _priceFilter = p => p.Price <= upperPrice && p.Price >= lowerPrice;
+        }
     }
 }
