@@ -57,7 +57,7 @@ internal class OrderingState : AppState
             switch (input)
             {
                 case 'E':
-                    EditOrder(order);
+                    RemoveProductsFromOrder(order.Id);
                     break;
                 case 'D':
                     DeleteExistingOrder(order.Id);
@@ -80,7 +80,7 @@ internal class OrderingState : AppState
             switch (input)
             {
                 case 'A':
-                    AddProductsToShoppingCart();
+                    AddOrUpdateProductsInOrder();
                     break;
                 case 'B':
                     OnStateChanged(this, nameof(BrowsingState));
@@ -99,7 +99,7 @@ internal class OrderingState : AppState
         }
     }
 
-    private void AddProductsToShoppingCart()
+    private void AddOrUpdateProductsInOrder()
     {
         var order = new Order(_session.AuthenticatedUser.Email);
         _view.Info($"Type the list of product ID - quantity pairs of items you'd like to purchase. Type [{ConsoleKey.Backspace}] when you are finished.");
@@ -145,10 +145,7 @@ internal class OrderingState : AppState
                 {
                     break;
                 }
-                
             }
-
-            
         }
 
         if (order.Products.Count == 0)
@@ -241,45 +238,68 @@ internal class OrderingState : AppState
         context.Orders.Remove(order);
         context.SaveChanges();
     }
-
-    private void EditOrder(Order order)
+    
+    // TODO: rename to RemoveProductsFromOrder
+    private void RemoveProductsFromOrder(int orderId)
     {
-        using var context = new AppDbContext();
-        var consoleKey = ConsoleKey.Enter;
-        int? id;
-        while (consoleKey != ConsoleKey.Backspace)
+        var productIdsToRemove = new HashSet<int>();
+        while (_inputHandler.AskUserKeyInput($"Press any key to start entering IDs of products to remove. Press [{ConsoleKey.Backspace}] to exit.") != ConsoleKey.Backspace)
         {
-            if (_inputHandler.TryAskUserTextInput(
-                       x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
-                       x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
-                       out id,
-                       $"Please type the ID of the product you would like to remove. Press [{ConsoleKey.Enter}] to exit.",
-                       "Invalid input. Input must be empty or a valid number"))
+            if (!_inputHandler.TryAskUserTextInput(
+                    x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
+                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
+                    out int? id,
+                    $"Please type the ID of the product you would like to remove. Press [{ConsoleKey.Enter}] to exit.",
+                    "Invalid input. Input must be empty or a valid number"))
             {
-                if (id != null)
-                {
-                    var product = context.OrderProducts.Find(order.Id, id);
-                    if (product == null)
-                    {
-                        _view.Error($"Unable to find product [{id}]");
-                    }
-                    else
-                    {
-                        order.Products.Remove(product);
-                        context.OrderProducts.Remove(product);
-                        context.SaveChanges();
-                        _view.Info($"Successfully removed product ID [{id}]");
-                    }
-                    consoleKey = _inputHandler.AskUserKeyInput($"Press any key to input another product ID. Press [{ConsoleKey.Backspace}] to exit.");
-                }
-                else
-                {
-                    break;
-                }
+                continue;
             }
+
+            if (id == null)
+            {
+                break;
+            }
+
+            productIdsToRemove.Add(id.Value);
         }
 
-        AddProductsToShoppingCart();
+        if (productIdsToRemove.Count == 0)
+        {
+            _view.Info("No products removed from order");
+        }
+        else
+        {
+            _view.Info($"Removing the following products with IDs: {string.Join(", ", productIdsToRemove)}");
+            using var context = new AppDbContext();
+            var order = context.Orders.Find(orderId);
+            if (order == null)
+            {
+                _view.Error($"Order [{orderId}] not found.");
+                return;
+            }
+
+            var orderProductIds = order.Products.Select(x => x.ProductId).ToHashSet();
+            var invalidProductIdsToRemove = productIdsToRemove.Except(productIdsToRemove.Intersect(orderProductIds)).ToList();
+            if (invalidProductIdsToRemove.Count > 0)
+            {
+                _view.Error($"The following product IDs cannot be removed because they are not in the order: {string.Join(",", invalidProductIdsToRemove)}");
+                return;
+            }
+
+            order.Products = order.Products
+                .Where(x => !productIdsToRemove.Contains(x.ProductId))
+                .ToList();
+
+            context.Orders.Update(order);
+            if (!context.TrySaveChanges())
+            {
+                _view.Error("Failed to remove products from order");
+                return;
+            } 
+        }
+
+        // TODO: rename to AddOrUpdateProductInOrder
+        AddOrUpdateProductsInOrder();
     }
 
     private void ConfirmOrder(Order order)

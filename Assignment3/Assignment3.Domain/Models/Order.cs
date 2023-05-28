@@ -72,5 +72,5 @@ public class Order
 	public DateTime Date { get; init; }
     public string CustomerEmail { get; init; }
     public OrderStatus Status { get; set; } = OrderStatus.Unconfirmed;
-	public IList<OrderProduct> Products { get; init; } = new List<OrderProduct>();
+	public IList<OrderProduct> Products { get; set; } = new List<OrderProduct>();
 }
