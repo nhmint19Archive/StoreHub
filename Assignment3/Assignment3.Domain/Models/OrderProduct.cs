@@ -1,7 +1,7 @@
 namespace Assignment3.Domain.Models;
 public class OrderProduct
 {
-	public decimal PriceAtPurchase { get; init; }
+	public decimal PriceAtPurchase { get; set; }
 	public int ProductQuantity { get; set; }
 	public int ProductId { get; set; }
 	public int OrderId { get; set; }

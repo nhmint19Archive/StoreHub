@@ -335,13 +335,11 @@ internal class OrderingState : AppState
         }
         
         // TODO: move to CustomerAccount class per assignment 2
-        var invoice = order.Prepare(deliveryMethod, transactionMethod);
-        invoice.EmailToCustomer();
-        var success = invoice.MakePayment();
+        order.Finalize(deliveryMethod, transactionMethod);
+        var success = order.Confirm();
         if (success)
         {
             _view.Info("Order successfully placed");
-            order.StartDelivery();
             return;
         }
         
@@ -463,35 +461,53 @@ internal class OrderingState : AppState
 
     private ITransactionMethod? ProcessCardTransaction()
     {
-        do
+        string? cardNo;
+        while (!_inputHandler.TryAskUserTextInput(
+                   x => string.IsNullOrEmpty(x) || InputFormatValidator.ValidateCardNumber(x),
+                   x => x,
+                   out cardNo,
+                   $"Enter your card number in the xxxx-xxxx-xxxx-xxxx format. Press [{ConsoleKey.Enter}] if you do not want one",
+                   "Invalid input. Input must be empty or a valid card number"))
+        { }
+
+        if (string.IsNullOrEmpty(cardNo))
         {
-            if (_inputHandler.TryAskUserTextInput(
-                    InputFormatValidator.ValidateCardNumber,
-                    x => x,
-                    out var cardNo,
-                    $"Enter your card number:",
-                    "Card number is invalid.") &&
-                _inputHandler.TryAskUserTextInput(
-                    x => Regex.IsMatch(x, RegexPatterns.Cvc),
-                    x => x,
-                    out var cvc,
-                    $"Enter your card CVC:",
-                    "Card CVC is invalid.") && 
-                _inputHandler.TryAskUserTextInput(
-                    InputFormatValidator.ValidateCardExpiryDate,
-                    x => DateOnly.FromDateTime(DateTime.Parse(x)),
-                    out var expiryDate,
-                    $"Enter your card expiry date:",
-                    "Card Expiry Date is invalid."))
-            {
-                return new CreditCardTransaction(cardNo, cvc, expiryDate);
-            }
-
+            _view.Info("No card number entered.");
+            return null;
         }
-        while (_inputHandler.AskUserKeyInput(
-                   $"Press any key to continue. Press [{ConsoleKey.Backspace}] to return to payment options") != ConsoleKey.Backspace);
+        
+        string? cvc;
+        while (!_inputHandler.TryAskUserTextInput(
+                   x => string.IsNullOrEmpty(x) || Regex.IsMatch(x, RegexPatterns.Cvc),
+                   x => x,
+                   out cvc,
+                   $"Enter your card CVC. Press [{ConsoleKey.Enter}] to exit",
+                   "Invalid input. Input must be empty or a valid CVC"))
+        { }
 
-        return AskUserForPaymentMethod();
+        if (string.IsNullOrEmpty(cvc))
+        {
+            _view.Info("No card CVC entered.");
+            return null;
+        }
+        
+        // TODO: make the date format (mm/yyyy)
+        DateOnly? expiryDate;
+        while (!_inputHandler.TryAskUserTextInput(
+                   x => string.IsNullOrEmpty(x) || InputFormatValidator.ValidateCardExpiryDate(x),
+                   x => string.IsNullOrEmpty(x) ? null : DateOnly.FromDateTime(DateTime.Parse(x)),
+                   out expiryDate,
+                   $"Enter your card expiry date. Press [{ConsoleKey.Enter}] to exit.",
+                   "Invalid input. Input must be empty or a valid card expiry date"))
+        { }
+
+        if (expiryDate == null)
+        {
+            _view.Info("No card number entered.");
+            return null;
+        }
+        
+        return new CreditCardTransaction(cardNo, cvc, expiryDate.Value);
     }
 
     private ITransactionMethod? ProcessCashTransaction()

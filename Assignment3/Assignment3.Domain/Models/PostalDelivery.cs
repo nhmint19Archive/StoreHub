@@ -22,10 +22,10 @@ public class PostalDelivery : IDeliveryMethod
 		_apartmentNumber = apartmentNumber;
 	}
 
-	public decimal DeliveryCost => throw new NotImplementedException();
-
+	public decimal DeliveryCost { get; } = 15;
+	
 	public void StartDelivery()
 	{
-
+		Console.WriteLine("Package has been accepted by Australian Post");
 	}
 }

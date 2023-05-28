@@ -1,60 +1,74 @@
 ﻿using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Domain.Models;
 
-public class Invoice
+internal class Invoice
 {
-	private readonly IReadOnlyCollection<OrderProduct> _products;
+	private readonly IReadOnlyCollection<OrderProduct> _orderProducts;
 	private readonly int _orderId;
 	private readonly string _customerEmail;
 	private readonly ITransactionMethod _transactionMethod;
 	private readonly decimal _deliveryCost;
+	private readonly decimal _totalPrice;
 
 	internal Invoice(
-		IReadOnlyCollection<OrderProduct> products,
+		IReadOnlyCollection<OrderProduct> orderProducts,
 		int orderId,
 		string customerEmail,
 		ITransactionMethod transactionMethod,
 		decimal deliveryCost)
 	{
-		_products = products;
+		_orderProducts = orderProducts;
 		_orderId = orderId;
 		_customerEmail = customerEmail;
 		_transactionMethod = transactionMethod;
 		_deliveryCost = deliveryCost;
-		TotalPrice = CalculateTotalPrice();
+
+		PopulateProductPrice();
+		_totalPrice = _orderProducts.Sum(x => x.PriceAtPurchase * x.ProductQuantity) + _deliveryCost;
 	}
-
-	public int Id { get; set; }
-
-	public decimal TotalPrice { get; }
-
-	public void EmailToCustomer()
+	
+	/// <summary>
+	/// Email the invoice to the customer.
+	/// </summary>
+	internal void EmailToCustomer()
 	{
-		Console.WriteLine($"An invoice has been sent to '{_customerEmail}'");
-		var email = new Email(_customerEmail);
-		email.Send(
+		EmailSimulator.Send(
+			_customerEmail,
 			"Your invoice from All Your Healthy Food Store",
-			$"Order: {_orderId}\nTotal price: {TotalPrice}\nDelivery cost: {_deliveryCost}");
+			$"Order: {_orderId}\nTotal price: {_totalPrice}\nDelivery cost: {_deliveryCost}");
 	}
-
-	public bool MakePayment()
+	
+	/// <summary>
+	/// Make the payment.
+	/// </summary>
+	/// <returns></returns>
+	/// <exception cref="InvalidOperationException"></exception>
+	internal bool MakePayment()
 	{
         Console.WriteLine("Making payment");
-
-        var transaction = new Transaction()
-        {
-	        TransactionDateUtc = DateTime.UtcNow,
-	        Amount = TotalPrice,
-        };
-
         try
         {
 	        using var context = new AppDbContext();	        
-	        var order = context.Orders.Find(_orderId) ?? throw new InvalidOperationException();
+	        var order = context.Orders
+		        .Include(x => x.Products)
+		        .FirstOrDefault(x => x.Id == _orderId) ?? throw new InvalidOperationException("Order not found");
+	        
+	        var transaction = new Transaction()
+	        {
+		        TransactionDateUtc = DateTime.UtcNow,
+		        Amount = _totalPrice,
+	        };
+	        
 	        var receipt = _transactionMethod.Execute(transaction, order);
+	        var productsToPurchase = context.Products
+		        .Where(x => _orderProducts.Select(y => y.ProductId).Contains(x.Id))
+		        .ToDictionary(x => x.Id, x => x.Price);
+	        
 	        order.Status = OrderStatus.Confirmed;
+
 	        context.Update(order);
 	        context.Transactions.Add(transaction);
 	        context.Receipts.Add(receipt);
@@ -69,8 +83,16 @@ public class Invoice
         }
 	}
 
-	private decimal CalculateTotalPrice()
+	private void PopulateProductPrice()
 	{
-		return _products.Sum(x => x.PriceAtPurchase * x.ProductQuantity) + _deliveryCost;
+		using var context = new AppDbContext();
+		var productsToPurchase = context.Products
+			.Where(x => _orderProducts.Select(y => y.ProductId).Contains(x.Id))
+			.ToDictionary(x => x.Id, x => x.Price);
+		
+		foreach (var orderProduct in _orderProducts)
+		{
+			orderProduct.PriceAtPurchase = productsToPurchase[orderProduct.ProductId];
+		}
 	}
 }

@@ -44,34 +44,29 @@ public static class InputFormatValidator
     public static bool ValidateCardNumber(string cardNumber)
     {
         // Check if the card number matches a valid credit card pattern
-        if (!Regex.IsMatch(cardNumber, RegexPatterns.CardNo))
-        {
-            return false;
-        }
-
-        // Remove any spaces or dashes from the card number
-        cardNumber = cardNumber.Replace(" ", "").Replace("-", "");
+        return Regex.IsMatch(cardNumber, RegexPatterns.CardNo);
 
         // Apply the Luhn algorithm to validate the card number
-        var sum = 0;
-        var length = cardNumber.Length;
-        for (var i = 0; i < length; i++)
-        {
-            var digit = int.Parse(cardNumber[i].ToString());
-
-            if (i % 2 == length % 2)
-            {
-                digit *= 2;
-                if (digit > 9)
-                {
-                    digit -= 9;
-                }
-            }
-
-            sum += digit;
-        }
-
-        return sum % 10 == 0;
+        // However, in the context of this project, this is unnecessary.
+        // var sum = 0;
+        // var length = cardNumber.Length;
+        // for (var i = 0; i < length; i++)
+        // {
+        //     var digit = int.Parse(cardNumber[i].ToString());
+        //
+        //     if (i % 2 == length % 2)
+        //     {
+        //         digit *= 2;
+        //         if (digit > 9)
+        //         {
+        //             digit -= 9;
+        //         }
+        //     }
+        //
+        //     sum += digit;
+        // }
+        //
+        // return sum % 10 == 0;
     }
 
     /// <summary>
@@ -81,28 +76,25 @@ public static class InputFormatValidator
     /// <returns></returns>
     public static bool ValidateCardExpiryDate(string expiryDate)
     {
-        var format = "MM/yy";
+        const string format = "MM/yyyy";
 
         // Check if the expiry date follows the format
-        if (DateTime.TryParseExact(
-            expiryDate,
-            format,
-            null,
-            System.Globalization.DateTimeStyles.None,
-            out DateTime parsedDate))
+        if (!DateTime.TryParseExact(
+                expiryDate,
+                format,
+                null,
+                System.Globalization.DateTimeStyles.None,
+                out var parsedDate))
         {
-            // Check if the parsed date is in the future / card not expired
-            var currentMonth = DateTime.Now.Month;
-            var currentYear = DateTime.Now.Year;
-            var expiryMonth = parsedDate.Month;
-            var expiryYear = parsedDate.Year;
-            if (expiryYear > currentYear || (expiryYear == currentYear && expiryMonth > currentMonth))
-            {
-                return true;
-            }
+            return false;
         }
-
-        return false;
+        
+        // Check if the parsed date is in the future / card not expired
+        var currentMonth = DateTime.Now.Month;
+        var currentYear = DateTime.Now.Year;
+        var expiryMonth = parsedDate.Month;
+        var expiryYear = parsedDate.Year;
+        return expiryYear > currentYear || (expiryYear == currentYear && expiryMonth > currentMonth);
     }
 
     /// <summary>
