@@ -8,6 +8,9 @@ using System.Globalization;
 
 namespace Assignment3.Application.States
 {
+    /// <summary>
+    /// Allows a staff member or admin user to view sales statistics.
+    /// </summary>
     internal class ViewSalesDataState : AppState
     {
         private readonly UserSession _session;

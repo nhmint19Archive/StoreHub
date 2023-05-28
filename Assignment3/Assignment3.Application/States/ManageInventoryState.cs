@@ -7,6 +7,9 @@ using Assignment3.Domain.Services;
 
 namespace Assignment3.Application.States
 {
+    /// <summary>
+    /// Allows the staff member to update product inventory.
+    /// </summary>
     internal class ManageInventoryState : AppState
     {
         private readonly Catalogue _catalogue;
@@ -31,14 +34,14 @@ namespace Assignment3.Application.States
         {
             if (!_session.IsUserSignedIn)
             {
-                _view.Error("Invalid access to ordering page");
+                _view.Error("Invalid access to inventory management page");
                 OnStateChanged(this, nameof(SignInState));
                 return;
             }
 
             if (!_session.IsUserInRole(Roles.Staff) && !_session.IsUserInRole(Roles.Admin))
             {
-                _view.Error("Invalid access to ordering page");
+                _view.Error("Invalid access to inventory management page");
                 _view.Info("Signing out");
                 _session.SignOut();
                 OnStateChanged(this, nameof(MainMenuState));

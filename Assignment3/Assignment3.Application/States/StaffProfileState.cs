@@ -4,6 +4,9 @@ using Assignment3.Domain.Enums;
 
 namespace Assignment3.Application.States
 {
+    /// <summary>
+    /// Allows a staff member to update product inventory and view refund requests.
+    /// </summary>
     internal class StaffProfileState : AppState
     {
         private readonly UserSession _session;
@@ -21,7 +24,7 @@ namespace Assignment3.Application.States
         {
             if (!_session.IsUserInRole(Roles.Staff))
             {
-                _view.Error("Invalid access to customer page");
+                _view.Error("Invalid access to staff page");
                 _view.Info("Signing out");
                 _session.SignOut();
                 OnStateChanged(this, nameof(MainMenuState));

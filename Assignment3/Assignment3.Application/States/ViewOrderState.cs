@@ -32,7 +32,7 @@ namespace Assignment3.Application.States
         {
             if (!_session.IsUserInRole(Roles.Customer))
             {
-                _view.Error("Invalid access to customer page");
+                _view.Error("Invalid access to staff page");
                 _view.Info("Signing out");
                 _session.SignOut();
                 OnStateChanged(this, nameof(MainMenuState));
@@ -66,7 +66,7 @@ namespace Assignment3.Application.States
                 .Where(x => x.CustomerEmail == _session.AuthenticatedUser.Email)
                 .OrderByDescending(x => x.Date);
 
-            if (orders.Count() > 0)
+            if (orders.Any())
             {
                 foreach (var order in orders)
                 {
@@ -81,7 +81,7 @@ namespace Assignment3.Application.States
                     }
 
                     _view.Info($"Total: ${totalPrice}");
-                    _view.Info($"Time: {order.Date}");
+                    _view.Info($"Date: {order.Date}");
                     _view.Info($"Status: {order.Status}");
                 }
             }
@@ -89,7 +89,6 @@ namespace Assignment3.Application.States
             {
                 _view.Info($"You have no orders");
             }
-            
         }
     }
 }

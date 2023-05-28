@@ -7,6 +7,9 @@ using Assignment3.Domain.Services;
 
 namespace Assignment3.Application.States;
 
+/// <summary>
+/// Allows the admin user to create staff accounts and add products data to the store.
+/// </summary>
 internal class AdminProfileState : AppState
 {
     private readonly UserSession _session;  

@@ -6,6 +6,9 @@ using Assignment3.Domain.Services;
 
 namespace Assignment3.Application.States;
 
+/// <summary>
+/// Allows the customer to change their profile details or view their account data.
+/// </summary>
 internal class CustomerProfileState : AppState
 {
     private readonly UserSession _session;    
