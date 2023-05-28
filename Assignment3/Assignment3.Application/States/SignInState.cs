@@ -87,7 +87,6 @@ internal class SignInState : AppState
         
         var newPassword = _inputHandler.AskUserTextInput("Enter your new password");
         account.SetPassword(newPassword);
-        
 
         context.UserAccounts.Update(account);
         if (!context.TrySaveChanges())

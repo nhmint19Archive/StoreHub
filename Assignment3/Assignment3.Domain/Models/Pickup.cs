@@ -17,7 +17,9 @@ public class Pickup : IDeliveryMethod
 	{
 		using var context = new AppDbContext();
 		var order = context.Orders.Find(_orderId) ?? throw new InvalidOperationException();
-		var email = new Email(order.CustomerEmail);
-		email.Send("Order from All Your Healthy Food Store", "Your order is being processed, we will notify you where and when you can pick it up via email");
+		EmailSimulator.Send(
+			order.CustomerEmail,
+			"Order from All Your Healthy Food Store", 
+			"Your order is being processed, we will notify you where and when you can pick it up via email");
 	}
 }

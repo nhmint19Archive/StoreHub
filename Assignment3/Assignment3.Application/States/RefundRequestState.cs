@@ -143,7 +143,7 @@ namespace Assignment3.Application.States
             var order = context.Orders.Find(orderToRefundId);
             if (order == null)
             {
-                _view.Error("Cannot find your order. Please do it again");
+                _view.Error($"Order [{orderToRefundId}] not found.");
                 return;
             }
 
