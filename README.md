@@ -5,10 +5,35 @@
 The project uses .NET - a framework developed by Microsoft to develop applications in C#.
 
 1. Install [.NET 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) to your local machine.
-2. Install [Visual Studio 2022 Community Edition](https://visualstudio.microsoft.com/vs/)
-    - Select the .NET desktop component. Make sure you include `SQL Server Express 2019 LocalDB` since this is required by the project.
+2. Install your IDE/text editor. Recommended options:
+    - [Visual Studio 2022 Community Edition](https://visualstudio.microsoft.com/vs/)
+    - [Visual Studio Code](https://www.jetbrains.com/rider/)
+    - [JetBrains Rider]() (free if you subscribe with your student email)
 3. Run `dotnet restore` to restore dependencies of the project.
 4. Run `dotnet run "/path/to/Assignment3.Application.csproj"` to start the application.
+
+## Database migration
+
+The project uses Entity Framework Core to handle object-database mappings.
+If the database schema is changed, you need to perform a migration.
+
+First, download the EF CLI tool:
+```
+dotnet tool install --global dotnet-ef
+```
+
+Run the following command to perform a migration
+```
+dotnet ef migrations add <migration name>
+dotnet ef database update
+```
+
+### For developers
+
+- To fix db-related errors, a quick fix is to:
+  1. Erase all files in the `Migrations/` folder
+  2. Erase all `.db` files
+  3. Do a fresh migration
 
 ## Coding conventions
 

@@ -1,3 +1,3 @@
 Id,OrderId,Id,Date,CustomerEmail,Status,TransactionId,Id,TransactionDateUtc,Amount
-1,1,0,01/01/0001 00:00:00,,Unconfirmed,1,0,01/01/0001 00:00:00,0
-2,2,0,01/01/0001 00:00:00,,Unconfirmed,2,0,01/01/0001 00:00:00,0
+1,0,0,01/01/0001 00:00:00,,Unconfirmed,1,0,01/01/0001 00:00:00,0
+2,4,0,01/01/0001 00:00:00,,Unconfirmed,2,0,01/01/0001 00:00:00,0
