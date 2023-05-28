@@ -37,7 +37,6 @@ internal class SignInState : AppState
         {
             ShowSignedInOptions();
         }
-
     }
 
     private void ShowSignedOutOptions()
@@ -154,7 +153,7 @@ internal class SignInState : AppState
         }
         
         var password = _inputHandler.AskUserTextInput("Choose your password");
-        var newUserAccount = new CustomerAccount()
+        var newUserAccount = new UserAccount()
         {
             Email = email,
             Phone = phone,

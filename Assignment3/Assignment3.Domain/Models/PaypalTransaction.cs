@@ -7,8 +7,18 @@ public class PaypalTransaction : ITransactionMethod
     {
         _username = username;
     }
+    
+    /// <summary>
+    /// Simulates a paypal transaction.
+    /// </summary>
+    /// <param name="transaction">Transaction.</param>
+    /// <param name="order">Order being paid for.</param>
+    /// <returns>Receipt</returns>
     public Receipt Execute(Transaction transaction, Order order)
     {
+        Console.WriteLine("Redirecting you to Paypal.com");
+        Console.WriteLine("...");
+        Console.WriteLine("Paypal payment successful");
         return new Receipt
         {
             Transaction = transaction,

@@ -7,19 +7,22 @@ public class PostalDelivery : IDeliveryMethod
 	private readonly string _streetName;
 	private readonly int _postcode;
 	private readonly string _apartmentNumber;
+	private readonly string _customerEmail;
 
 	public PostalDelivery(
 		int orderId,
 		int streetNumber,
 		string streetName,
 		int postcode,
-		string apartmentNumber = "")
+		string apartmentNumber,
+		string customerEmail)
 	{
 		_orderId = orderId;
 		_streetNumber = streetNumber;
 		_streetName = streetName;
 		_postcode = postcode;
 		_apartmentNumber = apartmentNumber ;
+		_customerEmail = customerEmail;
 	}
 	
 	/// <summary>
@@ -31,8 +34,10 @@ public class PostalDelivery : IDeliveryMethod
 	/// Simulates a package delivery from Australian Post
 	/// </summary>
 	public void StartDelivery()
-	{
-		Console.WriteLine($"Package for order [{_orderId}] has been accepted by Australian Post");
-		Console.WriteLine($"Delivery addressed to {_apartmentNumber} {_streetNumber} {_streetName} {_postcode}");
+	{		
+		EmailSimulator.Send(
+			_customerEmail,
+			"Order from All Your Healthy Food Store", 
+			$"Package for order [{_orderId}] has been accepted by Australian Post.\nDelivery addressed to {_apartmentNumber} {_streetNumber} {_streetName} {_postcode}");
 	}
 }
