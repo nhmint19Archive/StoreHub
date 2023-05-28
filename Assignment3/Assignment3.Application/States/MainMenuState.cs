@@ -17,6 +17,7 @@ internal class MainMenuState : AppState
         {
             { 'B', "Browse our store" },
             { 'A', "Accounts" },
+            { 'E', "Exit 'All Your Healthy Foods' Online Web Store" },
         };
 
         var input = _inputHandler.AskUserOption(
@@ -30,6 +31,9 @@ internal class MainMenuState : AppState
                 break;
             case 'B':
                 OnStateChanged(this, nameof(BrowsingState));
+                break;
+            case 'E':
+                Environment.Exit(0);
                 break;
         }
     }
