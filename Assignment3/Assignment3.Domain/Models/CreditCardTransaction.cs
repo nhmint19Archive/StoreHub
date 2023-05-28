@@ -14,13 +14,12 @@ public class CreditCardTransaction : ITransactionMethod
     }
     public Receipt Execute(Transaction transaction, Order order)
     {
-        var receipt = new Receipt
+        return new Receipt
         {
+            Transaction = transaction,
             Order = order,
             TransactionId = transaction.Id,
-            Transaction = transaction
+            OrderId = order.Id,
         };
-
-        return receipt;
     }
 }

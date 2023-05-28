@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 using Assignment3.Domain.Data;
@@ -12,10 +13,7 @@ internal class OrderingState : AppState
     private readonly UserSession _session;
     private readonly IConsoleView _view;
     private readonly IConsoleInputHandler _inputHandler;
-    public OrderingState(
-        UserSession session, 
-        IConsoleView view, 
-        IConsoleInputHandler inputHandler)
+    public OrderingState(UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
     {
         _session = session;
         _view = view;
@@ -97,8 +95,7 @@ internal class OrderingState : AppState
         _view.Info($"Pending order [{order.Id}]");
         _view.Info($"Creation date: {order.Date}");
         _view.Info($"Items:");
-        foreach (var orderProduct in order.Products) 
-        {
+        foreach (var orderProduct in order.Products) {
             _view.Info($"ID [{orderProduct.ProductId}] {orderProduct.Product.Name} - Quantity:  {orderProduct.ProductQuantity}");
         }
     }
@@ -108,47 +105,43 @@ internal class OrderingState : AppState
         var order = new Order(_session.AuthenticatedUser.Email);
         _view.Info($"Type the list of product ID - quantity pairs of items you'd like to purchase. Type [{ConsoleKey.Backspace}] when you are finished.");
         _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Backspace}]' to add 2 products with ID 1 and 1 product with ID 43");
-
-        do
+        
+        var consoleKey = ConsoleKey.Enter;
+        while (consoleKey != ConsoleKey.Backspace)
         {
-            if (!_inputHandler.TryAskUserTextInput(
+            if (_inputHandler.TryAskUserTextInput(
                     InputFormatValidator.ValidateHyphenSeparatedNumberPair,
                     InputConvertor.ToHyphenSeparatedIntegerPair,
                     out var result,
                     "Enter the product ID and quantity",
                     "Input must be a pair of hyphen-separated numbers"))
             {
-                continue;
-            }
-            
-            var (productId, productQuantity) = result;
-            var isProductAlreadyAdded = false;
-            foreach (var product in order.Products)
-            {
-                if (product.ProductId != productId || product.ProductQuantity == productQuantity)
+                var (productId, productQuantity) = result;
+                var isProductAlreadyAdded = false;
+                foreach (var product in order.Products)
                 {
-                    continue;
+                    if (product.ProductId == productId && product.ProductQuantity != productQuantity)
+                    {
+                        isProductAlreadyAdded = true;
+                        product.ProductQuantity = productQuantity;
+                        _view.Info($"Quantity of product ID [{product.ProductId}] changed to {product.ProductQuantity}");
+                    } 
                 }
-                
-                isProductAlreadyAdded = true;
-                product.ProductQuantity = productQuantity;
-                _view.Info(
-                    $"Quantity of product ID [{product.ProductId}] changed to {product.ProductQuantity}");
-            }
 
-            if (!isProductAlreadyAdded)
-            {
-                order.Products.Add(new OrderProduct
+                if (!isProductAlreadyAdded)
                 {
-                    ProductId = productId,
-                    ProductQuantity = productQuantity,
-                });
+                    order.Products.Add(new OrderProduct
+                    {
+                        ProductId = productId,
+                        ProductQuantity = productQuantity,
+                    });
+                }
+
+                _view.Info($"Added {productQuantity} of product ID [{productId}]");
             }
 
-            _view.Info($"Added {productQuantity} of product ID [{productId}]");
-        } 
-        while (_inputHandler.AskUserKeyInput(
-                     $"Press any key to continue. Press [{ConsoleKey.Backspace}] to finish.") != ConsoleKey.Backspace);
+            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to finish.");
+        }
 
         if (order.Products.Count == 0)
         {
@@ -170,17 +163,18 @@ internal class OrderingState : AppState
             _view.Error("Ordered items are invalid");
             return;
         }
-        
-        _view.Info("Saving new order");
-        context.Orders.Add(order);
-        context.OrderProducts.AddRange(order.Products);
-        if (!context.TrySaveChanges())
+
+        try
+        {
+            _view.Info("Saving new order");
+            context.Orders.Add(order);
+            context.OrderProducts.AddRange(order.Products);
+            context.SaveChanges();
+        }
+        catch
         {
             _view.Error("Failed to process order");
-            return;
         }
-        
-        _view.Info($"Order [{order.Id}] successfully created");
     }
 
     private bool ValidateOrderProductQuantity(Order order, IReadOnlyDictionary<int, uint> availableProducts)
@@ -202,7 +196,7 @@ internal class OrderingState : AppState
         errorMessages.AddRange(
             validProducts
             .Where(x => x.ProductQuantity > availableProducts[x.ProductId])
-            .Select(selector: x => $"Invalid purchase quantity for product with ID [{x.ProductId}] (only {availableProducts[x.ProductId]} are available)")
+            .Select(x => $"Invalid purchase quantity for product with ID [{x.ProductId}] (only {availableProducts[x.ProductId]} are available)")
             .ToList());
 
         if (errorMessages.Count <= 0)
@@ -237,13 +231,7 @@ internal class OrderingState : AppState
         
         _view.Info($"Erasing order [{order.Id}]");
         context.Orders.Remove(order);
-        if (!context.TrySaveChanges())
-        {
-            _view.Error("Failed to delete existing order");
-            return;
-        }
-        
-        _view.Info($"Order [{order.Id}] successfully deleted.");
+        context.SaveChanges();
     }
 
     private void EditOrder(Order order)
@@ -270,23 +258,23 @@ internal class OrderingState : AppState
         _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Backspace}]' to add 2 products with ID 1 and 1 product with ID 43");
 
         var productIdQuantityPairs = new Dictionary<int, int>();
-        do
+        var consoleKey = ConsoleKey.Enter;
+        while (consoleKey != ConsoleKey.Backspace)
         {
-            if (!_inputHandler.TryAskUserTextInput(
+            if (_inputHandler.TryAskUserTextInput(
                     InputFormatValidator.ValidateHyphenSeparatedNumberPair,
-                    InputConvertor.ToHyphenSeparatedIntegerPair,
+                    InputConvertor.ToHyphenSeparatedIntegerPair, 
                     out var result,
                     "Enter the product ID and new quantity",
                     "Input must be a pair of hyphen-separated numbers"))
             {
-                continue;
+                var (productId, quantity) = result;
+                productIdQuantityPairs.Add(productId, quantity);
             }
-            
-            var (productId, quantity) = result;
-            productIdQuantityPairs.Add(productId, quantity);
-        } while (_inputHandler.AskUserKeyInput(
-                     $"Press any key to continue. Press [{ConsoleKey.Backspace}] to quit.") != ConsoleKey.Backspace);
-        
+
+            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to quit.");
+        }
+
         var productIdsToAdd = productIdQuantityPairs
             .Where(x => !orderProductIds.Contains(x.Key))
             .ToDictionary(x => x.Key, x=>x.Value);
@@ -318,65 +306,107 @@ internal class OrderingState : AppState
             _view.Error("Ordered items are invalid");
             return;
         }
-        context.Orders.Update(order);
-        context.OrderProducts.UpdateRange(order.Products);
-        if (!context.TrySaveChanges())
+
+        try
         {
-            _view.Error("Failed to update order");
-            return;
+            context.Orders.Update(order);
+            context.OrderProducts.UpdateRange(order.Products);
+            context.SaveChanges();
         }
-        
-        _view.Info("Order successfully updated");
+        catch
+        {
+            _view.Error("Failed to process order");
+        }
     }
 
     private void ConfirmOrder(Order order)
     {
         var deliveryMethod = AskUserForDeliveryMethod(order.Id);
-        var transactionMethod = AskUserForPaymentMethod(order.Id);
+        if (deliveryMethod == null)
+        {
+            _view.Info("No delivery method selected");
+            return;
+        }
+        
+        var transactionMethod = AskUserForPaymentMethod();
+        if (transactionMethod == null)
+        {
+            _view.Info("No transaction method selected");
+            return;
+        }
+        
         // TODO: move to CustomerAccount class per assignment 2
         var invoice = order.Prepare(deliveryMethod, transactionMethod);
         invoice.EmailToCustomer();
         var success = invoice.MakePayment();
         if (success)
         {
-            ConsoleHelper.PrintInfo("Order successfully placed");
+            _view.Info("Order successfully placed");
             order.StartDelivery();
             return;
         }
         
-        ConsoleHelper.PrintError("An error occurred whilst processing your order");
+        _view.Info("An error occurred whilst processing your order");
     }
 
-    private IDeliveryMethod AskUserForDeliveryMethod(int orderId)
+    private IDeliveryMethod? AskUserForDeliveryMethod(int orderId)
     {
-        var choice = ConsoleHelper.AskUserOption(new Dictionary<char, string>()
+        var choice = _inputHandler.AskUserOption(new Dictionary<char, string>()
             {
                 { 'P', "Pick up at store" },
                 { 'D', "Postal delivery" },
+                { 'E', "Exit" },
             },
             "Please select a delivery method");
         return choice switch
         {
             'P' => ProcessPickupMethod(orderId),
             'D' => ProcessPostalDelivery(orderId),
+            'E' => null,
             _ => throw new InvalidOperationException(),
         };
     }
 
-    private IDeliveryMethod ProcessPostalDelivery(int orderId)
-    { 
-        // TODO(HUY): VALIDATE INPUT
-        var streetNumber = ConsoleHelper.AskUserTextInput("Enter your address number");
-        var streetName =  ConsoleHelper.AskUserTextInput("Enter your address street name");
-        var postalCode = ConsoleHelper.AskUserTextInput("Enter your postcode");
-        var apartmentNumber = ConsoleHelper.AskUserTextInput("Enter your apartment number (if applicable)");
-
-        return new PostalDelivery(
-            orderId, 
-            int.Parse(streetNumber), 
-            streetName, 
-             int.Parse(postalCode), 
-            apartmentNumber);
+    private IDeliveryMethod? ProcessPostalDelivery(int orderId)
+    {
+        do
+        {
+            if (_inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexPatterns.DigitsOnly),
+                    int.Parse,
+                    out var streetNumber,
+                    $"Enter your address number",
+                    "Street number is invalid.") &&
+                _inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexPatterns.StreetName),
+                    x => x,
+                    out var streetName,
+                    $"Enter your address street name",
+                    "Street name is invalid.") &&
+                _inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexPatterns.Postal),
+                    int.Parse,
+                    out var postalCode,
+                    $"Enter your postal code",
+                    "Postal code is invalid.") &&
+                _inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexPatterns.ApartmentNo),
+                    x => string.IsNullOrEmpty(x) ? null : x,
+                    out var apartmentNo,
+                    $"Enter your apartment number (if applicable)",
+                    "Apartment number is invalid."))
+            {
+                return new PostalDelivery(
+                    orderId,
+                    streetNumber,
+                    streetName,
+                    postalCode,
+                    apartmentNo);
+            }
+        } while (_inputHandler.AskUserKeyInput(
+                     $"Press any key to continue. Press [{ConsoleKey.Backspace}] to return to delivery options") !=
+                 ConsoleKey.Backspace);
+        return AskUserForDeliveryMethod(orderId);
     }
 
     private IDeliveryMethod ProcessPickupMethod(int orderId)
@@ -384,50 +414,111 @@ internal class OrderingState : AppState
         return new Pickup(orderId);
     }
 
-    private ITransactionMethod AskUserForPaymentMethod(int orderId)
+    private ITransactionMethod? AskUserForPaymentMethod()
     {                                                
-        var choice = ConsoleHelper.AskUserOption(new Dictionary<char, string>()          
+        var choice = _inputHandler.AskUserOption(new Dictionary<char, string>()          
             {                                                                            
                 { 'P', "Paypal" },                                             
                 { 'A', "Cash" },                   
                 { 'B', "Bank Transfer" },  
-                { 'C', "Credit Card" },                                              
+                { 'C', "Credit Card" },             
+                { 'E', "Exit"},
             },                                                                           
-            "Please select a delivery method");
+            "Please select a payment method");
         return choice switch
         {
-            'P' => ProcessPaypalTransaction(orderId),
-            'A' => ProcessCashTransaction(orderId),
-            'B' => ProcessBankTransfer(orderId),  
-            'C' => ProcessCardTransaction(orderId),    
+            'P' => ProcessPaypalTransaction(),
+            'A' => ProcessCashTransaction(),
+            'B' => ProcessBankTransfer(),  
+            'C' => ProcessCardTransaction(),    
+            'E' => null,
             _ => throw new InvalidOperationException(),
         };
     }
 
-    private ITransactionMethod ProcessBankTransfer(int orderId)
+    private ITransactionMethod? ProcessBankTransfer()
     {
-        // TODO(HUY): VALIDATE INPUT
-        var bsb = ConsoleHelper.AskUserTextInput("Enter your BSB");     
-        var accountNo =  ConsoleHelper.AskUserTextInput("Enter your account number");
-        return new BankTransaction(bsb, accountNo);
+        do
+        {
+            if (_inputHandler.TryAskUserTextInput(
+                    InputFormatValidator.ValidateBsb,
+                    x => x,
+                    out var bsb,
+                    $"Enter your BSB:",
+                    "BSB is invalid.") &&
+                _inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexPatterns.DigitsOnly),
+                    x => x,
+                    out var accountNo,
+                    $"Enter your account number:",
+                    "Account number is invalid."))
+            {
+                return new BankTransaction(bsb, accountNo);
+            }
+        } while (_inputHandler.AskUserKeyInput(
+                     $"Press any key to continue. Press [{ConsoleKey.Backspace}] to return to payment options") ==
+                 ConsoleKey.Backspace);
+        
+        return AskUserForPaymentMethod();
     }
 
-    private ITransactionMethod ProcessCardTransaction(int orderId)
+    private ITransactionMethod? ProcessCardTransaction()
     {
-        // TODO(HUY): VALIDATE INPUT
-        var cardNo = ConsoleHelper.AskUserTextInput("Enter your card number");
-        var cvc = ConsoleHelper.AskUserTextInput("Enter your card CVC");
-        var expiryDate = ConsoleHelper.AskUserTextInput("Enter your card expiry date");
-        return new CreditCardTransaction(cardNo, cvc, DateOnly.FromDateTime(DateTime.Parse(expiryDate))); 
+        do
+        {
+            if (_inputHandler.TryAskUserTextInput(
+                    InputFormatValidator.ValidateCardNumber,
+                    x => x,
+                    out var cardNo,
+                    $"Enter your card number:",
+                    "Card number is invalid.") &&
+                _inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexPatterns.Cvc),
+                    x => x,
+                    out var cvc,
+                    $"Enter your card CVC:",
+                    "Card CVC is invalid.") && 
+                _inputHandler.TryAskUserTextInput(
+                    InputFormatValidator.ValidateCardExpiryDate,
+                    x => DateOnly.FromDateTime(DateTime.Parse(x)),
+                    out var expiryDate,
+                    $"Enter your card expiry date:",
+                    "Card Expiry Date is invalid."))
+            {
+                return new CreditCardTransaction(cardNo, cvc, expiryDate);
+            }
+
+        }
+        while (_inputHandler.AskUserKeyInput(
+                   $"Press any key to continue. Press [{ConsoleKey.Backspace}] to return to payment options") != ConsoleKey.Backspace);
+
+        return AskUserForPaymentMethod();
     }
 
-    private ITransactionMethod ProcessCashTransaction(int orderId)
+    private ITransactionMethod? ProcessCashTransaction()
     {
-        throw new NotImplementedException();
+        return new CashTransaction();
     }
 
-    private ITransactionMethod ProcessPaypalTransaction(int orderId)
+    private ITransactionMethod? ProcessPaypalTransaction()
     {
-        throw new NotImplementedException();
+        do
+        {
+            if (_inputHandler.TryAskUserTextInput(
+                    x => Regex.IsMatch(x, RegexPatterns.Email) || 
+                         Regex.IsMatch(x, RegexPatterns.Phone),
+                    x => x,
+                    out var paypal,
+                    $"Enter your PayPal email or phone number:",
+                    "PayPal username is invalid."))
+            {
+                return new PaypalTransaction(paypal);
+            }
+            
+        }
+        while (_inputHandler.AskUserKeyInput(
+                   $"Press any key to continue. Press [{ConsoleKey.Backspace}] to return to payment options") != ConsoleKey.Backspace);
+        
+        return AskUserForPaymentMethod();
     }
 }

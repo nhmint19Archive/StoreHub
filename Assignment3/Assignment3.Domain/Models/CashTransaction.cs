@@ -4,6 +4,12 @@ public class CashTransaction : ITransactionMethod
 {
     public Receipt Execute(Transaction transaction, Order order)
     {
-        throw new NotImplementedException();
+        return new Receipt
+        {
+            Transaction = transaction,
+            Order = order,
+            TransactionId = transaction.Id,
+            OrderId = order.Id,
+        };
     }
 }
