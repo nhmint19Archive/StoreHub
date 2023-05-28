@@ -1,9 +1,12 @@
 ﻿namespace Assignment3.Domain.Models;
 
+/// <summary>
+/// Simulates an email being sent.
+/// </summary>
 internal static class EmailSimulator
 {
     /// <summary>
-    /// Simulates an email being sent.
+    /// Writes email to console.
     /// </summary>
     /// <param name="address">Email address of the recipient.</param>
     /// <param name="title">Email title.</param>

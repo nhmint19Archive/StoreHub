@@ -25,12 +25,21 @@ public class UserAccount
 	[Required]
 	[DataType(DataType.Password)]
 	public string Password { get; protected set; } = string.Empty;
-
+	
+	/// <summary>
+	/// Sets the password to a hash of the raw password.
+	/// </summary>
+	/// <param name="password">Raw password string.</param>
 	public void SetPassword(string password)
 	{
 		Password = Convert.ToHexString(HashPassword(password));
 	}
-
+	
+	/// <summary>
+	/// Authenticates the entered password.
+	/// </summary>
+	/// <param name="password">Raw password string.</param>
+	/// <returns><c>True</c> if the hash of the password matches the stored hash; otherwise <c>False</c>.</returns>
 	public bool Authenticate(string password)
 	{
 		var hashedString = Convert.ToHexString(HashPassword(password));

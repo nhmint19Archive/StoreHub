@@ -10,7 +10,10 @@ public class Pickup : IDeliveryMethod
 	{
 		_orderId = orderId;
 	}
-
+	
+	/// <summary>
+	/// Pickup is free.
+	/// </summary>
 	public decimal DeliveryCost => 0m;
 
 	/// <summary>

@@ -14,6 +14,8 @@ public class CreditCardTransaction : ITransactionMethod
     }
     public Receipt Execute(Transaction transaction, Order order)
     {
+        Console.WriteLine($"Executing a payment on the card [{_accountNo}]");
+        
         return new Receipt
         {
             Transaction = transaction,

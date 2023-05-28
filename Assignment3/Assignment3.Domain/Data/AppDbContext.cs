@@ -5,8 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Assignment3.Domain.Data;
-// TODO(HUY): add a wrapper that handle errors gracefully?
-// add a static variable that calls EnsureCreated() when first called.
+
+/// <summary>
+/// Implementation of a unit-of-work.
+/// The DbSet{T} properties are implementations of repositories for entities of type T.
+/// </summary>
 public class AppDbContext : DbContext
 {
 	public DbSet<Product> Products { get; set; } = null!;
@@ -15,14 +18,23 @@ public class AppDbContext : DbContext
 	public DbSet<OrderProduct> OrderProducts { get; set; } = null!;
 	public DbSet<Receipt> Receipts { get; set; } = null!;
 	public DbSet<Transaction> Transactions { get; set; } = null!;
-	public DbSet<RefundRequest> RefundRequests { get; set; }
-
+	public DbSet<RefundRequest> RefundRequests { get; set; } = null!;
+	
+	/// <summary>
+	/// Configures the class to use the specified datasource and database provider.
+	/// </summary>
+	/// <param name="optionsBuilder"></param>
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
 		const string connectionString = "Data Source=AllYourHealthyDb.db";
 		_ = optionsBuilder.UseSqlite(connectionString);
 	}
 
+	/// <summary>
+	/// An exception-safe wrapper for <see cref="DbContext.SaveChanges()"/>.
+	/// Fails in Debug mode./>
+	/// </summary>
+	/// <returns><c>True</c> if the database transaction is successful; otherwise <c>False</c></returns>
 	public bool TrySaveChanges()
 	{
 		try
@@ -37,6 +49,10 @@ public class AppDbContext : DbContext
 		}
 	}
 
+	/// <summary>
+	/// Sets up relationships between entities.
+	/// </summary>
+	/// <param name="modelBuilder"></param>
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
