@@ -244,7 +244,7 @@ internal class OrderingState : AppState
                        x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
                        x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                        out id,
-                       $"Please type the ID of the product. Press [{ConsoleKey.Enter}] to exit.",
+                       $"Please type the ID of the product you would like to remove. Press [{ConsoleKey.Enter}] to exit.",
                        "Invalid input. Input must be empty or a valid number"))
             {
                 if (id != null)
@@ -263,7 +263,7 @@ internal class OrderingState : AppState
                     }
                 }
             }
-            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to quit.");
+            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to input another product ID. Press [{ConsoleKey.Backspace}] to exit.");
         }
 
         var orderProductIds = order.Products.Select(x => x.ProductId).ToHashSet();
