@@ -15,6 +15,7 @@ public class Order
 		IDeliveryMethod deliveryMethod,
 		ITransactionMethod transactionMethod)
 	{
+		_deliveryMethod = deliveryMethod;
 		return new Invoice(
 			new ReadOnlyCollection<OrderProduct>(Products),
 			Id,
