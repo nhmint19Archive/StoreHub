@@ -61,7 +61,6 @@ internal class OrderingState : AppState
                     break;
                 case 'D':
                     DeleteExistingOrder(order.Id);
-                    AddProductsToShoppingCart();
                     break;
                 case 'C':
                     ConfirmOrder(order);
