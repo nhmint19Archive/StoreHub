@@ -93,7 +93,7 @@ internal class OrderingState : AppState
     {
         _view.Info($"Pending order [{order.Id}]");
         _view.Info($"Creation date: {order.Date}");
-        _view.Info($"Items:");
+        _view.Info($"{order.Products.Count} Items:");
         foreach (var orderProduct in order.Products) {
             _view.Info($"ID [{orderProduct.ProductId}] {orderProduct.Product.Name} - Quantity:  {orderProduct.ProductQuantity}");
         }
@@ -239,9 +239,9 @@ internal class OrderingState : AppState
                 InputFormatValidator.ValidateCommaSeparatedNumberList,
                 InputConvertor.ToCommaSeparatedIntegerList,
                 out var productIdsToRemove,
-                $"Enter a comma separated list of IDs of products to be removed. Press [{ConsoleKey.Enter}] if you do not wish to remove any product"))
+                $"Enter a comma separated list of IDs of products to be removed. Press [{ConsoleKey.Enter}] if you do not wish to remove any product",
+                $"Invalid input. Please type in a list of comma - separated product IDs or press[Enter]"))
         {
-            _view.Error("Invalid input. Please type in a list of comma-separated product IDs or press [Enter]");
             return;
         }
 
@@ -280,7 +280,7 @@ internal class OrderingState : AppState
 
         foreach (var (productId, quantity) in productIdsToAdd)
         {
-            _view.Info($"Adding [{quantity}] of new product with ID [{productId}]");
+            _view.Info($"Adding {quantity} of new product with ID [{productId}]");
         }
         
         foreach (var orderProduct in order.Products)
