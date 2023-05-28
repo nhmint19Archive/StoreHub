@@ -204,10 +204,10 @@ internal class OrderingState : AppState
             return;
         }
         
-        _view.Info($"Successfully added/updated order [{order.Id}]");
+        _view.Info($"Successfully {(isOrderNew ? "added" : "updated")} order [{order.Id}]");
     }
 
-    private bool ValidateOrderProductQuantity(Order order, IReadOnlyDictionary<int, uint> availableProducts)
+    private bool ValidateOrderProductQuantity(Order order, IReadOnlyDictionary<int, int> availableProducts)
     {
         var errorMessages = new List<string>();
         IEnumerable<OrderProduct> validProducts = order.Products;
