@@ -57,7 +57,7 @@ internal class OrderingState : AppState
             switch (input)
             {
                 case 'E':
-                    EditOrder(order);
+                    RemoveProductsFromOrder(order.Id);
                     break;
                 case 'D':
                     DeleteExistingOrder(order.Id);
@@ -80,7 +80,7 @@ internal class OrderingState : AppState
             switch (input)
             {
                 case 'A':
-                    AddProductsToShoppingCart();
+                    AddOrUpdateProductsInOrder();
                     break;
                 case 'B':
                     OnStateChanged(this, nameof(BrowsingState));
@@ -99,56 +99,71 @@ internal class OrderingState : AppState
         }
     }
 
-    private void AddProductsToShoppingCart()
+    private void AddOrUpdateProductsInOrder(int? orderId = null)
     {
-        var order = new Order(_session.AuthenticatedUser.Email);
+        var isOrderNew = orderId == null;
+        using var context = new AppDbContext();
+        Order order;
+        if (isOrderNew)
+        {
+            order = new Order(_session.AuthenticatedUser.Email);
+        }
+        else
+        {
+            order = context.Orders.Find(orderId);
+            if (order == null)
+            {
+                order = new Order(_session.AuthenticatedUser.Email);
+                isOrderNew = true;
+            }
+        }
+
         _view.Info($"Type the list of product ID - quantity pairs of items you'd like to purchase. Type [{ConsoleKey.Backspace}] when you are finished.");
         _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Backspace}]' to add 2 products with ID 1 and 1 product with ID 43");
 
-        var consoleKey = ConsoleKey.Enter;
-        while (consoleKey != ConsoleKey.Backspace)
+        while (_inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to exit.") != ConsoleKey.Backspace)
         {
-            if (_inputHandler.TryAskUserTextInput(
-                    InputFormatValidator.ValidateHyphenSeparatedNumberPair,
-                    InputConvertor.ToHyphenSeparatedIntegerPair,
+            if (!_inputHandler.TryAskUserTextInput(
+                    x => string.IsNullOrEmpty(x) || InputFormatValidator.ValidateHyphenSeparatedNumberPair(x),
+                    x => string.IsNullOrEmpty(x)
+                        ? (int.MinValue, int.MinValue)
+                        : InputConvertor.ToHyphenSeparatedIntegerPair(x),
                     out var result,
-                    $"Enter the product ID and quantity. Press [{ConsoleKey.Enter}] to exit.",
-                    "Input must be a pair of hyphen-separated numbers"))
+                    $"Enter the product ID and quantity you'd like to add or update. Enter nothing to exit.",
+                    "Input must be empty or a pair of hyphen-separated numbers"))
             {
-                if (result != (default, default))
-                {
-                    var (productId, productQuantity) = result;
-                    var isProductAlreadyAdded = false;
-                    foreach (var product in order.Products)
-                    {
-                        if (product.ProductId == productId && product.ProductQuantity != productQuantity)
-                        {
-                            isProductAlreadyAdded = true;
-                            product.ProductQuantity = productQuantity;
-                            _view.Info($"Quantity of product ID [{product.ProductId}] changed to {product.ProductQuantity}");
-                        }
-                    }
-
-                    if (!isProductAlreadyAdded)
-                    {
-                        order.Products.Add(new OrderProduct
-                        {
-                            ProductId = productId,
-                            ProductQuantity = productQuantity,
-                        });
-                    }
-
-                    _view.Info($"Added {productQuantity} of product ID [{productId}]");
-                    consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to finish.");
-                }
-                else
-                {
-                    break;
-                }
-                
+                continue;
+            }
+            
+            // the user is highly unlikely to enter this specific number so we can safely treat it as a special case
+            if (result == (int.MinValue, int.MinValue))
+            {
+                break;
             }
 
-            
+            var (productId, productQuantity) = result;
+            var isProductAlreadyAdded = false;
+            foreach (var product in order.Products)
+            {
+                if (product.ProductId == productId && product.ProductQuantity != productQuantity)
+                {
+                    isProductAlreadyAdded = true;
+                    product.ProductQuantity = productQuantity;
+                    _view.Info(
+                        $"Quantity of product ID [{product.ProductId}] changed to {product.ProductQuantity}");
+                }
+            }
+
+            if (!isProductAlreadyAdded)
+            {
+                order.Products.Add(new OrderProduct
+                {
+                    ProductId = productId,
+                    ProductQuantity = productQuantity,
+                });
+            }
+
+            _view.Info($"Added {productQuantity} of product ID [{productId}]");
         }
 
         if (order.Products.Count == 0)
@@ -158,7 +173,6 @@ internal class OrderingState : AppState
         }
 
         var productIdList = order.Products.Select(x => x.ProductId).ToList();
-        using var context = new AppDbContext();
         var products = context.Products
             .Where(x => productIdList.Contains(x.Id) && x.InventoryCount > 0)
             .Select(x => new { x.Id, x.InventoryCount })
@@ -171,21 +185,29 @@ internal class OrderingState : AppState
             _view.Error("Ordered items are invalid");
             return;
         }
-
-        try
+        
+        if (isOrderNew)
         {
             _view.Info("Saving new order");
             context.Orders.Add(order);
-            context.OrderProducts.AddRange(order.Products);
-            context.SaveChanges();
+            context.OrderProducts.AddRange(order.Products);       
         }
-        catch
+        else
+        {
+            _view.Info("Updating order");
+            context.Orders.Update(order);
+        }
+
+        if (!context.TrySaveChanges())
         {
             _view.Error("Failed to process order");
+            return;
         }
+        
+        _view.Info($"Successfully {(isOrderNew ? "added" : "updated")} order [{order.Id}]");
     }
 
-    private bool ValidateOrderProductQuantity(Order order, IReadOnlyDictionary<int, uint> availableProducts)
+    private bool ValidateOrderProductQuantity(Order order, IReadOnlyDictionary<int, int> availableProducts)
     {
         var errorMessages = new List<string>();
         IEnumerable<OrderProduct> validProducts = order.Products;
@@ -241,45 +263,72 @@ internal class OrderingState : AppState
         context.Orders.Remove(order);
         context.SaveChanges();
     }
-
-    private void EditOrder(Order order)
+    
+    private void RemoveProductsFromOrder(int orderId)
     {
-        using var context = new AppDbContext();
-        var consoleKey = ConsoleKey.Enter;
-        int? id;
-        while (consoleKey != ConsoleKey.Backspace)
+        var productIdsToRemove = new HashSet<int>();
+        while (_inputHandler.AskUserKeyInput($"Press any key to start entering IDs of products to remove. Press [{ConsoleKey.Backspace}] to exit.") != ConsoleKey.Backspace)
         {
-            if (_inputHandler.TryAskUserTextInput(
-                       x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
-                       x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
-                       out id,
-                       $"Please type the ID of the product you would like to remove. Press [{ConsoleKey.Enter}] to exit.",
-                       "Invalid input. Input must be empty or a valid number"))
+            if (!_inputHandler.TryAskUserTextInput(
+                    x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
+                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
+                    out int? id,
+                    $"Please type the ID of the product you would like to remove. Enter nothing to exit.",
+                    "Invalid input. Input must be empty or a valid number"))
             {
-                if (id != null)
-                {
-                    var product = context.OrderProducts.Find(order.Id, id);
-                    if (product == null)
-                    {
-                        _view.Error($"Unable to find product [{id}]");
-                    }
-                    else
-                    {
-                        order.Products.Remove(product);
-                        context.OrderProducts.Remove(product);
-                        context.SaveChanges();
-                        _view.Info($"Successfully removed product ID [{id}]");
-                    }
-                    consoleKey = _inputHandler.AskUserKeyInput($"Press any key to input another product ID. Press [{ConsoleKey.Backspace}] to exit.");
-                }
-                else
-                {
-                    break;
-                }
+                continue;
+            }
+
+            if (id == null)
+            {
+                break;
+            }
+
+            if (!productIdsToRemove.Contains(id.Value))
+            {
+                productIdsToRemove.Add(id.Value);
             }
         }
 
-        AddProductsToShoppingCart();
+        if (productIdsToRemove.Count == 0)
+        {
+            _view.Info("No products removed from order");
+        }
+        else
+        {
+            _view.Info($"Removing the following products with IDs: {string.Join(", ", productIdsToRemove)}");
+            using var context = new AppDbContext();
+            var order = context.Orders
+                .Include(x => x.Products)
+                .FirstOrDefault(x => x.Id == orderId);
+            
+            if (order == null)
+            {
+                _view.Error($"Order [{orderId}] not found.");
+                return;
+            }
+
+            var orderProductIds = order.Products.Select(x => x.ProductId).ToList();
+            var invalidProductIdsToRemove = productIdsToRemove.Except(productIdsToRemove.Intersect(orderProductIds)).ToList();
+            if (invalidProductIdsToRemove.Count > 0)
+            {
+                _view.Error($"The following product IDs cannot be removed because they are not in the order: {string.Join(",", invalidProductIdsToRemove)}");
+                return;
+            }
+
+            order.Products = order.Products
+                .Where(x => !productIdsToRemove.Contains(x.ProductId))
+                .ToList();
+
+            context.Orders.Update(order);
+            if (!context.TrySaveChanges())
+            {
+                _view.Error("Failed to remove products from order");
+                return;
+            } 
+        }
+
+        AddOrUpdateProductsInOrder();
     }
 
     private void ConfirmOrder(Order order)
@@ -455,13 +504,12 @@ internal class OrderingState : AppState
             return null;
         }
         
-        // TODO: make the date format (mm/yyyy)
         DateOnly? expiryDate;
         while (!_inputHandler.TryAskUserTextInput(
                    x => string.IsNullOrEmpty(x) || InputFormatValidator.ValidateCardExpiryDate(x),
                    x => string.IsNullOrEmpty(x) ? null : DateOnly.FromDateTime(DateTime.Parse(x)),
                    out expiryDate,
-                   $"Enter your card expiry date. Press [{ConsoleKey.Enter}] to exit.",
+                   $"Enter your card expiry date. Enter nothing to exit.",
                    "Invalid input. Input must be empty or a valid card expiry date"))
         { }
 

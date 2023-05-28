@@ -11,5 +11,5 @@ public class Product
 	public string Name { get; init; } = string.Empty;
 	public string Description { get; init; } = string.Empty;
 	public decimal Price { get; set; } = decimal.Zero;
-	public uint InventoryCount { get; set; }
+	public int InventoryCount { get; set; }
 }

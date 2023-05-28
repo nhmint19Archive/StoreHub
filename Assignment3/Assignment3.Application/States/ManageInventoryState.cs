@@ -131,10 +131,10 @@ namespace Assignment3.Application.States
                 return;
             }
             
-            uint? inventoryCount;
+            int? inventoryCount;
             while (!_inputHandler.TryAskUserTextInput(
-                       x => string.IsNullOrEmpty(x) || uint.TryParse(x, out _),
-                       x => string.IsNullOrEmpty(x) ? null : uint.Parse(x),
+                       x => string.IsNullOrEmpty(x) || int.TryParse(x, out var y) && y >= 0,
+                       x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out inventoryCount,
                    $"Please type the quantity of the product. Press [{ConsoleKey.Enter}] to exit.",
                    "Invalid input. Input must be empty or a valid number"))
@@ -256,10 +256,10 @@ namespace Assignment3.Application.States
             _view.Info($"Product ID [{product.Id}] - {product.Name}");
             _view.Info($"Current stock: {product.InventoryCount}");
             
-            uint? inventoryCount;
+            int? inventoryCount;
             while (!_inputHandler.TryAskUserTextInput(
-                   x => string.IsNullOrEmpty(x) || uint.TryParse(x, out _),
-                   x => string.IsNullOrEmpty(x) ? null : uint.Parse(x),
+                   x => string.IsNullOrEmpty(x) || int.TryParse(x, out var y) && y >= 0,
+                   x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out inventoryCount,
                    $"Please type the quantity of the product",
                    "Invalid input. Input must be a valid number"))

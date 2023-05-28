@@ -1,4 +1,5 @@
-﻿using Assignment3.Domain.Data;
+﻿using System.Diagnostics.Contracts;
+using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,6 +55,7 @@ internal class Invoice
 	        using var context = new AppDbContext();	        
 	        var order = context.Orders
 		        .Include(x => x.Products)
+		        .ThenInclude(x => x.Product)
 		        .FirstOrDefault(x => x.Id == _orderId) ?? throw new InvalidOperationException("Order not found");
 	        
 	        var transaction = new Transaction()
@@ -61,12 +63,18 @@ internal class Invoice
 		        TransactionDateUtc = DateTime.UtcNow,
 		        Amount = _totalPrice,
 	        };
+
+	        foreach (var purchasedOrderProducts in order.Products)
+	        {
+		        purchasedOrderProducts.Product.InventoryCount -= purchasedOrderProducts.ProductQuantity;
+		        if (purchasedOrderProducts.Product.InventoryCount < 0)
+		        {
+			        throw new InvalidOperationException("Cannot purchase more products than the available stock");
+		        }
+	        }
 	        
 	        var receipt = _transactionMethod.Execute(transaction, order);
-	        var productsToPurchase = context.Products
-		        .Where(x => _orderProducts.Select(y => y.ProductId).Contains(x.Id))
-		        .ToDictionary(x => x.Id, x => x.Price);
-	        
+
 	        order.Status = OrderStatus.Confirmed;
 
 	        context.Update(order);
