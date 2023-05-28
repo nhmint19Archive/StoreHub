@@ -44,31 +44,10 @@ namespace Assignment3.Application.States
                 OnStateChanged(this, nameof(MainMenuState));
                 return;
             }
-            
-            // TODO: refactor this to make the behavior similar to BrowsingState for consistency
-            var products = _catalogue.GetProducts();
-            _view.Info($"Displaying {products.Count} available products:");
-            foreach (var product in products)
-            {
-                ShowProduct(product);
-            }
 
-            while (!SelectOption())
-            {}
-        }
-
-        private void ShowProduct(Product product)
-        {
-            _view.Info(string.Empty);
-            _view.Info($"ID [{product.Id}] - Availability: {product.InventoryCount}");
-            _view.Info($"{product.Name} - {product.Price} AUD");
-            _view.Info($"{product.Description}");
-        }
-
-        private bool SelectOption()
-        {
             var options = new Dictionary<char, string>()
                 {
+                    { 'S', "Show All Products" },
                     { 'C', "Add a New Product to the catalogue" },
                     { 'U', "Update a Products Price" },
                     { 'Q', "Update a Products Quantity" },
@@ -80,6 +59,9 @@ namespace Assignment3.Application.States
 
             switch (input)
             {
+                case 'S':
+                    ShowAllProducts();
+                    break;
                 case 'C':
                     CreateProduct();
                     break;
@@ -94,10 +76,26 @@ namespace Assignment3.Application.States
                     break;
                 case 'E':
                     OnStateChanged(this, nameof(MainMenuState));
-                    return true;
+                    break;
             }
-            return false;
+        }
 
+        private void ShowAllProducts()
+        {
+            var products = _catalogue.GetProducts();
+            _view.Info($"Displaying {products.Count} available products:");
+            foreach (var product in products)
+            {
+                ShowProduct(product);
+            }
+        }
+
+        private void ShowProduct(Product product)
+        {
+            _view.Info(string.Empty);
+            _view.Info($"ID [{product.Id}] - Availability: {product.InventoryCount}");
+            _view.Info($"{product.Name} - {product.Price} AUD");
+            _view.Info($"{product.Description}");
         }
 
         private void CreateProduct()
