@@ -414,7 +414,8 @@ internal class OrderingState : AppState
                     streetNumber,
                     streetName,
                     postalCode,
-                    apartmentNo);
+                    apartmentNo ?? string.Empty,
+                    _session.AuthenticatedUser.Email);
             }
         } while (_inputHandler.AskUserKeyInput(
                      $"Press any key to continue. Press [{ConsoleKey.Backspace}] to return to delivery options") !=

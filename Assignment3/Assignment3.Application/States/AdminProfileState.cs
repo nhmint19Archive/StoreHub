@@ -94,7 +94,7 @@ internal class AdminProfileState : AppState
             return;
         }
 
-        var newStaffAccount = new StaffAccount()
+        var newStaffAccount = new UserAccount()
         {
             Email = email,
             Phone = phone,
