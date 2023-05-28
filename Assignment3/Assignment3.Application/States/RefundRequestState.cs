@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Application.States
 {
-    
+    /// <summary>
+    /// Allows a customer to create or view their refund requests.
+    /// </summary>
     internal class RefundRequestState : AppState
     {
         private readonly UserSession _session;
@@ -26,7 +28,7 @@ namespace Assignment3.Application.States
         {
             if (!_session.IsUserInRole(Roles.Customer))
             {
-                _view.Error("Invalid access to staff page");
+                _view.Error("Invalid access to customer page");
                 _view.Info("Signing out");
                 _session.SignOut();
                 OnStateChanged(this, nameof(MainMenuState));

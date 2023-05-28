@@ -5,6 +5,9 @@ using System.Linq.Expressions;
 
 namespace Assignment3.Application.States;
 
+/// <summary>
+/// Allows customers to browse the store.
+/// </summary>
 internal class BrowsingState : AppState
 {
     private readonly Catalogue _catalogue;

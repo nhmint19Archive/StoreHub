@@ -7,6 +7,9 @@ using Assignment3.Domain.Services;
 
 namespace Assignment3.Application.States;
 
+/// <summary>
+/// Allows the user to sign in, create a new account or reset their password.
+/// </summary>
 internal class SignInState : AppState
 {
     private readonly UserSession _session;  

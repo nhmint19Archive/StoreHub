@@ -2,6 +2,9 @@ using Assignment3.Application.Services;
 
 namespace Assignment3.Application.States;
 
+/// <summary>
+/// Acts the starting state of the application.
+/// </summary>
 internal class MainMenuState : AppState
 {
     private readonly IConsoleInputHandler _inputHandler;

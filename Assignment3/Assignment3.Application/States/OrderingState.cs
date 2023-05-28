@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Application.States;
 
+/// <summary>
+/// Allows a customer to manage their order.
+/// </summary>
 internal class OrderingState : AppState
 {
     private readonly UserSession _session;
