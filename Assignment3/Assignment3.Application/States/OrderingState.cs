@@ -266,69 +266,7 @@ internal class OrderingState : AppState
             consoleKey = _inputHandler.AskUserKeyInput($"Press any key to input another product ID. Press [{ConsoleKey.Backspace}] to exit.");
         }
 
-        var orderProductIds = order.Products.Select(x => x.ProductId).ToHashSet();
-        _view.Info($"Type the list of product ID - quantity pairs of items you'd like to update or add to order. Type [{ConsoleKey.Backspace}] when you are finished.");
-        _view.Info($"For example: type '1-2 [{ConsoleKey.Enter}] 43-1 [{ConsoleKey.Backspace}]' to add 2 products with ID 1 and 1 product with ID 43");
-
-        var productIdQuantityPairs = new Dictionary<int, int>();
-        consoleKey = ConsoleKey.Enter;
-        while (consoleKey != ConsoleKey.Backspace)
-        {
-            if (_inputHandler.TryAskUserTextInput(
-                    InputFormatValidator.ValidateHyphenSeparatedNumberPair,
-                    InputConvertor.ToHyphenSeparatedIntegerPair, 
-                    out var result,
-                    "Enter the product ID and new quantity",
-                    "Input must be a pair of hyphen-separated numbers"))
-            {
-                var (productId, quantity) = result;
-                productIdQuantityPairs.Add(productId, quantity);
-            }
-
-            consoleKey = _inputHandler.AskUserKeyInput($"Press any key to continue. Press [{ConsoleKey.Backspace}] to quit.");
-        }
-
-        var productIdsToAdd = productIdQuantityPairs
-            .Where(x => !orderProductIds.Contains(x.Key))
-            .ToDictionary(x => x.Key, x=>x.Value);
-
-        foreach (var (productId, quantity) in productIdsToAdd)
-        {
-            _view.Info($"Adding {quantity} of new product with ID [{productId}]");
-        }
-        
-        foreach (var orderProduct in order.Products)
-        {
-            if (productIdQuantityPairs.TryGetValue(orderProduct.ProductId, out var updatedQuantity))
-            {
-                orderProduct.ProductQuantity = updatedQuantity;
-            }
-        }
-
-        var productIdList = order.Products.Select(x => x.ProductId).ToList();
-        var products = context.Products
-            .Where(x => productIdList.Contains(x.Id) && x.InventoryCount > 0)
-            .Select(x => new { x.Id, x.InventoryCount })
-            .ToDictionary(
-                x => x.Id,
-                x => x.InventoryCount);
-
-        if (!ValidateOrderProductQuantity(order, products))
-        {
-            _view.Error("Ordered items are invalid");
-            return;
-        }
-
-        try
-        {
-            context.Orders.Update(order);
-            context.OrderProducts.UpdateRange(order.Products);
-            context.SaveChanges();
-        }
-        catch
-        {
-            _view.Error("Failed to process order");
-        }
+        AddProductsToShoppingCart();
     }
 
     private void ConfirmOrder(Order order)
