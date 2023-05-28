@@ -351,7 +351,7 @@ internal class OrderingState : AppState
                     $"Enter your postal code",
                     "Postal code is invalid.") &&
                 _inputHandler.TryAskUserTextInput(
-                    x => Regex.IsMatch(x, RegexPatterns.ApartmentNo),
+                    x => string.IsNullOrEmpty(x) || Regex.IsMatch(x, RegexPatterns.ApartmentNo),
                     x => string.IsNullOrEmpty(x) ? null : x,
                     out var apartmentNo,
                     $"Enter your apartment number (if applicable)",
