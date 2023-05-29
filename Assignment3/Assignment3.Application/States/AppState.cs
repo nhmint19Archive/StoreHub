@@ -1,3 +1,6 @@
+using Assignment3.Application.Models;
+using Assignment3.Application.Services;
+
 namespace Assignment3.Application.States;
 
 /// <summary>
@@ -8,6 +11,17 @@ namespace Assignment3.Application.States;
 /// </summary>
 internal abstract class AppState
 {
+    protected readonly UserSession _session;
+    protected readonly IConsoleView _view;
+    protected readonly IConsoleInputHandler _inputHandler;
+    
+    protected AppState(UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)
+    {
+        _view = view;
+        _inputHandler = inputHandler;
+        _session = session;
+    }
+
     /// <summary>
     /// Notifies that the application state is changed.
     /// </summary>

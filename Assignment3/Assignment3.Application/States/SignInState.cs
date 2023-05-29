@@ -12,17 +12,11 @@ namespace Assignment3.Application.States;
 /// </summary>
 internal class SignInState : AppState
 {
-    private readonly UserSession _session;  
-    private readonly IConsoleView _view;
-    private readonly IConsoleInputHandler _inputHandler;
     public SignInState(
         UserSession session, 
         IConsoleView view, 
-        IConsoleInputHandler inputHandler)
+        IConsoleInputHandler inputHandler)  : base(session, view, inputHandler)
     {
-        _session = session;
-        _view = view;
-        _inputHandler = inputHandler;
     }
 
     /// <inheritdoc />

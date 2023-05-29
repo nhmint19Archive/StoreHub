@@ -13,20 +13,14 @@ namespace Assignment3.Application.States;
 internal class ManageInventoryState : AppState
 {
     private readonly Catalogue _catalogue;
-    private readonly UserSession _session;
-    private readonly IConsoleView _view;
-    private readonly IConsoleInputHandler _inputHandler;
 
     public ManageInventoryState(
         Catalogue catalogue, 
         UserSession session, 
         IConsoleView view, 
-        IConsoleInputHandler inputHandler)
+        IConsoleInputHandler inputHandler)  : base(session, view, inputHandler)
     {
         _catalogue = catalogue;
-        _session = session;
-        _view = view;
-        _inputHandler = inputHandler;
     }
         
     /// <inheritdoc/>

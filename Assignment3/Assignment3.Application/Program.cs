@@ -47,7 +47,7 @@ internal class Program
             .AddSingleton<IConsoleView, ConsoleView>()
             .AddSingleton<IConsoleInputHandler, ConsoleInputHandler>()
             .AddSingleton<AppController>()
-            .AddSingleton<Catalogue>()
+            .AddTransient<Catalogue>()
             .AddSingleton<MainMenuState>()
             .AddSingleton<BrowsingState>()
             .AddSingleton<OrderingState>()

@@ -12,17 +12,11 @@ namespace Assignment3.Application.States;
 /// </summary>
 internal class AdminProfileState : AppState
 {
-    private readonly UserSession _session;  
-    private readonly IConsoleView _view;
-    private readonly IConsoleInputHandler _inputHandler;
     public AdminProfileState(
         UserSession session, 
         IConsoleInputHandler inputHandler, 
-        IConsoleView view)
+        IConsoleView view)  : base(session, view, inputHandler)
     {
-        _session = session;
-        _inputHandler = inputHandler;
-        _view = view;
     }
     
     /// <inheritdoc/>

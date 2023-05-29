@@ -1,3 +1,4 @@
+using Assignment3.Application.Models;
 using Assignment3.Application.Services;
 
 namespace Assignment3.Application.States;
@@ -7,10 +8,8 @@ namespace Assignment3.Application.States;
 /// </summary>
 internal class MainMenuState : AppState
 {
-    private readonly IConsoleInputHandler _inputHandler;
-    public MainMenuState(IConsoleInputHandler inputHandler)
+    public MainMenuState(UserSession session, IConsoleView view, IConsoleInputHandler inputHandler)  : base(session, view, inputHandler)
     {
-        _inputHandler = inputHandler;
     }
 
     /// <inheritdoc />

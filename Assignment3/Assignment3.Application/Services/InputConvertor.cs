@@ -6,26 +6,6 @@
 internal static class InputConvertor
 {
     /// <summary>
-    /// Converts raw user input into a comma-separated integer list.
-    /// </summary>
-    /// <param name="input">Raw input string.</param>
-    /// <returns>A collection of integers.</returns>
-    /// <remarks>
-    /// This method does not perform any validation.
-    /// The string input is assumed to already be a comma-separated list of integers.
-    /// For input validation, see <see cref="InputFormatValidator.ValidateCommaSeparatedNumberList(string)"/>.
-    /// </remarks>
-    public static IReadOnlyCollection<int> ToCommaSeparatedIntegerList(string input)
-    {
-        return string.IsNullOrEmpty(input)
-            ? new List<int>()
-            : input.Split(",")
-                .Select(x => x.Trim())
-                .Select(x => int.Parse(x))
-                .ToList();
-    }
-
-    /// <summary>
     /// Converts raw user input into a hyphen-separated integer pair.
     /// </summary>
     /// <param name="input">Raw input string.</param>
