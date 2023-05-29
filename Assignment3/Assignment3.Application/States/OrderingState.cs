@@ -566,7 +566,7 @@ internal class OrderingState : AppState
                    "PayPal username is invalid."))
         { }
 
-        if (paypalUsername == null)
+        if ( string.IsNullOrEmpty(paypalUsername))
         {
             _view.Info("No Paypal identifier entered.");
             return null;
