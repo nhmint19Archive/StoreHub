@@ -73,21 +73,21 @@ internal class AdminProfileState : AppState
 
     private void CreateStaffAccount()
     {
-        var email = _inputHandler.AskUserTextInput($"Enter the staff member's email. Press [{ConsoleKey.Enter}] to exit.");
+        var email = _inputHandler.AskUserTextInput($"Enter the staff member's email. Type nothing and press [Enter] to exit.");
         if (string.IsNullOrEmpty(email))
         {
             _view.Info("Empty email. No staff account created.");
             return;
         }
         
-        var phone = _inputHandler.AskUserTextInput($"Enter the staff member's phone number. Press [{ConsoleKey.Enter}] to exit.");       
+        var phone = _inputHandler.AskUserTextInput($"Enter the staff member's phone number. Type nothing and press [Enter] to exit.");       
         if (string.IsNullOrEmpty(phone))
         {
             _view.Info("Empty phone number. No staff account created.");
             return;
         }
         
-        var password = _inputHandler.AskUserTextInput($"Enter the account password. Press [{ConsoleKey.Enter}] to exit.");
+        var password = _inputHandler.AskUserTextInput($"Enter the account password. Type nothing and press [Enter] to exit.");
         if (string.IsNullOrEmpty(password))
         {
             _view.Info("Empty password. No staff account created.");
@@ -122,7 +122,7 @@ internal class AdminProfileState : AppState
 
     private void ChangeStaffAccountDetails()
     {
-        var email = _inputHandler.AskUserTextInput($"Enter the staff member's email. Press [{ConsoleKey.Enter}] to exit.");
+        var email = _inputHandler.AskUserTextInput($"Enter the staff member's email. Type nothing and press [Enter] to exit.");
         if (string.IsNullOrEmpty(email)) 
         {
             _view.Info("Empty email. No staff account updated.");
@@ -137,8 +137,8 @@ internal class AdminProfileState : AppState
             return;
         }
         
-        var newPhoneNumber = _inputHandler.AskUserTextInput($"Enter the staff member's new phone number. Press [{ConsoleKey.Enter}] if you do not want to change their phone number");
-        var newPassword = _inputHandler.AskUserTextInput($"Enter the staff member's new password. Press [{ConsoleKey.Enter}] if you do not want to change their password");
+        var newPhoneNumber = _inputHandler.AskUserTextInput($"Enter the staff member's new phone number. Type nothing and press [Enter]if you do not want to change their phone number");
+        var newPassword = _inputHandler.AskUserTextInput($"Enter the staff member's new password. Type nothing and press [Enter]if you do not want to change their password");
 
         if (string.IsNullOrEmpty(newPhoneNumber) && string.IsNullOrEmpty(newPassword))
         {

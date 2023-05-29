@@ -124,7 +124,7 @@ internal class OrderingState : AppState
                         ? (int.MinValue, int.MinValue)
                         : InputConvertor.ToHyphenSeparatedIntegerPair(x),
                     out var result,
-                    $"Enter the product ID and quantity you'd like to add or update. Enter nothing to exit.",
+                    $"Enter the product ID and quantity you'd like to add or update. Type nothing and press [Enter] to exit.",
                     "Input must be empty or a pair of hyphen-separated numbers"))
             {
                 continue;
@@ -268,7 +268,7 @@ internal class OrderingState : AppState
                     x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
                     x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                     out int? id,
-                    $"Please type the ID of the product you would like to remove. Enter nothing to exit.",
+                    $"Please type the ID of the product you would like to remove. Type nothing and press [Enter] to exit.",
                     "Invalid input. Input must be empty or a valid number"))
             {
                 continue;
@@ -474,7 +474,7 @@ internal class OrderingState : AppState
                    x => string.IsNullOrEmpty(x) || InputFormatValidator.ValidateCardNumber(x),
                    x => x,
                    out cardNo,
-                   $"Enter your card number in the xxxx-xxxx-xxxx-xxxx format. Press [{ConsoleKey.Enter}] if you do not want one",
+                   $"Enter your card number in the xxxx-xxxx-xxxx-xxxx format. Type nothing and press [Enter]if you do not want one",
                    "Invalid input. Input must be empty or a valid card number"))
         { }
 
@@ -489,7 +489,7 @@ internal class OrderingState : AppState
                    x => string.IsNullOrEmpty(x) || Regex.IsMatch(x, RegexPatterns.Cvc),
                    x => x,
                    out cvc,
-                   $"Enter your card CVC. Press [{ConsoleKey.Enter}] to exit",
+                   $"Enter your card CVC. Type nothing and press [Enter]to exit",
                    "Invalid input. Input must be empty or a valid CVC"))
         { }
 
@@ -504,7 +504,7 @@ internal class OrderingState : AppState
                    x => string.IsNullOrEmpty(x) || InputFormatValidator.ValidateCardExpiryDate(x),
                    x => string.IsNullOrEmpty(x) ? null : DateOnly.FromDateTime(DateTime.Parse(x)),
                    out expiryDate,
-                   $"Enter your card expiry date. Enter nothing to exit.",
+                   $"Enter your card expiry date. Type nothing and press [Enter] to exit.",
                    "Invalid input. Input must be empty or a valid card expiry date"))
         { }
 

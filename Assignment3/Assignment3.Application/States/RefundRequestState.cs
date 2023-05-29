@@ -131,7 +131,7 @@ internal class RefundRequestState : AppState
                    x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out orderToRefundId,
-                   $"Type the order ID you'd like to request a refund. Enter nothing to cancel",
+                   $"Type the order ID you'd like to request a refund. Type nothing and press [Enter]to cancel",
                    "Invalid input. Input must be empty or a valid number"))
         { }
 
@@ -152,7 +152,7 @@ internal class RefundRequestState : AppState
         var requests = context.RefundRequests.Find(orderToRefundId);
         if (requests != null)
         {
-            _view.Error($"You already requested a refund for order [{orderToRefundId}]");
+            _view.Error($"You have already requested a refund for order [{orderToRefundId}]");
             return;
         }
 
@@ -166,6 +166,6 @@ internal class RefundRequestState : AppState
             return;
         }
 
-        _view.Info("Refund has been sent successfully. Please wait for the store to process your request.");
+        _view.Info("Refund has been sent. Please wait for the store to process your request.");
     }
 }
