@@ -137,8 +137,8 @@ internal class AdminProfileState : AppState
             return;
         }
         
-        var newPhoneNumber = _inputHandler.AskUserTextInput($"Enter the staff member's new phone number. Type nothing and press [Enter]if you do not want to change their phone number");
-        var newPassword = _inputHandler.AskUserTextInput($"Enter the staff member's new password. Type nothing and press [Enter]if you do not want to change their password");
+        var newPhoneNumber = _inputHandler.AskUserTextInput($"Enter the staff member's new phone number. Type nothing and press [Enter] if you do not want to change their phone number");
+        var newPassword = _inputHandler.AskUserTextInput($"Enter the staff member's new password. Type nothing and press [Enter] if you do not want to change their password");
 
         if (string.IsNullOrEmpty(newPhoneNumber) && string.IsNullOrEmpty(newPassword))
         {

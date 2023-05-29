@@ -131,7 +131,7 @@ internal class RefundRequestState : AppState
                    x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out orderToRefundId,
-                   $"Type the order ID you'd like to request a refund. Type nothing and press [Enter]to cancel",
+                   $"Type the order ID you'd like to request a refund. Type nothing and press [Enter] to cancel",
                    "Invalid input. Input must be empty or a valid number"))
         { }
 

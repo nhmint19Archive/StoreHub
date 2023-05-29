@@ -474,7 +474,7 @@ internal class OrderingState : AppState
                    x => string.IsNullOrEmpty(x) || InputFormatValidator.ValidateCardNumber(x),
                    x => x,
                    out cardNo,
-                   $"Enter your card number in the xxxx-xxxx-xxxx-xxxx format. Type nothing and press [Enter]if you do not want one",
+                   $"Enter your card number in the xxxx-xxxx-xxxx-xxxx format. Type nothing and press [Enter] if you do not want one",
                    "Invalid input. Input must be empty or a valid card number"))
         { }
 
@@ -489,7 +489,7 @@ internal class OrderingState : AppState
                    x => string.IsNullOrEmpty(x) || Regex.IsMatch(x, RegexPatterns.Cvc),
                    x => x,
                    out cvc,
-                   $"Enter your card CVC. Type nothing and press [Enter]to exit",
+                   $"Enter your card CVC. Type nothing and press [Enter] to exit",
                    "Invalid input. Input must be empty or a valid CVC"))
         { }
 
@@ -504,7 +504,7 @@ internal class OrderingState : AppState
                    x => string.IsNullOrEmpty(x) || InputFormatValidator.ValidateCardExpiryDate(x),
                    x => string.IsNullOrEmpty(x) ? null : DateOnly.FromDateTime(DateTime.Parse(x)),
                    out expiryDate,
-                   $"Enter your card expiry date. Type nothing and press [Enter] to exit.",
+                   $"Enter your card expiry date in the mm/yyyy format. Type nothing and press [Enter] to exit.",
                    "Invalid input. Input must be empty or a valid card expiry date"))
         { }
 
