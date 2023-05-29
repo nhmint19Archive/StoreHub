@@ -323,7 +323,7 @@ internal class OrderingState : AppState
             } 
         }
 
-        AddOrUpdateProductsInOrder();
+        AddOrUpdateProductsInOrder(orderId);
     }
 
     private void ConfirmOrder(Order order)
