@@ -47,8 +47,7 @@ public class ConsoleInputHandler : IConsoleInputHandler
     public ConsoleKey AskUserKeyInput(string prompt = "Please enter your key:")
     {
         _view.Info(prompt);
-        var result = Console.ReadKey(false).Key;
-        Console.WriteLine();
+        var result = Console.ReadKey(true).Key;
         return result;
     }
 
