@@ -14,8 +14,6 @@ internal class BrowsingState : AppState
     private readonly UserSession _session;
     private readonly IConsoleView _view;
     private readonly IConsoleInputHandler _inputHandler;
-    private Expression<Func<Product, bool>>? _priceFilter = null;
-    private Expression<Func<Product, bool>>? _nameFilter = null;
 
     public BrowsingState(
         Catalogue catalogue,
@@ -51,7 +49,7 @@ internal class BrowsingState : AppState
             { 'O', "Manage Order" }
         };
 
-        if (_nameFilter != null || _priceFilter != null)
+        if (_catalogue.AreFiltersApplied)
         {
             options.Add('C', "Clear Filter");
         }
@@ -71,8 +69,7 @@ internal class BrowsingState : AppState
                 ShowProducts();
                 break;
             case 'C':
-                _priceFilter = null;
-                _nameFilter = null;
+                _catalogue.ResetFilters();
                 break;
             case 'E':
                 OnStateChanged(this, nameof(MainMenuState));
@@ -85,7 +82,7 @@ internal class BrowsingState : AppState
 
     private void ShowProducts()
     {
-        var products = _catalogue.GetProducts(_priceFilter, _nameFilter);
+        var products = _catalogue.GetProducts();
         _view.Info($"Displaying {products.Count} available products:");
 
         foreach (var product in products)
@@ -106,7 +103,7 @@ internal class BrowsingState : AppState
             { 'D', "Display Available Products" },
         };
 
-        if (_nameFilter != null || _priceFilter != null)
+        if (_catalogue.AreFiltersApplied)
         {
             options.Add('C', "Clear filter");
         }
@@ -129,8 +126,7 @@ internal class BrowsingState : AppState
                 ShowFilters();
                 break;
             case 'C':
-                _priceFilter = null;
-                _nameFilter = null;
+                _catalogue.ResetFilters();
                 break;
             case 'E':
                 OnStateChanged(this, nameof(MainMenuState));
@@ -140,41 +136,51 @@ internal class BrowsingState : AppState
 
     private void ShowFilters()
     {
+       string? nameFilter;
         while (!_inputHandler.TryAskUserTextInput(
                     _ => true,
-                    x => string.IsNullOrEmpty(x) ? null : p => p.Name.Contains(x),
-                    out _nameFilter,
+                    x => string.IsNullOrEmpty(x) ? null : x,
+                    out nameFilter,
                     $"Please type the product name filter or press [{ConsoleKey.Enter}] if you don not want any filter"))
         {
         }
 
+        if (nameFilter != null)
+        {
+            _catalogue.SetProductNameFilter(nameFilter);
+        }
+        else
+        {
+            _view.Info("No product name filters applied");
+        }
+
         decimal upperPrice;
         while (!_inputHandler.TryAskUserTextInput(
-                   x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
+                   x => string.IsNullOrEmpty(x) || (decimal.TryParse(x, out var y) && y >= 0),
                    x => string.IsNullOrEmpty(x) ?  decimal.MaxValue : decimal.Parse(x),
                    out upperPrice,
                    $"Please type the upper price limit or press [{ConsoleKey.Enter}] if you do not want one",
-                   "Invalid input. Input must be empty or a valid number"))
+                   "Invalid input. Input must be empty or a positive number"))
         {
         }
         
         decimal lowerPrice;
         while (!_inputHandler.TryAskUserTextInput(
-                   x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
+                   x => string.IsNullOrEmpty(x) || (decimal.TryParse(x, out var y) && y >= 0 && y <= upperPrice),
                    x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
                    out lowerPrice,
                    $"Please type the lower price limit or press [{ConsoleKey.Enter}] if you do not want one",
-                   "Invalid input. Input must be empty or a valid number"))
+                   $"Invalid input. Input must be empty or a positive number smaller than the upper price limit of ${upperPrice}"))
         {
         }
         
-        if (upperPrice == decimal.MaxValue && lowerPrice == default)
+        if (upperPrice != decimal.MaxValue || lowerPrice != default)
         {
-            _priceFilter = null;
-        }
+            _catalogue.SetPriceFilters(upperPrice, lowerPrice);
+        } 
         else
         {
-            _priceFilter = p => p.Price <= upperPrice && p.Price >= lowerPrice;
+            _view.Info("No price filters applied");
         }
     }
 }

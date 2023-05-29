@@ -105,7 +105,7 @@ internal class OrderingState : AppState
     {
         var isOrderNew = orderId == null;
         using var context = new AppDbContext();
-        Order order;
+        Order? order;
         if (isOrderNew)
         {
             order = new Order(_session.AuthenticatedUser.Email);
