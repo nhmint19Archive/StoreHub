@@ -29,7 +29,7 @@ internal class ViewSalesDataState : AppState
     /// <inheritdoc />
     public override void Run()
     {
-        if (!_session.IsUserInRole(Roles.Admin) || !_session.IsUserInRole(Roles.Staff))
+        if (!_session.IsUserInRole(Roles.Admin) && !_session.IsUserInRole(Roles.Staff))
         {
             _view.Error("Invalid access to sales data page");
             _view.Info("Signing out");
