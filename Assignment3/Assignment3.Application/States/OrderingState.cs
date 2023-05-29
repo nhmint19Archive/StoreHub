@@ -393,7 +393,7 @@ internal class OrderingState : AppState
         
         string? streetName;
         while (!_inputHandler.TryAskUserTextInput(
-                   x => Regex.IsMatch(x, RegexPatterns.StreetName) || string.IsNullOrEmpty(x),
+                   x => string.IsNullOrEmpty(x) || Regex.IsMatch(x, RegexPatterns.StreetName),
                    x => x,
                    out streetName,
                    $"Enter your address street name. Type nothing and press [Enter] to cancel.",
@@ -408,7 +408,7 @@ internal class OrderingState : AppState
         
         int? postalCode;
         while (!_inputHandler.TryAskUserTextInput(
-                   x => Regex.IsMatch(x, RegexPatterns.Postal) || string.IsNullOrEmpty(x),
+                   x => string.IsNullOrEmpty(x) || Regex.IsMatch(x, RegexPatterns.Postal),
                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out postalCode,
                    $"Enter your postal code. Type nothing and press [Enter] to cancel.",
