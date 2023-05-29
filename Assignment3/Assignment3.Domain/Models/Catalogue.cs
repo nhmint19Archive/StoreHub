@@ -44,15 +44,15 @@ public class Catalogue
 	/// <returns>Read-only collection of available products</returns>
 	public IReadOnlyCollection<Product> GetProducts()
 	{
-		_priceFilter ??= _ => true;
-        _nameFilter ??= _ => true;
+		var priceFilter = _priceFilter ?? (_ => true);
+        var nameFilter = _nameFilter ?? (_ => true);
 
         using var context = new AppDbContext();
 		return context.Products
 			.AsNoTracking()
 			.Where(x => x.InventoryCount > 0)
 			.AsEnumerable()
-			.Where(x => _nameFilter(x.Name) && _priceFilter(x.Price))
+			.Where(x => nameFilter(x.Name) && priceFilter(x.Price))
 			.ToList();
 	}
 }
