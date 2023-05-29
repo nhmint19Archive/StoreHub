@@ -138,14 +138,14 @@ internal class SignInState : AppState
 
     private void CreateCustomerAccount()
     {
-        var email = _inputHandler.AskUserTextInput($"Choose your email. Press [{ConsoleKey.Enter}] to exit.");
+        var email = _inputHandler.AskUserTextInput($"Choose your email. Enter nothing to exit.");
         if (string.IsNullOrEmpty(email))
         {
             _view.Info("No account created.");
             return;
         }
         
-        var phone = _inputHandler.AskUserTextInput($"Choose your phone number. Press [{ConsoleKey.Enter}] to exit.");
+        var phone = _inputHandler.AskUserTextInput($"Choose your phone number. Enter nothing to exit.");
         if (string.IsNullOrEmpty(phone))
         {
             _view.Info("No account created.");

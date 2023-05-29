@@ -99,7 +99,7 @@ internal class BrowsingState : AppState
                     _ => true,
                     x => string.IsNullOrEmpty(x) ? null : x,
                     out nameFilter,
-                    $"Please type the product name filter or press [{ConsoleKey.Enter}] if you don not want any filter"))
+                    $"Please type the product name filter. Enter nothing if you do not want to apply any name filter"))
         {
         }
 
@@ -117,7 +117,7 @@ internal class BrowsingState : AppState
                    x => string.IsNullOrEmpty(x) || (decimal.TryParse(x, out var y) && y >= 0),
                    x => string.IsNullOrEmpty(x) ?  decimal.MaxValue : decimal.Parse(x),
                    out upperPrice,
-                   $"Please type the upper price limit or press [{ConsoleKey.Enter}] if you do not want one",
+                   $"Please type the upper price limit. Enter nothing if you do want to apply an upper price limit",
                    "Invalid input. Input must be empty or a positive number"))
         {
         }
@@ -127,7 +127,7 @@ internal class BrowsingState : AppState
                    x => string.IsNullOrEmpty(x) || (decimal.TryParse(x, out var y) && y >= 0 && y <= upperPrice),
                    x => string.IsNullOrEmpty(x) ? default : decimal.Parse(x),
                    out lowerPrice,
-                   $"Please type the lower price limit or press [{ConsoleKey.Enter}] if you do not want one",
+                   $"Please type the lower price limit. Enter nothing if you do want to apply a lower price limit",
                    $"Invalid input. Input must be empty or a positive number smaller than the upper price limit of ${upperPrice}"))
         {
         }

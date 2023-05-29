@@ -103,14 +103,14 @@ internal class ManageInventoryState : AppState
 
     private void CreateProduct()
     {
-        var name = _inputHandler.AskUserTextInput($"Enter the name of the product. Press [{ConsoleKey.Enter}] to exit.");
+        var name = _inputHandler.AskUserTextInput($"Enter the name of the product. Enter nothing to exit.");
         if (string.IsNullOrEmpty(name))
         {
             _view.Info("No product created.");
             return;
         }
             
-        var description = _inputHandler.AskUserTextInput($"Enter the description of the product. Press [{ConsoleKey.Enter}] to exit.");
+        var description = _inputHandler.AskUserTextInput($"Enter the description of the product. Enter nothing to exit.");
         if (string.IsNullOrEmpty(description))
         {
             _view.Info("No product created.");
@@ -122,7 +122,7 @@ internal class ManageInventoryState : AppState
                    x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? null : decimal.Parse(x),
                    out price,
-                   $"Please type the price of the product. Press [{ConsoleKey.Enter}] to exit.",
+                   $"Please type the price of the product. Enter nothing to exit.",
                    "Invalid input. Input must be empty or a valid number"))
         { }
 
@@ -137,7 +137,7 @@ internal class ManageInventoryState : AppState
                    x => string.IsNullOrEmpty(x) || int.TryParse(x, out var y) && y >= 0,
                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out inventoryCount,
-                   $"Please type the quantity of the product. Press [{ConsoleKey.Enter}] to exit.",
+                   $"Please type the quantity of the product. Enter nothing to exit.",
                    "Invalid input. Input must be empty or a valid number"))
         { }
 
@@ -181,7 +181,7 @@ internal class ManageInventoryState : AppState
                    x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out id,
-                   $"Please type the ID of the product. Press [{ConsoleKey.Enter}] to exit."))
+                   $"Please type the ID of the product. Enter nothing to exit."))
         {
         }
             
@@ -207,7 +207,7 @@ internal class ManageInventoryState : AppState
                    x => string.IsNullOrEmpty(x) || decimal.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? null : decimal.Parse(x),
                    out price,
-                   $"Please type the price of the product. Press [{ConsoleKey.Enter}] to exit.",
+                   $"Please type the price of the product. Enter nothing] to exit.",
                    "Invalid input. Input must be empty or a valid number"))
         { }
             
@@ -236,7 +236,7 @@ internal class ManageInventoryState : AppState
                    x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out id,
-                   $"Please type the ID of the product. Press [{ConsoleKey.Enter}] to exit.",
+                   $"Please type the ID of the product. Enter nothing to exit.",
                    "Invalid input. Input must be empty or a valid number"))
         { }
             
@@ -288,7 +288,7 @@ internal class ManageInventoryState : AppState
                    x => string.IsNullOrEmpty(x) || int.TryParse(x, out _),
                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out id,
-                   $"Please type the ID of the product. Press [{ConsoleKey.Enter}] to exit.",
+                   $"Please type the ID of the product. Enter nothing to exit.",
                    "Invalid input. Input must be empty or a valid number"))
         { }
 

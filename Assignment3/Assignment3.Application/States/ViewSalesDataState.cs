@@ -4,6 +4,7 @@ using Assignment3.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Text;
+using Assignment3.Domain.Enums;
 
 namespace Assignment3.Application.States;
 
@@ -28,37 +29,38 @@ internal class ViewSalesDataState : AppState
     /// <inheritdoc />
     public override void Run()
     {
-        ShowDataOptions();
-        ShowReceipts();
-    }
+        if (!_session.IsUserInRole(Roles.Admin) || !_session.IsUserInRole(Roles.Staff))
+        {
+            _view.Error("Invalid access to sales data page");
+            _view.Info("Signing out");
+            _session.SignOut();
+            OnStateChanged(this, nameof(MainMenuState));
+            return;
+        }
         
-    private void ShowDataOptions()
-    {
-        var options = new Dictionary<char, string>()
+        var input = _inputHandler.AskUserOption(new Dictionary<char, string>()
         {
             { 'E', "Exit to Main Menu" },
-            { 'P', "Print Sales Data" }
-        };
-
-        var input = _inputHandler.AskUserOption(options);
+            { 'P', "Print Sales Data" },
+            { 'S', "Show Receipts" }
+        });
 
         switch (input)
         {
             case 'P':
                 PrintSalesData();
                 break;
+            case 'S':
+                ShowReceipts();
+                break;
             case 'E':
                 OnStateChanged(this, nameof(MainMenuState));
                 break;
         }
     }
-
+    
     private void PrintSalesData()
     {
-        // we can change the path to print out later
-        var currentDir = Directory.GetCurrentDirectory();
-        //var filePath = Path.GetFullPath(Path.Combine(currentDir, @"..\..\..\"));
-
         try
         {            
             using var context = new AppDbContext();
@@ -73,12 +75,7 @@ internal class ViewSalesDataState : AppState
 
             foreach (var receipt in receipts)
             {
-                var totalPrice = 0m;
-                foreach (var orderProduct in receipt.Order.Products)
-                {
-                    totalPrice += orderProduct.Product.Price * orderProduct.ProductQuantity;
-                }
-
+                var totalPrice = receipt.Order.Products.Sum(orderProduct => orderProduct.Product.Price * orderProduct.ProductQuantity);
                 var stringData = new string[] { 
                     $"{receipt.Id}", 
                     $"{receipt.OrderId}", 
@@ -91,17 +88,14 @@ internal class ViewSalesDataState : AppState
                 csvData.Add(stringData);
             }
 
-            using (StreamWriter sw = new StreamWriter($"sales_data.csv", false, Encoding.UTF8))
-            {
-                // Write column headers
-                sw.WriteLine("ID,OrderId,Status,Date,Customer Email,Amount");
+            using var sw = new StreamWriter($"sales_data.csv", false, Encoding.UTF8);
+            // Write column headers
+            sw.WriteLine("ID,OrderId,Status,Date,Customer Email,Amount");
 
-                // Write data rows
-                foreach (string[] rowData in csvData)
-                {
-                    string line = string.Join(",", rowData);
-                    sw.WriteLine(line);
-                }
+            // Write data rows
+            foreach (var line in csvData.Select(rowData => string.Join(",", rowData)))
+            {
+                sw.WriteLine(line);
             }
 
             _view.Info("Successfully export CSV file for Sales Data");

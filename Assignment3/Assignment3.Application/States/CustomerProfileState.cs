@@ -68,8 +68,8 @@ internal class CustomerProfileState : AppState
 
     private void ChangeAccountDetails()
     {
-        var newPhoneNumber = _inputHandler.AskUserTextInput("Enter your new phone number or press enter if you do not want to change your phone number");
-        var newPassword = _inputHandler.AskUserTextInput("Enter your new password or press enter if you do not want to change your password");
+        var newPhoneNumber = _inputHandler.AskUserTextInput("Enter your new phone number. Enter nothing if you do not want to change your phone number");
+        var newPassword = _inputHandler.AskUserTextInput("Enter your new password. Enter nothing if you do not want to change your password");
         
         if (string.IsNullOrEmpty(newPhoneNumber) && string.IsNullOrEmpty(newPassword))
         {
