@@ -377,8 +377,8 @@ internal class OrderingState : AppState
     private IDeliveryMethod? ProcessPostalDelivery(int orderId)
     {
         int? streetNumber;
-        while (_inputHandler.TryAskUserTextInput(
-                   x => Regex.IsMatch(x, RegexPatterns.DigitsOnly),
+        while (!_inputHandler.TryAskUserTextInput(
+                   x => Regex.IsMatch(x, RegexPatterns.DigitsOnly) || string.IsNullOrEmpty(x),
                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out streetNumber,
                    $"Enter your address number. Type nothing and press [Enter] to cancel.",
@@ -392,8 +392,8 @@ internal class OrderingState : AppState
         }
         
         string? streetName;
-        while (_inputHandler.TryAskUserTextInput(
-                   x => Regex.IsMatch(x, RegexPatterns.StreetName),
+        while (!_inputHandler.TryAskUserTextInput(
+                   x => Regex.IsMatch(x, RegexPatterns.StreetName) || string.IsNullOrEmpty(x),
                    x => x,
                    out streetName,
                    $"Enter your address street name. Type nothing and press [Enter] to cancel.",
@@ -407,8 +407,8 @@ internal class OrderingState : AppState
         }
         
         int? postalCode;
-        while (_inputHandler.TryAskUserTextInput(
-                   x => Regex.IsMatch(x, RegexPatterns.Postal),
+        while (!_inputHandler.TryAskUserTextInput(
+                   x => Regex.IsMatch(x, RegexPatterns.Postal) || string.IsNullOrEmpty(x),
                    x => string.IsNullOrEmpty(x) ? null : int.Parse(x),
                    out postalCode,
                    $"Enter your postal code. Type nothing and press [Enter] to cancel.",
@@ -422,7 +422,7 @@ internal class OrderingState : AppState
         }
 
         string? apartmentNo;
-        while (_inputHandler.TryAskUserTextInput(
+        while (!_inputHandler.TryAskUserTextInput(
                    x => string.IsNullOrEmpty(x) || Regex.IsMatch(x, RegexPatterns.ApartmentNo),
                    x => string.IsNullOrEmpty(x) ? null : x,
                    out apartmentNo,
