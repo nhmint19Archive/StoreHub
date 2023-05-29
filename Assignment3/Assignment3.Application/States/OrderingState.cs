@@ -175,12 +175,6 @@ internal class OrderingState : AppState
                 x => x.Id,
                 x => x.InventoryCount);
 
-        if (order.Products.Count == 0)
-        {
-            _view.Info("No products added");
-            return;
-        }
-
         if (!ValidateOrderProductQuantity(order, products))
         {
             _view.Error("Ordered items are invalid");
