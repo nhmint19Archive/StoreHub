@@ -54,40 +54,33 @@ internal class OrderingState : AppState
             choices.Add('D', "Delete existing order");
             choices.Add('C', "Confirm Order");
             choices.Add('V', "View Order");
-
-            var input = _inputHandler.AskUserOption(choices);
-            switch (input)
-            {
-                case 'E':
-                    RemoveProductsFromOrder(order.Id);
-                    break;
-                case 'D':
-                    DeleteExistingOrder(order.Id);
-                    break;
-                case 'C':
-                    ConfirmOrder(order);
-                    break;
-                case 'B':
-                    OnStateChanged(this, nameof(BrowsingState));
-                    break;
-                case 'V':
-                    ViewOrder(order);
-                    break;
-            }
         }
         else
         {
             choices.Add('A', "Add Order");
-            var input = _inputHandler.AskUserOption(choices);
-            switch (input)
-            {
-                case 'A':
-                    AddOrUpdateProductsInOrder();
-                    break;
-                case 'B':
-                    OnStateChanged(this, nameof(BrowsingState));
-                    break;
-            }
+        }
+
+        var input = _inputHandler.AskUserOption(choices);
+        switch (input)
+        {
+            case 'A':
+                AddOrUpdateProductsInOrder();
+                break;
+            case 'E' when order != null:
+                RemoveProductsFromOrder(order.Id);
+                break;
+            case 'D' when order != null:
+                DeleteExistingOrder(order.Id);
+                break;
+            case 'C' when order != null:
+                ConfirmOrder(order);
+                break;
+            case 'B':
+                OnStateChanged(this, nameof(BrowsingState));
+                break;
+            case 'V' when order != null:
+                ViewOrder(order);
+                break;
         }
     }
 

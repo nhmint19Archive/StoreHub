@@ -1,5 +1,6 @@
 using Assignment3.Application.Models;
 using Assignment3.Application.Services;
+using Assignment3.Domain.Enums;
 using Assignment3.Domain.Models;
 using System.Linq.Expressions;
 
@@ -30,52 +31,49 @@ internal class BrowsingState : AppState
     /// <inheritdoc />
     public override void Run()
     {
-        if (_session.IsUserSignedIn)
-        {
-            ShowSignedInOptions();
-        }
-        else
-        {
-            ShowSignedOutOptions();
-        }
-    }
-
-    private void ShowSignedInOptions()
-    {
         var options = new Dictionary<char, string>()
         {
             { 'D', "Display Available Products" },
             { 'E', "Exit To Main Menu" },
-            { 'O', "Manage Order" }
         };
 
-        if (_catalogue.AreFiltersApplied)
+        if (_session.IsUserInRole(Roles.Customer))
         {
-            options.Add('C', "Clear Filter");
+            options.Add('O', "Manage Order");
         }
         else
         {
-            options.Add('A', "Add Filter");
+            options.Add('S', "Sign in with a customer account to start ordering");
         }
 
-        var input = _inputHandler.AskUserOption(options);
-
-        switch (input)
+        if (_catalogue.AreFiltersApplied)
         {
-            case 'A':
-                ShowFilters();
+            options.Add('C', "Clear filter");
+        }
+        else
+        {
+            options.Add('A', "Add filter");
+        }
+        
+        switch (_inputHandler.AskUserOption(options))
+        {
+            case 'A' when !_catalogue.AreFiltersApplied:
+                AddFilters();
                 break;
             case 'D':
                 ShowProducts();
                 break;
-            case 'C':
+            case 'C' when _catalogue.AreFiltersApplied:
                 _catalogue.ResetFilters();
                 break;
             case 'E':
                 OnStateChanged(this, nameof(MainMenuState));
                 break;
-            case 'O':
+            case 'O' when _session.IsUserInRole(Roles.Customer):
                 OnStateChanged(this, nameof(OrderingState));
+                break;
+            case 'S' when !_session.IsUserSignedIn:
+                OnStateChanged(this, nameof(SignInState));
                 break;
         }
     }
@@ -93,48 +91,8 @@ internal class BrowsingState : AppState
             _view.Info($"{product.Description}");
         }
     }
-    
-    private void ShowSignedOutOptions()
-    {
-        var options = new Dictionary<char, string>()
-        {
-            { 'S', "Sign In To Start Shopping" },
-            { 'E', "Exit to Main Menu" },
-            { 'D', "Display Available Products" },
-        };
 
-        if (_catalogue.AreFiltersApplied)
-        {
-            options.Add('C', "Clear filter");
-        }
-        else
-        {
-            options.Add('A', "Add filter");
-        }
-
-        var input = _inputHandler.AskUserOption(options);
-
-        switch (input)
-        {
-            case 'S':
-                OnStateChanged(this, nameof(SignInState));
-                break;
-            case 'D':
-                ShowProducts();
-                break;
-            case 'A':
-                ShowFilters();
-                break;
-            case 'C':
-                _catalogue.ResetFilters();
-                break;
-            case 'E':
-                OnStateChanged(this, nameof(MainMenuState));
-                break;
-        }
-    }
-
-    private void ShowFilters()
+    private void AddFilters()
     {
        string? nameFilter;
         while (!_inputHandler.TryAskUserTextInput(
