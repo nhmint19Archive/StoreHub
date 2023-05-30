@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Text;
 using Assignment3.Domain.Enums;
+using Assignment3.Domain.Models;
 
 namespace Assignment3.Application.States;
 
@@ -13,11 +14,14 @@ namespace Assignment3.Application.States;
 /// </summary>
 internal class ViewSalesDataState : AppState
 {
+    private readonly SalesDataAnalyzer _salesDataAnalyzer;
     public ViewSalesDataState(
         UserSession session, 
         IConsoleView view, 
-        IConsoleInputHandler inputHandler) : base(session, view, inputHandler)
+        IConsoleInputHandler inputHandler,
+        SalesDataAnalyzer salesDataAnalyzer) : base(session, view, inputHandler)
     {
+        _salesDataAnalyzer = salesDataAnalyzer;
     }
 
     /// <inheritdoc />
@@ -55,49 +59,14 @@ internal class ViewSalesDataState : AppState
     
     private void PrintSalesData()
     {
-        try
-        {            
-            using var context = new AppDbContext();
-            var receipts = context.Receipts
-                .Include(x => x.Order)
-                .ThenInclude(x => x.Products)
-                .ThenInclude(x => x.Product)
-                .AsNoTracking()
-                .AsEnumerable();
-
-            var csvData = new List<string[]>();
-
-            foreach (var receipt in receipts)
-            {
-                var totalPrice = receipt.Order.Products.Sum(orderProduct => orderProduct.Product.Price * orderProduct.ProductQuantity);
-                var stringData = new string[] { 
-                    $"{receipt.Id}", 
-                    $"{receipt.OrderId}", 
-                    $"{receipt.Order.Status}", 
-                    $"{receipt.Order.Date}",
-                    $"{receipt.Order.CustomerEmail}",
-                    $"{totalPrice}"
-                };
-
-                csvData.Add(stringData);
-            }
-
-            using var sw = new StreamWriter($"sales_data.csv", false, Encoding.UTF8);
-            // Write column headers
-            sw.WriteLine("ID,OrderId,Status,Date,Customer Email,Amount");
-
-            // Write data rows
-            foreach (var line in csvData.Select(rowData => string.Join(",", rowData)))
-            {
-                sw.WriteLine(line);
-            }
-
-            _view.Info("Successfully export CSV file for Sales Data");
-        } 
-        catch (Exception ex) {
-            Debug.Fail(ex.Message);
-            _view.Error("Failed to display sales data");
+        var fileName = "sales_data.csv";
+        if (_salesDataAnalyzer.TryWriteSalesDataToFile(fileName))
+        {
+            _view.Info($"Finished writing sales data to the file '{fileName}'");
+            return;
         }
+        
+        _view.Error($"An error occurred whilst exporting sales data to '{fileName}'");
     }
 
     private void ShowReceipts()

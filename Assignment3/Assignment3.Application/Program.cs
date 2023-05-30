@@ -58,6 +58,7 @@ internal class Program
             .AddSingleton<StaffProfileState>()
             .AddSingleton<OrderingState>()
             .AddSingleton<ViewSalesDataState>()
+            .AddSingleton<SalesDataAnalyzer>()
             .AddSingleton<ViewOrderState>()
             .AddSingleton<RefundRequestState>()
             .AddSingleton<ManageInventoryState>()
