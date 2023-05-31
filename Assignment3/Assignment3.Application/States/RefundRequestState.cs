@@ -82,7 +82,7 @@ internal class RefundRequestState : AppState
             }
 
             _view.Info($"Total: ${totalPrice}");
-            _view.Info(message: $"Time: {order.Date}");
+            _view.Info(message: $"Time: {order.Date.ToLocalTime()}");
         }
     }
 
@@ -114,7 +114,7 @@ internal class RefundRequestState : AppState
             }
 
             _view.Info($"Total: ${totalPrice}");
-            _view.Info($"Request Date: {request.Date}");
+            _view.Info($"Request Date: {request.Date.ToLocalTime()}");
             _view.Info($"Request Status: {request.RequestStatus}");
             _view.Info($"Comment from the store: {request.StaffComment}");
         }

@@ -74,7 +74,7 @@ internal class ViewOrderState : AppState
                 }
 
                 _view.Info($"Total: ${totalPrice}");
-                _view.Info($"Date: {order.Date}");
+                _view.Info($"Date: {order.Date.ToLocalTime()}");
                 _view.Info($"Status: {order.Status}");
             }
         }

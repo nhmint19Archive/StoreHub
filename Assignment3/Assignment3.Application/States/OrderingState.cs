@@ -84,7 +84,7 @@ internal class OrderingState : AppState
     private void ViewOrder(Order order)
     {
         _view.Info($"Pending order [{order.Id}]");
-        _view.Info($"Creation date: {order.Date}");
+        _view.Info($"Creation date: {order.Date.ToLocalTime()}");
         _view.Info($"{order.Products.Count} Item(s):");
         foreach (var orderProduct in order.Products) 
         {

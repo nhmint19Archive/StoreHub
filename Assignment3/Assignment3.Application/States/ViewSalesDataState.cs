@@ -92,7 +92,7 @@ internal class ViewSalesDataState : AppState
                 
             _view.Info($"Total: ${totalPrice}");
             _view.Info($"Customer: {receipt.Order.CustomerEmail}");
-            _view.Info(message: $"Time: {receipt.Order.Date}");
+            _view.Info(message: $"Time: {receipt.Order.Date.ToLocalTime()}");
         }
     }
 }
