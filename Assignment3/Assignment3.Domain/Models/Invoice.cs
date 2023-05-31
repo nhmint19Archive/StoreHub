@@ -1,4 +1,5 @@
-﻿using Assignment3.Domain.Data;
+﻿using System.Diagnostics.CodeAnalysis;
+using Assignment3.Domain.Data;
 using Assignment3.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,9 +45,11 @@ internal class Invoice
 	/// <summary>
 	/// Make the payment.
 	/// </summary>
-	/// <returns></returns>
+	/// <returns><c>True</c> if payment is successful; otherwise <c>False</c></returns>
 	/// <exception cref="InvalidOperationException"></exception>
-	internal bool MakePayment()
+	internal bool TryMakePayment(
+		[NotNullWhen(true)]
+		out Receipt? receipt)
 	{
         Console.WriteLine("Making payment");
         try
@@ -72,20 +75,19 @@ internal class Invoice
 		        }
 	        }
 	        
-	        var receipt = _transactionMethod.Execute(transaction, order);
-
+	        receipt = _transactionMethod.Execute(transaction, order);
 	        order.Status = OrderStatus.Confirmed;
 
 	        context.Update(order);
 	        context.Transactions.Add(transaction);
 	        context.Receipts.Add(receipt);
-
 	        context.SaveChanges();
-
+	        
 	        return true;
         }
         catch
         {
+	        receipt = null;
 	        return false;
         }
 	}

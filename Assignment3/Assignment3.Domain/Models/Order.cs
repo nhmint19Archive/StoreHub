@@ -38,25 +38,20 @@ public class Order
 	/// <exception cref="InvalidOperationException">Order has not been finalized.</exception>
 	public bool Confirm()
 	{
-		var success = _invoice?.MakePayment() 
-			?? throw new InvalidOperationException("Cannot confirm an order that is not finalized");
-		if (!success)
+		if (_invoice == null)
+		{
+			throw new InvalidOperationException("Cannot confirm an order that is not finalized");
+		}
+		
+		if (!_invoice.TryMakePayment(out var receipt))
 		{
 			return false;
 		}
-
+			
+		receipt.EmailToCustomer();
 		Status = OrderStatus.Confirmed;
 		StartDelivery();
-		SendReceiptToCustomer();
 		return true;
-	}
-
-	private void SendReceiptToCustomer()
-	{
-		EmailSimulator.Send(
-			CustomerEmail,
-			"Your receipt from All Your Healthy Food Store",
-			$"Order: {Id}\nConfirmed Date: {DateTime.UtcNow.ToLocalTime()}");
 	}
 
 	private void StartDelivery()
