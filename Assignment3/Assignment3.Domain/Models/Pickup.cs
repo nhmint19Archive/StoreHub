@@ -1,4 +1,5 @@
 using Assignment3.Domain.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Domain.Models;
 
@@ -32,5 +33,10 @@ public class Pickup : IDeliveryMethod
 			order.CustomerEmail,
 			"Order from All Your Healthy Food Store", 
 			"Your order is available for pickup from 9AM to 5PM at our Glenferrie store.");
-	}
+
+        // sometime later
+        order.Status = Enums.OrderStatus.Delivered;
+		context.Orders.Update(order);
+		context.SaveChanges();
+    }
 }

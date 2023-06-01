@@ -1,3 +1,5 @@
+using Assignment3.Domain.Data;
+
 namespace Assignment3.Domain.Models;
 
 public class PostalDelivery : IDeliveryMethod
@@ -39,5 +41,13 @@ public class PostalDelivery : IDeliveryMethod
 			_customerEmail,
 			"Order from All Your Healthy Food Store", 
 			$"Package for order [{_orderId}] has been accepted by Australian Post.\nDelivery addressed to {_apartmentNumber} {_streetNumber} {_streetName} {_postcode}");
-	}
+
+        using var context = new AppDbContext();
+        var order = context.Orders.Find(_orderId) ?? throw new InvalidOperationException();
+
+		// sometime later
+        order.Status = Enums.OrderStatus.Delivered;
+        context.Orders.Update(order);
+        context.SaveChanges();
+    }
 }
