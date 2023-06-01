@@ -30,7 +30,7 @@ internal class StaffProfileState : AppState
         var input = _inputHandler.AskUserOption(
             new Dictionary<char, string>()
             {
-                { 'D', "View Data Sales" },
+                { 'D', "View Sales Data" },
                 { 'V', "View My Profile" },
                 { 'M', "Manage Inventory" },
                 { 'E', "Exit to Main Menu" },

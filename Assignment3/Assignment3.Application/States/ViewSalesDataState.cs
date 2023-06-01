@@ -39,7 +39,7 @@ internal class ViewSalesDataState : AppState
         var input = _inputHandler.AskUserOption(new Dictionary<char, string>()
         {
             { 'E', "Exit to Main Menu" },
-            { 'P', "Print Sales Data" },
+            { 'P', "Export Sales Data To CSV file" },
             { 'S', "Show Receipts" }
         });
 
