@@ -10,7 +10,7 @@ The project uses .NET - a framework developed by Microsoft to develop applicatio
     - [Visual Studio Code](https://www.jetbrains.com/rider/)
     - [JetBrains Rider]() (free if you subscribe with your student email)
 3. Run `dotnet restore` to restore dependencies of the project.
-4. Run `dotnet run "/path/to/Assignment3.Application.csproj"` to start the application.
+4. Run `dotnet run "/path/to/StoreHub.Application.csproj"` to start the application.
 
 ## Database migration
 

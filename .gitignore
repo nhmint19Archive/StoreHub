@@ -236,4 +236,4 @@ _Pvt_Extensions
 *.db-shm
 *.db-wal
 [Mm]igrations/
-/Assignment3/Assignment3.Application/fileTest.csv
+/StoreHub/StoreHub.Application/fileTest.csv
